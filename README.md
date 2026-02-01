@@ -58,3 +58,85 @@ Grau en Enginyeria Informàtica de Gestió i Sistemes d'Informació - Tecnocampu
 ## 📬 Contacte
 
 Per a consultes acadèmiques relacionades amb aquest projecte, es pot contactar amb l’autor mitjançant el repositori GitHub.
+
+---
+
+## 🧰 Prerequisits i execució local
+
+Per executar el projecte en un entorn local és necessari disposar de les següents eines instal·lades:
+
+### Requisits generals
+- Git
+- Docker (Docker Desktop o Docker Engine)
+
+### Backend
+- Java Development Kit (JDK) 17 (LTS)
+- Maven (o Maven Wrapper inclòs al projecte)
+- IntelliJ IDEA (recomanat)
+
+### Frontend
+- Node.js (versió LTS, 20.x recomanada)
+- npm (inclòs amb Node.js)
+- Visual Studio Code (recomanat)
+
+---
+
+## ▶ Execució del projecte en local
+
+### 1. Clonar el repositori
+
+```bash
+git clone https://github.com/AlvaroPerdigonG/tfg-ticketing-devops.git
+cd tfg-ticketing-devops
+```
+
+### 2. Iniciar la base de dades amb Docker
+El projecte utilitza una base de dades PostgreSQL executada en un contenidor Docker.
+```bash
+docker-compose up -d
+```
+
+### 3. Executar el backend
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+El backend quedarà accessible a: http://localhost:8080
+
+### 4. Executar el frontend
+Des del directori frontend:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+El frontend quedarà accessible a: http://localhost:5173
+
+### ⚙ Configuració
+Les variables de configuració s’estableixen mitjançant fitxers d’entorn i perfils d’execució:
+
+Backend: application.yml / application-local.yml
+
+Frontend: .env
+
+No s’inclouen credencials ni secrets al repositori.
+Es proporciona un fitxer d’exemple per a la configuració (.env.example).
+
+### 🧪 Execució de proves
+Backend:
+```bash
+cd backend
+./mvnw test
+```
+Frontend:
+```bash
+cd frontend
+npm run test
+```
+
+### 🐳 Execució completa amb Docker (opcional)
+El projecte pot executar-se completament mitjançant contenidors:
+```bash
+docker-compose up --build
+```
+Aquesta opció permet desplegar el sistema sencer (backend, frontend i base de dades) sense instal·lar dependències locals addicionals.
