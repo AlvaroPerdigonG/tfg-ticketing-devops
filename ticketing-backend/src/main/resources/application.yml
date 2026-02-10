@@ -1,3 +1,11 @@
+#spring:
+#  profiles:
+#    active: local
+#
+
 spring:
-  profiles:
-    active: local
+  application:
+    name: ticketing-backend
+
+server:
+  port: 8080
