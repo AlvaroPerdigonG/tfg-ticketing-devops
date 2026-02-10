@@ -10,7 +10,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ticketing_pgdata:/var/lib/postgresql/data
+    healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U ticketing -d ticketing" ]
+        interval: 5s
+        timeout: 5s
+        retries: 10
 
 volumes:
-  pgdata:
+  ticketing_pgdata:
