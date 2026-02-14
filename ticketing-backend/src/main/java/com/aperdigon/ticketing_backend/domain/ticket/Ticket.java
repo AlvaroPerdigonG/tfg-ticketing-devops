@@ -76,6 +76,33 @@ public final class Ticket {
         );
     }
 
+    public static Ticket rehydrate(
+            TicketId id,
+            String title,
+            String description,
+            CategoryId categoryId,
+            UserId createdBy,
+            TicketStatus status,
+            Instant createdAt,
+            Instant updatedAt,
+            UserId assignedTo,
+            List<Comment> comments
+    ) {
+        // Importante: NO aplica reglas de creación, solo reconstruye estado persistido
+        return new Ticket(
+                id,
+                title,
+                description,
+                categoryId,
+                createdBy,
+                status,
+                createdAt,
+                updatedAt,
+                assignedTo,
+                comments
+        );
+    }
+
     // Comportamiento de dominio (UC4)
     public void changeStatus(TicketStatus newStatus, Clock clock) {
         Guard.notNull(newStatus, "newStatus");
@@ -93,15 +120,22 @@ public final class Ticket {
     }
 
     // Comportamiento de dominio (UC5)
-    public Comment addComment(String content, User author, Clock clock) {
-        Guard.notNull(author, "author");
+    public Comment addComment(String content, UserId authorId, Clock clock) {
+        Guard.notNull(authorId, "authorId");
         Instant now = Instant.now(Guard.notNull(clock, "clock"));
 
-        Comment comment = new Comment(new CommentId(UUID.randomUUID()), content, author, now);
+        Comment comment = new Comment(
+                new CommentId(UUID.randomUUID()),
+                content,
+                authorId,
+                now
+        );
+
         this.comments.add(comment);
         touch(clock);
         return comment;
     }
+
 
     // Opcional: asignación (para UC6/realismo)
     public void assignTo(User agent, Clock clock) {
