@@ -16,3 +16,8 @@ spring:
       web:
         exposure:
           include: health,info
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:keys/jwt-public.pem

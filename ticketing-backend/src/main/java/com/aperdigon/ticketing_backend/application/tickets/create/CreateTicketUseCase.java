@@ -8,9 +8,11 @@ import com.aperdigon.ticketing_backend.domain.category.Category;
 import com.aperdigon.ticketing_backend.domain.shared.validation.Guard;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
 import com.aperdigon.ticketing_backend.domain.user.User;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 
+@Service
 public final class CreateTicketUseCase {
 
     private final TicketRepository ticketRepository;
