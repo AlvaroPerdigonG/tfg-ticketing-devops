@@ -5,9 +5,11 @@ import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenExc
 import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
 import com.aperdigon.ticketing_backend.domain.shared.validation.Guard;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 
+@Service
 public final class ChangeTicketStatusUseCase {
 
     private final TicketRepository ticketRepository;
