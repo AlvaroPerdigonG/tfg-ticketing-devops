@@ -19,4 +19,14 @@ public final class InMemoryUserRepository implements UserRepository {
     public Optional<User> findById(UserId id) {
         return Optional.ofNullable(store.get(id));
     }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        if (email == null) {
+            return Optional.empty();
+        }
+        return store.values().stream()
+                .filter(u -> u.email().equalsIgnoreCase(email))
+                .findFirst();
+    }
 }

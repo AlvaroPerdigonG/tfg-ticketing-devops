@@ -38,6 +38,7 @@ public final class CreateTicketUseCaseTest {
                 UserId.of(UUID.randomUUID()),
                 "user@test.com",
                 "User",
+                "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
                 UserRole.USER,
                 true
         );
@@ -77,6 +78,7 @@ public final class CreateTicketUseCaseTest {
                 UserId.of(UUID.randomUUID()),
                 "user@test.com",
                 "User",
+                "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
                 UserRole.USER,
                 true
         );

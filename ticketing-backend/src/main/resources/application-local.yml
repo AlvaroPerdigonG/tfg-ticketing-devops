@@ -11,13 +11,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: health,info
   security:
     oauth2:
       resourceserver:
         jwt:
           public-key-location: classpath:keys/jwt-public.pem
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

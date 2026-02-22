@@ -2,6 +2,7 @@ package com.aperdigon.ticketing_backend.api.shared.exception;
 
 import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenException;
 import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
+import com.aperdigon.ticketing_backend.application.shared.exception.UnauthorizedException;
 import com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException;
 import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketAlreadyResolved;
 import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketInvalidStatusTransition;
@@ -20,6 +21,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ApiError> forbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of("FORBIDDEN", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiError> unauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiError.of("UNAUTHORIZED", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
