@@ -19,6 +19,9 @@ public class UserJpaEntity {
     @Column(name = "display_name", nullable = false, length = 120)
     private String displayName;
 
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private UserRole role;
@@ -28,10 +31,11 @@ public class UserJpaEntity {
 
     protected UserJpaEntity() {}
 
-    public UserJpaEntity(UUID id, String email, String displayName, UserRole role, boolean isActive) {
+    public UserJpaEntity(UUID id, String email, String displayName, String passwordHash, UserRole role, boolean isActive) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
+        this.passwordHash = passwordHash;
         this.role = role;
         this.isActive = isActive;
     }
@@ -39,6 +43,7 @@ public class UserJpaEntity {
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getDisplayName() { return displayName; }
+    public String getPasswordHash() { return passwordHash; }
     public UserRole getRole() { return role; }
     public boolean isActive() { return isActive; }
 }

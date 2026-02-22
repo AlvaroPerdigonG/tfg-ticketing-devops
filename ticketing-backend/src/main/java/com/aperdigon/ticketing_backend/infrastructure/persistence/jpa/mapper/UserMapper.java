@@ -12,6 +12,7 @@ public final class UserMapper {
                 new UserId(e.getId()),
                 e.getEmail(),
                 e.getDisplayName(),
+                e.getPasswordHash(),
                 e.getRole(),
                 e.isActive()
         );
