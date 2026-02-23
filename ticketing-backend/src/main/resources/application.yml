@@ -12,6 +12,8 @@ server:
 
 app:
   security:
+    cors:
+      allowed-origins: http://localhost:5173
     jwt:
       private-key-location: classpath:keys/jwt-private.pem
       expiration-seconds: 3600
