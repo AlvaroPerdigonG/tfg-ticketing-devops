@@ -22,4 +22,9 @@ public class JpaUserRepository implements UserRepository {
     public Optional<User> findById(UserId id) {
         return springRepo.findById(id.value()).map(UserMapper::toDomain);
     }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return springRepo.findByEmailIgnoreCase(email).map(UserMapper::toDomain);
+    }
 }

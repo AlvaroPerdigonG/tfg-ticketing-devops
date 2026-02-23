@@ -2,6 +2,7 @@ package com.aperdigon.ticketing_backend.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,6 +20,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // health/actuator (ajusta a tu gusto)
                         .requestMatchers("/actuator/health", "/api/health").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
                         //UC1: crear ticket todos
                         .requestMatchers("/api/tickets").hasAnyRole("USER","AGENT","ADMIN")

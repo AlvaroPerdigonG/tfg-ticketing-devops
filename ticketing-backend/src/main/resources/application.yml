@@ -1,11 +1,17 @@
-#spring:
-#  profiles:
-#    active: local
-#
-
 spring:
   application:
     name: ticketing-backend
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:keys/jwt-public.pem
 
 server:
   port: 8080
+
+app:
+  security:
+    jwt:
+      private-key-location: classpath:keys/jwt-private.pem
+      expiration-seconds: 3600

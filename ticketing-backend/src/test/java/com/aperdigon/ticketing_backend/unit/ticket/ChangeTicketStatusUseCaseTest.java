@@ -35,7 +35,7 @@ public final class ChangeTicketStatusUseCaseTest {
         var ticketRepo = new InMemoryTicketRepository();
         var useCase = new ChangeTicketStatusUseCase(ticketRepo, clock);
 
-        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", UserRole.USER, true);
+        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
         Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
 
         Ticket ticket = Ticket.openNew("T", "D", category, creator, clock);
@@ -93,7 +93,7 @@ public final class ChangeTicketStatusUseCaseTest {
         var ticketRepo = new InMemoryTicketRepository();
         var useCase = new ChangeTicketStatusUseCase(ticketRepo, clock);
 
-        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", UserRole.USER, true);
+        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
         Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
 
         Ticket ticket = Ticket.openNew("T", "D", category, creator, clock);
