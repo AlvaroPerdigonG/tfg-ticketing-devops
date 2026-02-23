@@ -6,6 +6,7 @@ import { isExpired, toAuthUser } from "../../features/auth/model/jwt";
 type AuthContextValue = {
   state: AuthState;
   isAuthenticated: boolean;
+  isHydrated: boolean;
   hasRole: (role: Role) => boolean;
   hasAnyRole: (roles: Role[]) => boolean;
 
@@ -20,6 +21,7 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ token: null, user: null });
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
@@ -53,18 +55,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Auto-hidratar desde localStorage
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEY);
-    if (!token) return;
 
-    try {
-      const user = toAuthUser(token);
-      if (isExpired(user.exp)) {
+    if (token) {
+      try {
+        const user = toAuthUser(token);
+        if (isExpired(user.exp)) {
+          localStorage.removeItem(STORAGE_KEY);
+        } else {
+          setState({ token, user });
+        }
+      } catch {
         localStorage.removeItem(STORAGE_KEY);
-        return;
       }
-      setState({ token, user });
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
     }
+
+    setIsHydrated(true);
   }, []);
 
   // Auto-logout si expira mientras estás en la app
@@ -98,13 +103,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       state,
       isAuthenticated: Boolean(state.token && state.user && !isExpired(state.user.exp)),
+      isHydrated,
       hasRole,
       hasAnyRole,
       login,
       loginWithToken,
       logout,
     }),
-    [state, hasRole, hasAnyRole, login, loginWithToken, logout],
+    [state, isHydrated, hasRole, hasAnyRole, login, loginWithToken, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
