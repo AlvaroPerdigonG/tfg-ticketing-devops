@@ -41,7 +41,7 @@ public class LocalSeedRunner implements CommandLineRunner {
                     USER_ID,
                     "user@local.test",
                     "Local User",
-                    passwordEncoder.encode("local-user-password"),
+                    passwordEncoder.encode("password"),
                     UserRole.USER,
                     true
             ));
@@ -52,7 +52,7 @@ public class LocalSeedRunner implements CommandLineRunner {
                     AGENT_ID,
                     "agent@local.test",
                     "Local Agent",
-                    passwordEncoder.encode("local-agent-password"),
+                    passwordEncoder.encode("password"),
                     UserRole.AGENT,
                     true
             ));
