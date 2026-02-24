@@ -36,7 +36,7 @@ public class LocalSeedRunner implements CommandLineRunner {
             categoryRepo.save(new CategoryJpaEntity(CATEGORY_ID, "General", true));
         }
 
-        if (userRepo.findById(USER_ID).isEmpty()) {
+        if (userRepo.findByEmailIgnoreCase("user@local.test").isEmpty()) {
             userRepo.save(new UserJpaEntity(
                     USER_ID,
                     "user@local.test",
@@ -47,7 +47,7 @@ public class LocalSeedRunner implements CommandLineRunner {
             ));
         }
 
-        if (userRepo.findById(AGENT_ID).isEmpty()) {
+        if (userRepo.findByEmailIgnoreCase("agent@local.test").isEmpty()) {
             userRepo.save(new UserJpaEntity(
                     AGENT_ID,
                     "agent@local.test",

@@ -1,9 +1,18 @@
-# Script para reiniciar la aplicación con base de datos limpia
-Write-Host "=== Reiniciando Ticketing Backend ===" -ForegroundColor Cyan
+param(
+    [switch]$ResetDatabase
+)
 
-# 1. Detener contenedores y limpiar volúmenes
+# Script para iniciar la aplicación. La base de datos se conserva por defecto.
+Write-Host "=== Iniciando Ticketing Backend ===" -ForegroundColor Cyan
+
+# 1. Detener contenedores (sin borrar volumen por defecto)
 Write-Host "`n[1/5] Deteniendo contenedores Docker..." -ForegroundColor Yellow
-docker compose down -v 2>$null
+if ($ResetDatabase) {
+    Write-Host "    ResetDatabase activado: se eliminará el volumen de PostgreSQL" -ForegroundColor DarkYellow
+    docker compose down -v 2>$null
+} else {
+    docker compose down 2>$null
+}
 
 # 2. Iniciar PostgreSQL
 Write-Host "[2/5] Iniciando PostgreSQL..." -ForegroundColor Yellow
@@ -39,4 +48,3 @@ Write-Host "Presiona Ctrl+C para detener la aplicación`n" -ForegroundColor Gray
 
 $env:SPRING_PROFILES_ACTIVE = "local"
 .\mvnw.cmd spring-boot:run
-
