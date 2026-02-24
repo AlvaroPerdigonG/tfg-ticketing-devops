@@ -19,3 +19,10 @@ export type LoginRequest = {
 export type LoginResponse = {
   accessToken: string;
 };
+
+export type RegisterRequest = {
+  email: string;
+  displayName: string;
+  password: string;
+  confirmPassword: string;
+};

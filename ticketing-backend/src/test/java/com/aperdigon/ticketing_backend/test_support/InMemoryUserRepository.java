@@ -29,4 +29,10 @@ public final class InMemoryUserRepository implements UserRepository {
                 .filter(u -> u.email().equalsIgnoreCase(email))
                 .findFirst();
     }
+
+    @Override
+    public User save(User user) {
+        store.put(user.id(), user);
+        return user;
+    }
 }

@@ -27,4 +27,10 @@ public class JpaUserRepository implements UserRepository {
     public Optional<User> findByEmail(String email) {
         return springRepo.findByEmailIgnoreCase(email).map(UserMapper::toDomain);
     }
+
+    @Override
+    public User save(User user) {
+        var savedEntity = springRepo.save(UserMapper.toJpa(user));
+        return UserMapper.toDomain(savedEntity);
+    }
 }

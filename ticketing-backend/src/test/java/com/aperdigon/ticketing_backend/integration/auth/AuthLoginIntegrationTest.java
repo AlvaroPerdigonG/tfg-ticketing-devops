@@ -132,4 +132,48 @@ class AuthLoginIntegrationTest {
                                 """))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void register_creates_user_and_returns_jwt() throws Exception {
+        var mvcResult = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"new.user@test.com","displayName":"New User","password":"Secret123!","confirmPassword":"Secret123!"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken", notNullValue()))
+                .andReturn();
+
+        String body = mvcResult.getResponse().getContentAsString();
+        String token = body.replaceAll(".*\\"accessToken\\":\\"([^\\"]+)\\".*", "$1");
+        SignedJWT jwt = SignedJWT.parse(token);
+
+        assertEquals(List.of("USER"), jwt.getJWTClaimsSet().getStringListClaim("roles"));
+        assertNotNull(jwt.getJWTClaimsSet().getExpirationTime());
+
+        var savedUser = userRepo.findByEmailIgnoreCase("new.user@test.com").orElseThrow();
+        assertEquals(UserRole.USER, savedUser.getRole());
+        assertEquals("New User", savedUser.getDisplayName());
+    }
+
+    @Test
+    void register_returns_bad_request_when_email_is_duplicated() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"user@test.com","displayName":"Duplicate User","password":"Secret123!","confirmPassword":"Secret123!"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Registration failed"));
+    }
+
+    @Test
+    void register_returns_bad_request_when_password_does_not_match_policy() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"weak.user@test.com","displayName":"Weak User","password":"password","confirmPassword":"password"}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
 }
