@@ -31,7 +31,8 @@ public class SecurityConfig {
                         // health/actuator (ajusta a tu gusto)
                         .requestMatchers("/actuator/health", "/api/health").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        // auth: login/register abiertos
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
 
                         //UC1: crear ticket todos
                         .requestMatchers("/api/tickets").hasAnyRole("USER","AGENT","ADMIN")

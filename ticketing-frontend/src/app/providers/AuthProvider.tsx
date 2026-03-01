@@ -11,6 +11,13 @@ type AuthContextValue = {
   hasAnyRole: (roles: Role[]) => boolean;
 
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
+  register: (payload: {
+    email: string;
+    displayName: string;
+    password: string;
+    confirmPassword: string;
+    remember?: boolean;
+  }) => Promise<void>;
   loginWithToken: (token: string, remember?: boolean) => void;
   logout: () => void;
 };
@@ -47,6 +54,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string, remember = false) => {
       const res = await authApi.login({ email, password });
+      loginWithToken(res.accessToken, remember);
+    },
+    [loginWithToken],
+  );
+
+  const register = useCallback(
+    async ({ email, displayName, password, confirmPassword, remember = false }: {
+      email: string;
+      displayName: string;
+      password: string;
+      confirmPassword: string;
+      remember?: boolean;
+    }) => {
+      const res = await authApi.register({ email, displayName, password, confirmPassword });
       loginWithToken(res.accessToken, remember);
     },
     [loginWithToken],
@@ -107,10 +128,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hasRole,
       hasAnyRole,
       login,
+      register,
       loginWithToken,
       logout,
     }),
-    [state, isHydrated, hasRole, hasAnyRole, login, loginWithToken, logout],
+    [state, isHydrated, hasRole, hasAnyRole, login, register, loginWithToken, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -17,4 +17,15 @@ public final class UserMapper {
                 e.isActive()
         );
     }
+
+    public static UserJpaEntity toJpa(User user) {
+        return new UserJpaEntity(
+                user.id().value(),
+                user.email(),
+                user.displayName(),
+                user.passwordHash(),
+                user.role(),
+                user.isActive()
+        );
+    }
 }
