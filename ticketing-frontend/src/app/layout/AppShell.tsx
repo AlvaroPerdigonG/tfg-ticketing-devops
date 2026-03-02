@@ -1,8 +1,6 @@
-import { MdDashboard, MdOutlineAdd } from "react-icons/md";
 import { Layout, Menu, Typography } from "antd";
 import type { MenuProps } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { HiBars3, HiTicket, HiUsers } from "react-icons/hi2";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 
 type AppMenuItem = Required<NonNullable<MenuProps["items"]>>[number];
@@ -10,15 +8,15 @@ type AppMenuItem = Required<NonNullable<MenuProps["items"]>>[number];
 const { Header, Sider, Content } = Layout;
 
 const baseItems: AppMenuItem[] = [
-  { key: "/dashboard", icon: <MdDashboard fontSize={18}/>, label: "Dashboard" },
-  { key: "/tickets", icon: <HiTicket   fontSize={18}/>, label: "Tickets" },
-  { key: "/tickets/new", icon: <MdOutlineAdd fontSize={18}/>, label: "Nuevo ticket" },
-  { key: "/profile", icon: <HiBars3 fontSize={18}/>, label: "Perfil" }
+  { key: "/dashboard", label: "Dashboard" },
+  { key: "/tickets", label: "Tickets" },
+  { key: "/tickets/new", label: "Nuevo ticket" },
+  { key: "/profile", label: "Perfil" },
 ];
 
 function getMenuItems(isAdmin: boolean): AppMenuItem[] {
   if (isAdmin) {
-    return [...baseItems, { key: "/admin", icon: <HiUsers fontSize={18}/>, label: "Administración" }];
+    return [...baseItems, { key: "/admin", label: "Administración" }];
   }
 
   return baseItems;
@@ -27,7 +25,7 @@ function getMenuItems(isAdmin: boolean): AppMenuItem[] {
 function getSelectedKey(pathname: string, items: AppMenuItem[]) {
   const matched = items
     .map((item) => item.key?.toString() ?? "")
-    .sort((a, b) => b.length - a.length) // Sort by length descending
+    .sort((a, b) => b.length - a.length)
     .find((key) => key && pathname.startsWith(key));
 
   return matched ? [matched] : ["/dashboard"];
@@ -58,7 +56,7 @@ export function AppShell() {
         />
       </Sider>
 
-      <Layout style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <Layout style={{ display: "flex", flexDirection: "column", width: "100%" }}>
         <Header
           style={{
             background: "#fff",
