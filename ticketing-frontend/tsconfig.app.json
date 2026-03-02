@@ -34,9 +34,6 @@
       "antd/*": [
         "src/vendor/antd/*"
       ],
-      "@ant-design/icons": [
-        "src/vendor/ant-design-icons/index.tsx"
-      ]
     }
   },
   "include": [
