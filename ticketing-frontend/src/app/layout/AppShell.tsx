@@ -1,21 +1,24 @@
-import { DashboardOutlined, FileAddOutlined, ProfileOutlined, TagsOutlined, TeamOutlined } from "@ant-design/icons";
+import { MdDashboard, MdOutlineAdd } from "react-icons/md";
+
 import { Layout, Menu, Typography } from "antd";
 import type { MenuProps } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { HiBars3, HiTicket, HiUsers } from "react-icons/hi2";
 
 const { Header, Sider, Content } = Layout;
 
 const menuItems: MenuProps["items"] = [
-  { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-  { key: "/tickets", icon: <TagsOutlined />, label: "Tickets" },
-  { key: "/tickets/new", icon: <FileAddOutlined />, label: "Nuevo ticket" },
-  { key: "/profile", icon: <ProfileOutlined />, label: "Perfil" },
-  { key: "/admin", icon: <TeamOutlined />, label: "Administración" },
+  { key: "/dashboard", icon: <MdDashboard fontSize={18}/>, label: "Dashboard" },
+  { key: "/tickets", icon: <HiTicket   fontSize={18}/>, label: "Tickets" },
+  { key: "/tickets/new", icon: <MdOutlineAdd fontSize={18}/>, label: "Nuevo ticket" },
+  { key: "/profile", icon: <HiBars3 fontSize={18}/>, label: "Perfil" },
+  { key: "/admin", icon: <HiUsers fontSize={18}/>, label: "Administración" },
 ];
 
 function getSelectedKey(pathname: string) {
   const matched = menuItems
     ?.map((item) => item?.key?.toString() ?? "")
+    .sort((a, b) => b.length - a.length) // Sort by length descending
     .find((key) => key && pathname.startsWith(key));
 
   return matched ? [matched] : ["/dashboard"];
@@ -43,7 +46,7 @@ export function AppShell() {
         />
       </Sider>
 
-      <Layout>
+      <Layout style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <Header
           style={{
             background: "#fff",
@@ -51,6 +54,7 @@ export function AppShell() {
             display: "flex",
             alignItems: "center",
             paddingInline: 24,
+            height: 64,
           }}
         >
           <Typography.Title level={5} style={{ margin: 0 }}>

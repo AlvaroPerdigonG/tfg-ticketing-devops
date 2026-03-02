@@ -7,9 +7,6 @@ export default defineConfig({
   resolve: {
     alias: {
       antd: fileURLToPath(new URL("./src/vendor/antd/index.tsx", import.meta.url)),
-      "@ant-design/icons": fileURLToPath(
-        new URL("./src/vendor/ant-design-icons/index.tsx", import.meta.url),
-      ),
     },
   },
   test: {
