@@ -1,23 +1,32 @@
 import { MdDashboard, MdOutlineAdd } from "react-icons/md";
-
 import { Layout, Menu, Typography } from "antd";
 import type { MenuProps } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { HiBars3, HiTicket, HiUsers } from "react-icons/hi2";
+import { useAuth } from "../../features/auth/hooks/useAuth";
+
+type AppMenuItem = Required<NonNullable<MenuProps["items"]>>[number];
 
 const { Header, Sider, Content } = Layout;
 
-const menuItems: MenuProps["items"] = [
+const baseItems: AppMenuItem[] = [
   { key: "/dashboard", icon: <MdDashboard fontSize={18}/>, label: "Dashboard" },
   { key: "/tickets", icon: <HiTicket   fontSize={18}/>, label: "Tickets" },
   { key: "/tickets/new", icon: <MdOutlineAdd fontSize={18}/>, label: "Nuevo ticket" },
-  { key: "/profile", icon: <HiBars3 fontSize={18}/>, label: "Perfil" },
-  { key: "/admin", icon: <HiUsers fontSize={18}/>, label: "Administración" },
+  { key: "/profile", icon: <HiBars3 fontSize={18}/>, label: "Perfil" }
 ];
 
-function getSelectedKey(pathname: string) {
-  const matched = menuItems
-    ?.map((item) => item?.key?.toString() ?? "")
+function getMenuItems(isAdmin: boolean): AppMenuItem[] {
+  if (isAdmin) {
+    return [...baseItems, { key: "/admin", icon: <HiUsers fontSize={18}/>, label: "Administración" }];
+  }
+
+  return baseItems;
+}
+
+function getSelectedKey(pathname: string, items: AppMenuItem[]) {
+  const matched = items
+    .map((item) => item.key?.toString() ?? "")
     .sort((a, b) => b.length - a.length) // Sort by length descending
     .find((key) => key && pathname.startsWith(key));
 
@@ -27,6 +36,9 @@ function getSelectedKey(pathname: string) {
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+
+  const menuItems = getMenuItems(hasRole("AGENT"));
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -39,7 +51,7 @@ export function AppShell() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={getSelectedKey(location.pathname)}
+          selectedKeys={getSelectedKey(location.pathname, menuItems)}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           style={{ borderInlineEnd: "none" }}
