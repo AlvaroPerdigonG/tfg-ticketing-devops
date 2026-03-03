@@ -115,13 +115,13 @@ export function Card({ children }: { children: React.ReactNode }) {
   return <section style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 20 }}>{children}</section>;
 }
 
-export function Button({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+export function Button({ children, onClick, type, size }: { children: React.ReactNode; onClick?: () => void; type?: "primary" | "default"; size?: "small" | "middle" | "large" }) {
   const theme = useContext(ThemeContext);
   return (
     <button
       type="button"
       onClick={onClick}
-      style={{ background: theme?.token?.colorPrimary ?? "#0c9136", color: "#fff", border: "none", padding: "8px 12px", borderRadius: 6 }}
+      style={{ background: type === "primary" || !type ? theme?.token?.colorPrimary ?? "#0c9136" : "#fff", color: type === "primary" || !type ? "#fff" : "#111827", border: type === "primary" || !type ? "none" : "1px solid #d1d5db", padding: size === "large" ? "10px 16px" : "8px 12px", borderRadius: 6 }}
     >
       {children}
     </button>
@@ -135,5 +135,72 @@ export function Result({ title, subTitle, extra }: { status?: string; title: str
       {subTitle && <p>{subTitle}</p>}
       {extra}
     </section>
+  );
+}
+
+
+export function Space({ children, direction = "horizontal", size = 8, style }: { children: React.ReactNode; direction?: "horizontal" | "vertical"; size?: number; style?: React.CSSProperties }) {
+  return <div style={{ display: "flex", flexDirection: direction === "vertical" ? "column" : "row", gap: size, ...(style ?? {}) }}>{children}</div>;
+}
+
+export function Tag({ children }: { children: React.ReactNode; color?: string }) {
+  return <span style={{ background: "#f3f4f6", borderRadius: 999, padding: "2px 8px", fontSize: 12 }}>{children}</span>;
+}
+
+export function Skeleton({ paragraph }: { active?: boolean; paragraph?: { rows: number } }) {
+  return <div aria-label="skeleton">Cargando... ({paragraph?.rows ?? 3})</div>;
+}
+
+export function Empty({ description }: { description?: React.ReactNode }) {
+  return <div>{description ?? "Sin datos"}</div>;
+}
+
+export function Alert({ message, description }: { type?: string; showIcon?: boolean; message: React.ReactNode; description?: React.ReactNode }) {
+  return <div><strong>{message}</strong>{description ? <p>{description}</p> : null}</div>;
+}
+
+export type TableProps<T> = {
+  rowKey: keyof T | ((row: T) => React.Key);
+  columns: Array<{
+    title: React.ReactNode;
+    dataIndex: keyof T;
+    key: string;
+    width?: number;
+    ellipsis?: boolean;
+    render?: (value: unknown, row: T) => React.ReactNode;
+  }>;
+  dataSource: T[];
+  pagination?: { pageSize?: number; hideOnSinglePage?: boolean };
+};
+
+export function Table<T extends Record<string, unknown>>({ rowKey, columns, dataSource }: TableProps<T>) {
+  const keyGetter = typeof rowKey === "function" ? rowKey : (row: T) => row[rowKey] as React.Key;
+
+  return (
+    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          {columns.map((column) => (
+            <th key={column.key} style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "8px 4px" }}>
+              {column.title}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {dataSource.map((row) => (
+          <tr key={keyGetter(row)}>
+            {columns.map((column) => {
+              const value = row[column.dataIndex];
+              return (
+                <td key={column.key} style={{ borderBottom: "1px solid #f3f4f6", padding: "8px 4px" }}>
+                  {column.render ? column.render(value, row) : (value as React.ReactNode)}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
