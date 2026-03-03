@@ -3,11 +3,11 @@ import { useAuth } from "../../features/auth/hooks/useAuth";
 import { UserTicketsHomePage } from "../../features/tickets/ui/UserTicketsHomePage";
 
 export function HomePage() {
-  const { hasRole } = useAuth();
+  const { hasAnyRole } = useAuth();
 
-  if (hasRole("USER")) {
-    return <UserTicketsHomePage />;
+  if (hasAnyRole(["AGENT", "ADMIN"])) {
+    return <PlaceholderPage title="Dashboard" />;
   }
 
-  return <PlaceholderPage title="Dashboard" />;
+  return <UserTicketsHomePage />;
 }
