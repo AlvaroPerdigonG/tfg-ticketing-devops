@@ -4,7 +4,8 @@ import { LoginPage } from "../features/auth/ui/LoginPage";
 import { AppShell } from "./layout/AppShell";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
-import { HomePage } from "./pages/HomePage";
+import { RoleLandingRedirect } from "./pages/RoleLandingRedirect";
+import { TicketsPage } from "./pages/TicketsPage";
 
 function ForbiddenPage() {
   return <PlaceholderPage title="403 — Forbidden" />;
@@ -19,9 +20,9 @@ export const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
-          { path: "/", element: <HomePage /> },
+          { path: "/", element: <RoleLandingRedirect /> },
           { path: "/dashboard", element: <PlaceholderPage title="Dashboard" /> },
-          { path: "/tickets", element: <PlaceholderPage title="Tickets" /> },
+          { path: "/tickets", element: <TicketsPage /> },
           { path: "/tickets/new", element: <PlaceholderPage title="Nuevo ticket" /> },
           { path: "/profile", element: <PlaceholderPage title="Perfil" /> },
           { path: "/admin", element: <PlaceholderPage title="Administración" /> },

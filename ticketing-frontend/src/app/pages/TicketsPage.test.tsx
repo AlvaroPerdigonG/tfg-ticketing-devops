@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
-import { HomePage } from "./HomePage";
+import { TicketsPage } from "./TicketsPage";
 
 const hasAnyRoleMock = vi.fn<(roles: Array<"USER" | "AGENT" | "ADMIN">) => boolean>();
 
@@ -15,32 +15,32 @@ vi.mock("../../features/tickets/ui/UserTicketsHomePage", () => ({
   UserTicketsHomePage: () => <h1>Mis tickets</h1>,
 }));
 
-describe("HomePage", () => {
+describe("TicketsPage", () => {
   beforeEach(() => {
     hasAnyRoleMock.mockReset();
   });
 
-  it("shows USER home for normal users", () => {
+  it("shows USER tickets page for normal users", () => {
     hasAnyRoleMock.mockReturnValue(false);
 
     render(
       <MemoryRouter>
-        <HomePage />
+        <TicketsPage />
       </MemoryRouter>,
     );
 
     expect(screen.getByRole("heading", { name: "Mis tickets" })).toBeInTheDocument();
   });
 
-  it("shows dashboard home for AGENT/ADMIN", () => {
+  it("shows generic tickets page for AGENT/ADMIN", () => {
     hasAnyRoleMock.mockReturnValue(true);
 
     render(
       <MemoryRouter>
-        <HomePage />
+        <TicketsPage />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tickets" })).toBeInTheDocument();
   });
 });

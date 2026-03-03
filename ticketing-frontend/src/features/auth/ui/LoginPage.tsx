@@ -38,7 +38,7 @@ export function LoginPage() {
         await register({ email, displayName, password, confirmPassword, remember });
       }
 
-      const from = loc.state?.from ?? "/tickets";
+      const from = loc.state?.from ?? "/";
       nav(from, { replace: true });
     } catch (err) {
       if (err instanceof ApiError) setError(`${err.status} — ${err.message}`);
