@@ -61,8 +61,20 @@ public final class Ticket {
 
     // Factory de dominio (UC1)
     public static Ticket openNew(String title, String description, Category category, User creator, Clock clock) {
+        return openNew(title, description, category, creator, TicketPriority.MEDIUM, clock);
+    }
+
+    public static Ticket openNew(
+            String title,
+            String description,
+            Category category,
+            User creator,
+            TicketPriority priority,
+            Clock clock
+    ) {
         Guard.notNull(category, "category");
         Guard.notNull(creator, "creator");
+        Guard.notNull(priority, "priority");
         Instant now = Instant.now(Guard.notNull(clock, "clock"));
 
         return new Ticket(
@@ -72,7 +84,7 @@ public final class Ticket {
                 category.id(),
                 creator.id(),
                 TicketStatus.OPEN,
-                TicketPriority.MEDIUM,
+                priority,
                 now,
                 now,
                 null,

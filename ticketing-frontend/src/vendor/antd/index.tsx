@@ -115,15 +115,16 @@ export function Card({ children }: { children: React.ReactNode }) {
   return <section style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 20 }}>{children}</section>;
 }
 
-export function Button({ children, onClick, type, size }: { children: React.ReactNode; onClick?: () => void; type?: "primary" | "default"; size?: "small" | "middle" | "large" }) {
+export function Button({ children, onClick, type, size, disabled, style, htmlType, loading }: { children: React.ReactNode; onClick?: () => void; type?: "primary" | "default"; size?: "small" | "middle" | "large"; disabled?: boolean; style?: React.CSSProperties; htmlType?: "button" | "submit" | "reset"; loading?: boolean }) {
   const theme = useContext(ThemeContext);
   return (
     <button
-      type="button"
+      type={htmlType ?? "button"}
       onClick={onClick}
-      style={{ background: type === "primary" || !type ? theme?.token?.colorPrimary ?? "#0c9136" : "#fff", color: type === "primary" || !type ? "#fff" : "#111827", border: type === "primary" || !type ? "none" : "1px solid #d1d5db", padding: size === "large" ? "10px 16px" : "8px 12px", borderRadius: 6 }}
+      disabled={disabled || loading}
+      style={{ background: type === "primary" || !type ? theme?.token?.colorPrimary ?? "#0c9136" : "#fff", color: type === "primary" || !type ? "#fff" : "#111827", border: type === "primary" || !type ? "none" : "1px solid #d1d5db", padding: size === "large" ? "10px 16px" : "8px 12px", borderRadius: 6, opacity: disabled || loading ? 0.6 : 1, cursor: disabled || loading ? "not-allowed" : "pointer", ...(style ?? {}) }}
     >
-      {children}
+      {loading ? "Cargando..." : children}
     </button>
   );
 }

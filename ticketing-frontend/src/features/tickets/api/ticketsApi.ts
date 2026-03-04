@@ -1,5 +1,13 @@
 import { createApiClient } from "../../../shared/api/client";
-import type { PaginatedResponse, TicketQueueScope, TicketStatus, TicketSummary } from "../model/types";
+import type {
+  CreateTicketInput,
+  CreateTicketResponse,
+  PaginatedResponse,
+  TicketCategory,
+  TicketQueueScope,
+  TicketStatus,
+  TicketSummary,
+} from "../model/types";
 
 const AUTH_TOKEN_STORAGE_KEY = "ticketing_access_token";
 
@@ -26,4 +34,8 @@ export const ticketsApi = {
 
   getQueueTickets: (params?: { page?: number; size?: number; status?: TicketStatus; q?: string; scope?: TicketQueueScope }) =>
     authClient.get<PaginatedResponse<TicketSummary>>(`/api/tickets${buildQuery(params ?? {})}`),
+
+  getCategories: () => authClient.get<TicketCategory[]>("/api/categories"),
+
+  createTicket: (payload: CreateTicketInput) => authClient.post<CreateTicketResponse>("/api/tickets", payload),
 };

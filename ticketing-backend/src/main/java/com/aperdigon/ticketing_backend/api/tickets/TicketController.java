@@ -64,6 +64,7 @@ public class TicketController {
                 request.title(),
                 request.description(),
                 new CategoryId(request.categoryId()),
+                request.priority(),
                 actor
         ));
 

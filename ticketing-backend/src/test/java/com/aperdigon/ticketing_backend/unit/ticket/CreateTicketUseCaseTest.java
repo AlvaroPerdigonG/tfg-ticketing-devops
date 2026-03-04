@@ -15,6 +15,7 @@ import com.aperdigon.ticketing_backend.application.tickets.create.CreateTicketUs
 import com.aperdigon.ticketing_backend.domain.category.Category;
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
+import com.aperdigon.ticketing_backend.domain.ticket.TicketPriority;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
@@ -53,6 +54,7 @@ public final class CreateTicketUseCaseTest {
                 "Printer not working",
                 "The printer shows error E23",
                 category.id(),
+                TicketPriority.HIGH,
                 new CurrentUser(creator.id(), creator.role())
         );
 
@@ -60,6 +62,7 @@ public final class CreateTicketUseCaseTest {
 
         Ticket saved = ticketRepo.findById(result.ticketId()).orElseThrow();
         assertEquals(TicketStatus.OPEN, saved.status());
+        assertEquals(TicketPriority.HIGH, saved.priority());
         assertEquals(creator.id(), saved.createdBy());
         assertEquals(category.id(), saved.categoryId());
         assertEquals(Instant.parse("2026-02-14T10:00:00Z"), saved.createdAt());
@@ -90,6 +93,7 @@ public final class CreateTicketUseCaseTest {
                 "Title",
                 "Description",
                 CategoryId.of(UUID.randomUUID()),
+                TicketPriority.MEDIUM,
                 new CurrentUser(creator.id(), creator.role())
         );
 

@@ -46,6 +46,7 @@ public final class CreateTicketUseCase {
                 command.description(),
                 category,
                 creator,
+                command.priority(),
                 clock
         );
 

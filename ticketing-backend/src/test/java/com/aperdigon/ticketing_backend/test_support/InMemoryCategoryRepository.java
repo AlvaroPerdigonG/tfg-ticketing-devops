@@ -5,6 +5,7 @@ import com.aperdigon.ticketing_backend.domain.category.Category;
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,5 +19,13 @@ public final class InMemoryCategoryRepository implements CategoryRepository {
     @Override
     public Optional<Category> findById(CategoryId id) {
         return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
+    public List<Category> findActive() {
+        return store.values().stream()
+                .filter(Category::isActive)
+                .sorted((left, right) -> left.name().compareToIgnoreCase(right.name()))
+                .toList();
     }
 }

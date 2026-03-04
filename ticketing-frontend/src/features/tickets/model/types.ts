@@ -13,6 +13,22 @@ export type TicketSummary = {
   assignedToUserId: string | null;
 };
 
+export type TicketCategory = {
+  id: string;
+  name: string;
+};
+
+export type CreateTicketInput = {
+  title: string;
+  description: string;
+  categoryId: string;
+  priority: TicketPriority;
+};
+
+export type CreateTicketResponse = {
+  ticketId: string;
+};
+
 export type PaginatedResponse<T> = {
   items: T[];
   page: number;
