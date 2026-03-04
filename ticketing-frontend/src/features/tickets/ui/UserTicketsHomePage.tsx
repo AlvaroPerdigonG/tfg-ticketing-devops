@@ -3,28 +3,10 @@ import { Alert, Button, Empty, Skeleton, Space, Table, Tag, Typography } from "a
 import type { TableProps } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ticketsApi } from "../api/ticketsApi";
+import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../model/presentation";
 import type { TicketPriority, TicketStatus, TicketSummary } from "../model/types";
 
 type LoadState = "loading" | "ready" | "error";
-
-const statusColorByValue: Record<TicketStatus, string> = {
-  OPEN: "default",
-  IN_PROGRESS: "processing",
-  RESOLVED: "success",
-};
-
-const statusLabelByValue: Record<TicketStatus, string> = {
-  OPEN: "Abierto",
-  IN_PROGRESS: "En progreso",
-  RESOLVED: "Resuelto",
-};
-
-
-const priorityLabelByValue: Record<TicketPriority, string> = {
-  LOW: "Baja",
-  MEDIUM: "Media",
-  HIGH: "Alta",
-};
 
 function formatDate(isoDate: string) {
   return new Intl.DateTimeFormat("es-ES", {
@@ -89,7 +71,7 @@ export function UserTicketsHomePage() {
         width: 140,
         render: (statusValue: unknown) => {
           const status = statusValue as TicketStatus;
-          return <Tag color={statusColorByValue[status]}>{statusLabelByValue[status]}</Tag>;
+          return <Tag color={ticketStatusColor[status]}>{ticketStatusLabel[status]}</Tag>;
         },
       },
       {
@@ -97,7 +79,7 @@ export function UserTicketsHomePage() {
         dataIndex: "priority",
         key: "priority",
         width: 120,
-        render: (priorityValue: unknown) => <Tag>{priorityLabelByValue[priorityValue as TicketPriority]}</Tag>,
+        render: (priorityValue: unknown) => <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>,
       },
       {
         title: "Fecha creación",
@@ -106,8 +88,19 @@ export function UserTicketsHomePage() {
         width: 220,
         render: (createdAtValue: unknown) => formatDate(String(createdAtValue)),
       },
+      {
+        title: "Acciones",
+        dataIndex: "id",
+        key: "actions",
+        width: 120,
+        render: (_id: unknown, row: TicketSummary) => (
+          <Button size="small" onClick={() => navigate(`/tickets/${row.id}`)}>
+            Ver
+          </Button>
+        ),
+      },
     ],
-    [],
+    [navigate],
   );
 
   return (

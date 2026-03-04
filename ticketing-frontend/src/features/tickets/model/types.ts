@@ -13,6 +13,19 @@ export type TicketSummary = {
   assignedToUserId: string | null;
 };
 
+export type TicketDetail = {
+  id: string;
+  title: string;
+  description: string;
+  status: TicketStatus;
+  priority: TicketPriority;
+  createdAt: string;
+  updatedAt: string;
+  createdByUserId: string;
+  assignedToUserId: string | null;
+  categoryId: string;
+};
+
 export type TicketCategory = {
   id: string;
   name: string;
