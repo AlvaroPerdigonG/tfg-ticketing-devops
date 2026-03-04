@@ -7,6 +7,7 @@ import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.mapper.Cat
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.CategorySpringDataRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,5 +22,12 @@ public class JpaCategoryRepository implements CategoryRepository {
     @Override
     public Optional<Category> findById(CategoryId id) {
         return springRepo.findById(id.value()).map(CategoryMapper::toDomain);
+    }
+
+    @Override
+    public List<Category> findActive() {
+        return springRepo.findByIsActiveTrueOrderByNameAsc().stream()
+                .map(CategoryMapper::toDomain)
+                .toList();
     }
 }
