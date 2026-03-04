@@ -14,7 +14,7 @@ vi.mock("../api/ticketsApi", () => ({
 
 describe("UserTicketsHomePage", () => {
   it("renders empty state when user has no tickets", async () => {
-    getMyTicketsMock.mockResolvedValueOnce([]);
+    getMyTicketsMock.mockResolvedValueOnce({ items: [], page: 0, size: 20, total: 0 });
 
     render(
       <ConfigProvider>

@@ -3,7 +3,7 @@ import { Alert, Button, Empty, Skeleton, Space, Table, Tag, Typography } from "a
 import type { TableProps } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ticketsApi } from "../api/ticketsApi";
-import type { TicketStatus, TicketSummary } from "../model/types";
+import type { TicketPriority, TicketStatus, TicketSummary } from "../model/types";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -17,6 +17,13 @@ const statusLabelByValue: Record<TicketStatus, string> = {
   OPEN: "Abierto",
   IN_PROGRESS: "En progreso",
   RESOLVED: "Resuelto",
+};
+
+
+const priorityLabelByValue: Record<TicketPriority, string> = {
+  LOW: "Baja",
+  MEDIUM: "Media",
+  HIGH: "Alta",
 };
 
 function formatDate(isoDate: string) {
@@ -44,7 +51,7 @@ export function UserTicketsHomePage() {
 
         if (!isMounted) return;
 
-        setTickets(response);
+        setTickets(response.items);
         setLoadState("ready");
       } catch (error) {
         if (!isMounted) return;
@@ -79,11 +86,18 @@ export function UserTicketsHomePage() {
         title: "Estado",
         dataIndex: "status",
         key: "status",
-        width: 160,
+        width: 140,
         render: (statusValue: unknown) => {
           const status = statusValue as TicketStatus;
           return <Tag color={statusColorByValue[status]}>{statusLabelByValue[status]}</Tag>;
         },
+      },
+      {
+        title: "Prioridad",
+        dataIndex: "priority",
+        key: "priority",
+        width: 120,
+        render: (priorityValue: unknown) => <Tag>{priorityLabelByValue[priorityValue as TicketPriority]}</Tag>,
       },
       {
         title: "Fecha creación",

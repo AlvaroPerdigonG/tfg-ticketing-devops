@@ -1,17 +1,26 @@
 package com.aperdigon.ticketing_backend.infrastructure.persistence.adapter;
 
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
+import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
+import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
+import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.CommentJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.TicketJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.mapper.TicketMapper;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.CategorySpringDataRepository;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.TicketSpringDataRepository;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,18 +43,17 @@ public class JpaTicketRepository implements TicketRepository {
     @Override
     @Transactional
     public Ticket save(Ticket ticket) {
-        // Cargamos referencias necesarias (createdBy + category + assignedTo) desde DB
         var createdBy = userSpringRepo.getReferenceById(ticket.createdBy().value());
         var category = categorySpringRepo.getReferenceById(ticket.categoryId().value());
         var assignedTo = ticket.assignedTo() == null ? null : userSpringRepo.getReferenceById(ticket.assignedTo().value());
 
-        // Si existe, actualizamos sobre la entidad existente para mantener relaciones y orphanRemoval
         TicketJpaEntity entity = ticketSpringRepo.findById(ticket.id().value())
                 .orElseGet(() -> new TicketJpaEntity(
                         ticket.id().value(),
                         ticket.title(),
                         ticket.description(),
                         ticket.status(),
+                        ticket.priority(),
                         ticket.createdAt(),
                         ticket.updatedAt(),
                         createdBy,
@@ -56,14 +64,13 @@ public class JpaTicketRepository implements TicketRepository {
         entity.setTitle(ticket.title());
         entity.setDescription(ticket.description());
         entity.setStatus(ticket.status());
+        entity.setPriority(ticket.priority());
         entity.setUpdatedAt(ticket.updatedAt());
         entity.setCreatedAt(ticket.createdAt());
         entity.setCreatedBy(createdBy);
         entity.setCategory(category);
         entity.setAssignedTo(assignedTo);
 
-        // Sin UC5 aún no necesitas persistir comments, pero lo dejamos preparado:
-        // sincronizamos comments por id (simple: borrar y recrear)
         entity.getComments().clear();
         for (var c : ticket.comments()) {
             var author = userSpringRepo.getReferenceById(c.authorId().value());
@@ -77,7 +84,6 @@ public class JpaTicketRepository implements TicketRepository {
         }
 
         TicketJpaEntity saved = ticketSpringRepo.save(entity);
-        // leer con details para mapear consistente
         return ticketSpringRepo.findWithDetailsById(saved.getId())
                 .map(TicketMapper::toDomain)
                 .orElseThrow();
@@ -87,5 +93,57 @@ public class JpaTicketRepository implements TicketRepository {
     @Transactional(readOnly = true)
     public Optional<Ticket> findById(TicketId id) {
         return ticketSpringRepo.findWithDetailsById(id.value()).map(TicketMapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, Pageable pageable) {
+        Specification<TicketJpaEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("createdBy").get("id"), createdBy.value()));
+
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            if (q != null && !q.isBlank()) {
+                String normalized = "%" + q.trim().toLowerCase() + "%";
+                predicates.add(cb.like(cb.lower(root.get("title")), normalized));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return ticketSpringRepo.findAll(spec, pageable).map(TicketMapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Ticket> findAgentTickets(UserId actorId, TicketQueueScope scope, TicketStatus status, String q, Pageable pageable) {
+        Specification<TicketJpaEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (scope == TicketQueueScope.UNASSIGNED) {
+                predicates.add(cb.isNull(root.get("assignedTo")));
+            } else if (scope == TicketQueueScope.MINE) {
+                predicates.add(cb.equal(root.get("assignedTo").get("id"), actorId.value()));
+            } else if (scope == TicketQueueScope.OTHERS) {
+                predicates.add(cb.isNotNull(root.get("assignedTo")));
+                predicates.add(cb.notEqual(root.get("assignedTo").get("id"), actorId.value()));
+            }
+
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            if (q != null && !q.isBlank()) {
+                String normalized = "%" + q.trim().toLowerCase() + "%";
+                predicates.add(cb.like(cb.lower(root.get("title")), normalized));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return ticketSpringRepo.findAll(spec, pageable).map(TicketMapper::toDomain);
     }
 }

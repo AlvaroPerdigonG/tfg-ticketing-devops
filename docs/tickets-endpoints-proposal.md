@@ -1,158 +1,69 @@
-# Propuesta de endpoints para páginas de Tickets (USER / AGENT / ADMIN)
+# Tickets API - estado actual y próximos pasos
 
-> Objetivo: habilitar completamente las páginas implementadas en frontend con filtros, paginación y acciones operativas.
+Este documento queda actualizado tras implementar los endpoints de tickets del MVP sin `slaState`.
 
-## 1) Listado de tickets del usuario autenticado (USER)
+## Endpoints implementados
 
 ### `GET /api/tickets/me`
-Lista los tickets creados por el usuario logado.
+Listado paginado de tickets creados por el usuario autenticado (`USER`, `AGENT`, `ADMIN`).
 
-**Query params (opcionales)**
-- `status`: `OPEN|IN_PROGRESS|RESOLVED`
-- `q`: texto libre (id/título)
-- `page`: número de página (base 0)
-- `size`: tamaño de página
-- `sort`: ejemplo `createdAt,desc`
-
-**200 Response**
-```json
-{
-  "items": [
-    {
-      "id": "uuid",
-      "title": "No puedo acceder",
-      "status": "OPEN",
-      "priority": "MEDIUM",
-      "createdAt": "2026-01-02T10:15:30Z",
-      "updatedAt": "2026-01-02T10:16:12Z",
-      "category": { "id": "uuid", "name": "Accesos" }
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "total": 148
-}
-```
-
----
-
-## 2) Cola operativa para AGENT/ADMIN
+Query params:
+- `status`: `OPEN|IN_PROGRESS|RESOLVED` (opcional)
+- `q`: búsqueda por título (opcional)
+- `page`: base 0 (default `0`)
+- `size`: tamaño página (default `20`, max `100`)
 
 ### `GET /api/tickets`
-Listado global para soporte con filtros avanzados.
+Listado paginado de cola operativa para `AGENT/ADMIN`.
 
-**Query params (opcionales)**
-- `scope`: `UNASSIGNED|MINE|ALL`  
-- `status`: lista CSV (`OPEN,IN_PROGRESS`)
-- `priority`: lista CSV (`LOW,MEDIUM,HIGH,URGENT`)
-- `categoryId`: UUID
-- `createdFrom`, `createdTo`: ISO datetime
-- `updatedFrom`, `updatedTo`: ISO datetime
-- `slaState`: `ON_TRACK|AT_RISK|BREACHED`
-- `assignedTo`: UUID (solo ADMIN)
-- `q`: texto libre
-- `page`, `size`, `sort`
+Query params:
+- `scope`: `UNASSIGNED|MINE|OTHERS|ALL` (default `MINE`)
+- `status`: `OPEN|IN_PROGRESS|RESOLVED` (opcional)
+- `q`: búsqueda por título (opcional)
+- `page`, `size`
 
-**200 Response**
-```json
-{
-  "items": [
-    {
-      "id": "uuid",
-      "title": "Error en facturación",
-      "status": "IN_PROGRESS",
-      "priority": "HIGH",
-      "createdAt": "2026-01-02T10:15:30Z",
-      "updatedAt": "2026-01-02T11:45:00Z",
-      "createdBy": { "id": "uuid", "displayName": "Juan" },
-      "assignedTo": { "id": "uuid", "displayName": "Agente 1" },
-      "category": { "id": "uuid", "name": "Facturación" },
-      "slaState": "AT_RISK"
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "total": 523
-}
-```
-
----
-
-## 3) Métricas para cards de dashboard/tickets operativos
-
-### `GET /api/tickets/metrics`
-
-**Query params (opcionales)**
-- `scope`: `MINE|TEAM|ALL`
-- `categoryId`
-
-**200 Response**
-```json
-{
-  "unassigned": 24,
-  "assignedToMe": 17,
-  "inProgress": 31,
-  "awaitingCustomer": 9,
-  "slaAtRisk": 12,
-  "slaBreached": 3
-}
-```
-
----
-
-## 4) Detalle de ticket
+Semántica de `scope`:
+- `UNASSIGNED`: tickets sin agente asignado
+- `MINE`: tickets asignados al agente autenticado
+- `OTHERS`: tickets asignados a otros agentes
+- `ALL`: todos
 
 ### `GET /api/tickets/{id}`
+Detalle de ticket.
+- `USER`: solo sus propios tickets (createdBy)
+- `AGENT/ADMIN`: acceso completo
 
-**200 Response**
+### Ya existentes
+- `POST /api/tickets`
+- `PATCH /api/tickets/{id}/status`
+
+## Modelo de paginación usado
+
+Se usa respuesta uniforme:
+
 ```json
 {
-  "id": "uuid",
-  "title": "No puedo acceder",
-  "description": "...",
-  "status": "OPEN",
-  "priority": "MEDIUM",
-  "createdAt": "2026-01-02T10:15:30Z",
-  "updatedAt": "2026-01-02T10:16:12Z",
-  "createdBy": { "id": "uuid", "displayName": "Juan" },
-  "assignedTo": { "id": "uuid", "displayName": "Agente 1" },
-  "category": { "id": "uuid", "name": "Accesos" }
+  "items": [],
+  "page": 0,
+  "size": 20,
+  "total": 0
 }
 ```
 
----
+Este formato es simple, estable para frontend y fácil de testear en el contexto del TFG.
 
-## 5) Asignación y acciones operativas
+## Cambios de dominio aplicados
 
-### `PATCH /api/tickets/{id}/assign`
-Body:
-```json
-{ "assignedToUserId": "uuid" }
-```
+- Añadido `priority` en `Ticket` con enum:
+  - `LOW`, `MEDIUM`, `HIGH`
+- Se inicializa por defecto en creación como `MEDIUM`.
+- Se persiste en base de datos (`tickets.priority`).
 
-### `PATCH /api/tickets/{id}/priority`
-Body:
-```json
-{ "priority": "LOW|MEDIUM|HIGH|URGENT" }
-```
+## Próximos endpoints sugeridos (no implementados aún)
 
-> Nota: el backend ya tiene `PATCH /api/tickets/{id}/status`; este endpoint encaja con esta propuesta.
+- `PATCH /api/tickets/{id}/assign`
+- `PATCH /api/tickets/{id}/priority`
+- `GET /api/tickets/{id}/comments`
+- `POST /api/tickets/{id}/comments`
 
----
-
-## 6) Comentarios (detalle / colaboración)
-
-### `GET /api/tickets/{id}/comments`
-### `POST /api/tickets/{id}/comments`
-Body:
-```json
-{ "body": "mensaje" }
-```
-
----
-
-## 7) Contratos recomendados
-
-- Añadir `priority` y `slaState` al modelo de ticket para la vista AGENT/ADMIN.
-- Respuesta paginada uniforme (`items/page/size/total`) para listados.
-- Filtros por query params, evitando endpoints duplicados por cada vista.
+> `slaState` queda fuera por ahora para evitar complejidad innecesaria en el MVP.
