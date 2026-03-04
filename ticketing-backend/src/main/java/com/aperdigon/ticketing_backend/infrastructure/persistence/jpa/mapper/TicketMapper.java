@@ -38,6 +38,7 @@ public final class TicketMapper {
                 category.id(),
                 createdBy.id(),
                 e.getStatus(),
+                e.getPriority(),
                 e.getCreatedAt(),
                 e.getUpdatedAt(),
                 assignedToId,

@@ -35,10 +35,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
 
                         //UC1: crear ticket todos
-                        .requestMatchers("/api/tickets").hasAnyRole("USER","AGENT","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/tickets").hasAnyRole("USER","AGENT","ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/me").hasAnyRole("USER","AGENT","ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets").hasAnyRole("AGENT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/*").hasAnyRole("USER", "AGENT", "ADMIN")
 
                         // UC4: cambiar estado solo AGENT/ADMIN
-                        .requestMatchers("/api/tickets/*/status").hasAnyRole("AGENT", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAnyRole("AGENT", "ADMIN")
 
                         // resto API: requiere estar autenticado
                         .requestMatchers("/api/**").authenticated()

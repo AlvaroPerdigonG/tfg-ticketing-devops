@@ -1,5 +1,6 @@
 package com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity;
 
+import com.aperdigon.ticketing_backend.domain.ticket.TicketPriority;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import jakarta.persistence.*;
 
@@ -25,6 +26,10 @@ public class TicketJpaEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private TicketStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false, length = 20)
+    private TicketPriority priority;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -55,6 +60,7 @@ public class TicketJpaEntity {
             String title,
             String description,
             TicketStatus status,
+            TicketPriority priority,
             Instant createdAt,
             Instant updatedAt,
             UserJpaEntity createdBy,
@@ -65,6 +71,7 @@ public class TicketJpaEntity {
         this.title = title;
         this.description = description;
         this.status = status;
+        this.priority = priority;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;
@@ -77,6 +84,7 @@ public class TicketJpaEntity {
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public TicketStatus getStatus() { return status; }
+    public TicketPriority getPriority() { return priority; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public UserJpaEntity getCreatedBy() { return createdBy; }
@@ -85,6 +93,7 @@ public class TicketJpaEntity {
     public List<CommentJpaEntity> getComments() { return comments; }
 
     public void setStatus(TicketStatus status) { this.status = status; }
+    public void setPriority(TicketPriority priority) { this.priority = priority; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
     public void setAssignedTo(UserJpaEntity assignedTo) { this.assignedTo = assignedTo; }
 

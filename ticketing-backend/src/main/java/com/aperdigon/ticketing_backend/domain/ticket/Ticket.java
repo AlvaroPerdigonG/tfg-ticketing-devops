@@ -26,6 +26,7 @@ public final class Ticket {
 
     private UserId assignedTo; // nullable en MVP
     private TicketStatus status;
+    private TicketPriority priority;
 
     private final Instant createdAt;
     private Instant updatedAt;
@@ -39,6 +40,7 @@ public final class Ticket {
             CategoryId categoryId,
             UserId createdBy,
             TicketStatus status,
+            TicketPriority priority,
             Instant createdAt,
             Instant updatedAt,
             UserId assignedTo,
@@ -50,6 +52,7 @@ public final class Ticket {
         this.categoryId = Guard.notNull(categoryId, "categoryId");
         this.createdBy = Guard.notNull(createdBy, "createdBy");
         this.status = Guard.notNull(status, "status");
+        this.priority = Guard.notNull(priority, "priority");
         this.createdAt = Guard.notNull(createdAt, "createdAt");
         this.updatedAt = Guard.notNull(updatedAt, "updatedAt");
         this.assignedTo = assignedTo;
@@ -69,6 +72,7 @@ public final class Ticket {
                 category.id(),
                 creator.id(),
                 TicketStatus.OPEN,
+                TicketPriority.MEDIUM,
                 now,
                 now,
                 null,
@@ -83,6 +87,7 @@ public final class Ticket {
             CategoryId categoryId,
             UserId createdBy,
             TicketStatus status,
+            TicketPriority priority,
             Instant createdAt,
             Instant updatedAt,
             UserId assignedTo,
@@ -96,6 +101,7 @@ public final class Ticket {
                 categoryId,
                 createdBy,
                 status,
+                priority,
                 createdAt,
                 updatedAt,
                 assignedTo,
@@ -164,6 +170,7 @@ public final class Ticket {
     public UserId createdBy() { return createdBy; }
     public UserId assignedTo() { return assignedTo; }
     public TicketStatus status() { return status; }
+    public TicketPriority priority() { return priority; }
     public Instant createdAt() { return createdAt; }
     public Instant updatedAt() { return updatedAt; }
     public List<Comment> comments() { return Collections.unmodifiableList(comments); }
