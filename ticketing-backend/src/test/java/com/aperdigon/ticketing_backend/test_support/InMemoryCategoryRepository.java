@@ -22,10 +22,33 @@ public final class InMemoryCategoryRepository implements CategoryRepository {
     }
 
     @Override
+    public Optional<Category> findByName(String name) {
+        if (name == null) {
+            return Optional.empty();
+        }
+        return store.values().stream()
+                .filter(category -> category.name().equalsIgnoreCase(name))
+                .findFirst();
+    }
+
+    @Override
+    public List<Category> findAll() {
+        return store.values().stream()
+                .sorted((left, right) -> left.name().compareToIgnoreCase(right.name()))
+                .toList();
+    }
+
+    @Override
     public List<Category> findActive() {
         return store.values().stream()
                 .filter(Category::isActive)
                 .sorted((left, right) -> left.name().compareToIgnoreCase(right.name()))
                 .toList();
+    }
+
+    @Override
+    public Category save(Category category) {
+        store.put(category.id(), category);
+        return category;
     }
 }

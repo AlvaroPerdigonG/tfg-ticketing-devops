@@ -7,6 +7,7 @@ import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.mapper.Use
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,6 +27,13 @@ public class JpaUserRepository implements UserRepository {
     @Override
     public Optional<User> findByEmail(String email) {
         return springRepo.findByEmailIgnoreCase(email).map(UserMapper::toDomain);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return springRepo.findByOrderByDisplayNameAsc().stream()
+                .map(UserMapper::toDomain)
+                .toList();
     }
 
     @Override

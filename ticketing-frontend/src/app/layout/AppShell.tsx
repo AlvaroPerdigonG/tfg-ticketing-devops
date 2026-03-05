@@ -38,7 +38,7 @@ export function AppShell() {
   const navigate = useNavigate();
   const { hasRole, logout } = useAuth();
 
-  const menuItems = getMenuItems(hasRole("AGENT"));
+  const menuItems = getMenuItems(hasRole("ADMIN"));
 
   const onLogout = () => {
     logout();

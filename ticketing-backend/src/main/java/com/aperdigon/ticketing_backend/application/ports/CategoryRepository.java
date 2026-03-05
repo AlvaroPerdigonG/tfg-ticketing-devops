@@ -8,5 +8,8 @@ import java.util.Optional;
 
 public interface CategoryRepository {
     Optional<Category> findById(CategoryId id);
+    Optional<Category> findByName(String name);
+    List<Category> findAll();
     List<Category> findActive();
+    Category save(Category category);
 }
