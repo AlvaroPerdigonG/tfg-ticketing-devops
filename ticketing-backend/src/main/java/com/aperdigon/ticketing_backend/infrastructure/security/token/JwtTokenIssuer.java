@@ -50,6 +50,8 @@ public class JwtTokenIssuer implements TokenIssuer {
                     .issueTime(Date.from(now))
                     .expirationTime(Date.from(exp))
                     .claim("roles", List.of(user.role().name()))
+                    .claim("email", user.email())
+                    .claim("displayName", user.displayName())
                     .build();
 
             SignedJWT jwt = new SignedJWT(

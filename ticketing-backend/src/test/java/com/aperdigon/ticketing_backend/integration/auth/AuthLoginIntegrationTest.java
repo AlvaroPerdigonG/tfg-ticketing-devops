@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -109,6 +110,8 @@ class AuthLoginIntegrationTest {
         SignedJWT jwt = SignedJWT.parse(token);
 
         assertEquals(activeUserId.toString(), jwt.getJWTClaimsSet().getSubject());
+        assertEquals("user@test.com", jwt.getJWTClaimsSet().getStringClaim("email"));
+        assertEquals("User", jwt.getJWTClaimsSet().getStringClaim("displayName"));
         assertEquals(List.of("USER"), jwt.getJWTClaimsSet().getStringListClaim("roles"));
         assertNotNull(jwt.getJWTClaimsSet().getExpirationTime());
     }
@@ -154,6 +157,28 @@ class AuthLoginIntegrationTest {
         var savedUser = userRepo.findByEmailIgnoreCase("new.user@test.com").orElseThrow();
         assertEquals(UserRole.USER, savedUser.getRole());
         assertEquals("New User", savedUser.getDisplayName());
+    }
+
+    @Test
+    void me_returns_profile_data_from_jwt_claims() throws Exception {
+        var loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"user@test.com","password":"secret123"}
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String tokenBody = loginResult.getResponse().getContentAsString();
+        String token = tokenBody.replaceAll(".*\"accessToken\":\"([^\"]+)\".*", "$1");
+
+        mockMvc.perform(get("/api/auth/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sub").value(activeUserId.toString()))
+                .andExpect(jsonPath("$.email").value("user@test.com"))
+                .andExpect(jsonPath("$.displayName").value("User"))
+                .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test

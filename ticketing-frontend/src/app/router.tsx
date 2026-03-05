@@ -8,6 +8,7 @@ import { RoleLandingRedirect } from "./pages/RoleLandingRedirect";
 import { TicketsPage } from "./pages/TicketsPage";
 import { CreateTicketPage } from "../features/tickets/ui/CreateTicketPage";
 import { TicketDetailPage } from "../features/tickets/ui/TicketDetailPage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 function ForbiddenPage() {
   return <PlaceholderPage title="403 — Forbidden" />;
@@ -27,7 +28,7 @@ export const router = createBrowserRouter([
           { path: "/tickets", element: <TicketsPage /> },
           { path: "/tickets/new", element: <CreateTicketPage /> },
           { path: "/tickets/:id", element: <TicketDetailPage /> },
-          { path: "/profile", element: <PlaceholderPage title="Perfil" /> },
+          { path: "/profile", element: <ProfilePage /> },
           { path: "/admin", element: <PlaceholderPage title="Administración" /> },
         ],
       },

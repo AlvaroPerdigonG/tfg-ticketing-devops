@@ -2,6 +2,8 @@ import type { Role, AuthUser } from "./types";
 
 type JwtPayload = {
   sub?: string;
+  email?: string;
+  displayName?: string;
   roles?: Role[] | string[];
   exp?: number;
 };
@@ -29,12 +31,17 @@ export function toAuthUser(token: string): AuthUser {
 
   if (!payload.sub) throw new Error("JWT missing 'sub'");
   if (!payload.exp) throw new Error("JWT missing 'exp'");
+  if (!payload.email) throw new Error("JWT missing 'email'");
+  if (!payload.displayName) throw new Error("JWT missing 'displayName'");
 
   const rolesRaw = payload.roles ?? [];
   const roles = rolesRaw.map(String) as Role[];
 
   return {
     id: payload.sub,
+    email: payload.email,
+    displayName: payload.displayName,
+    role: roles[0] ?? "USER",
     exp: payload.exp,
     roles,
   };
