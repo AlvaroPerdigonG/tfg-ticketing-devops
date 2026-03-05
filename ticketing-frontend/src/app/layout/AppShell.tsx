@@ -1,5 +1,5 @@
 import { MdDashboard, MdOutlineAdd } from "react-icons/md";
-import { Layout, Menu, Typography } from "antd";
+import { Button, Layout, Menu, Typography } from "antd";
 import type { MenuProps } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { HiBars3, HiTicket, HiUsers } from "react-icons/hi2";
@@ -36,9 +36,14 @@ function getSelectedKey(pathname: string, items: AppMenuItem[]) {
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasRole } = useAuth();
+  const { hasRole, logout } = useAuth();
 
   const menuItems = getMenuItems(hasRole("AGENT"));
+
+  const onLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -65,6 +70,7 @@ export function AppShell() {
             borderBottom: "1px solid #f0f0f0",
             display: "flex",
             alignItems: "center",
+            justifyContent: "space-between",
             paddingInline: 24,
             height: 64,
           }}
@@ -72,6 +78,8 @@ export function AppShell() {
           <Typography.Title level={5} style={{ margin: 0 }}>
             Ticketing Platform
           </Typography.Title>
+
+          <Button onClick={onLogout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24 }}>
           <Outlet />
