@@ -162,6 +162,11 @@ public final class Ticket {
         touch(clock);
     }
 
+    public void assignTo(UserId agentId, Clock clock) {
+        this.assignedTo = Guard.notNull(agentId, "agentId");
+        touch(clock);
+    }
+
     private void touch(Clock clock) {
         this.updatedAt = Instant.now(Guard.notNull(clock, "clock"));
     }

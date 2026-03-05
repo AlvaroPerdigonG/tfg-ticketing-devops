@@ -9,6 +9,8 @@ import com.aperdigon.ticketing_backend.api.tickets.detail.TicketDetailResponse;
 import com.aperdigon.ticketing_backend.api.tickets.list.TicketSummaryResponse;
 import com.aperdigon.ticketing_backend.application.tickets.change_status.ChangeTicketStatusCommand;
 import com.aperdigon.ticketing_backend.application.tickets.change_status.ChangeTicketStatusUseCase;
+import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeCommand;
+import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.create.CreateTicketCommand;
 import com.aperdigon.ticketing_backend.application.tickets.create.CreateTicketUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.get.GetTicketUseCase;
@@ -35,6 +37,7 @@ public class TicketController {
 
     private final CreateTicketUseCase createTicketUseCase;
     private final ChangeTicketStatusUseCase changeTicketStatusUseCase;
+    private final AssignTicketToMeUseCase assignTicketToMeUseCase;
     private final ListMyTicketsUseCase listMyTicketsUseCase;
     private final ListTicketsUseCase listTicketsUseCase;
     private final GetTicketUseCase getTicketUseCase;
@@ -43,6 +46,7 @@ public class TicketController {
     public TicketController(
             CreateTicketUseCase createTicketUseCase,
             ChangeTicketStatusUseCase changeTicketStatusUseCase,
+            AssignTicketToMeUseCase assignTicketToMeUseCase,
             ListMyTicketsUseCase listMyTicketsUseCase,
             ListTicketsUseCase listTicketsUseCase,
             GetTicketUseCase getTicketUseCase,
@@ -50,6 +54,7 @@ public class TicketController {
     ) {
         this.createTicketUseCase = createTicketUseCase;
         this.changeTicketStatusUseCase = changeTicketStatusUseCase;
+        this.assignTicketToMeUseCase = assignTicketToMeUseCase;
         this.listMyTicketsUseCase = listMyTicketsUseCase;
         this.listTicketsUseCase = listTicketsUseCase;
         this.getTicketUseCase = getTicketUseCase;
@@ -119,6 +124,13 @@ public class TicketController {
                 actor
         ));
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/assignment/me")
+    public ResponseEntity<Void> assignToMe(@PathVariable UUID id) {
+        var actor = currentUserProvider.getCurrentUser();
+        assignTicketToMeUseCase.execute(new AssignTicketToMeCommand(new TicketId(id), actor));
         return ResponseEntity.noContent().build();
     }
 }

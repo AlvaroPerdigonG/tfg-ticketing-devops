@@ -1,23 +1,13 @@
 import { Alert, Button, Card, Empty, Skeleton, Space, Table, Tag, Typography } from "antd";
 import type { TableProps } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ticketsApi } from "../api/ticketsApi";
+import { ticketPriorityLabel, ticketStatusLabel } from "../model/presentation";
 import type { TicketPriority, TicketQueueScope, TicketStatus, TicketSummary } from "../model/types";
 
 type QueueView = "unassigned" | "mine" | "all";
 type LoadState = "loading" | "ready" | "error";
-
-const STATUS_LABEL: Record<TicketStatus, string> = {
-  OPEN: "Abierto",
-  IN_PROGRESS: "En progreso",
-  RESOLVED: "Resuelto",
-};
-
-const PRIORITY_LABEL: Record<TicketPriority, string> = {
-  LOW: "Baja",
-  MEDIUM: "Media",
-  HIGH: "Alta",
-};
 
 function formatDate(isoDate: string) {
   return new Intl.DateTimeFormat("es-ES", {
@@ -33,6 +23,7 @@ function queueScopeFromView(view: QueueView): TicketQueueScope {
 }
 
 export function AgentAdminTicketsPage() {
+  const navigate = useNavigate();
   const [view, setView] = useState<QueueView>("unassigned");
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,14 +69,14 @@ export function AgentAdminTicketsPage() {
         dataIndex: "status",
         key: "status",
         width: 140,
-        render: (statusValue: unknown) => <Tag>{STATUS_LABEL[statusValue as TicketStatus]}</Tag>,
+        render: (statusValue: unknown) => <Tag>{ticketStatusLabel[statusValue as TicketStatus]}</Tag>,
       },
       {
         title: "Prioridad",
         dataIndex: "priority",
         key: "priority",
         width: 120,
-        render: (priorityValue: unknown) => <Tag>{PRIORITY_LABEL[priorityValue as TicketPriority]}</Tag>,
+        render: (priorityValue: unknown) => <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>,
       },
       {
         title: "Asignado",
@@ -101,8 +92,19 @@ export function AgentAdminTicketsPage() {
         width: 180,
         render: (updatedAtValue: unknown) => formatDate(String(updatedAtValue)),
       },
+      {
+        title: "Acciones",
+        dataIndex: "id",
+        key: "actions",
+        width: 120,
+        render: (_id: unknown, row: TicketSummary) => (
+          <Button size="small" onClick={() => navigate(`/tickets/${row.id}`)}>
+            Ver
+          </Button>
+        ),
+      },
     ],
-    [],
+    [navigate],
   );
 
   const viewLabel =

@@ -4,6 +4,7 @@ import type {
   CreateTicketResponse,
   PaginatedResponse,
   TicketCategory,
+  TicketDetail,
   TicketQueueScope,
   TicketStatus,
   TicketSummary,
@@ -38,4 +39,11 @@ export const ticketsApi = {
   getCategories: () => authClient.get<TicketCategory[]>("/api/categories"),
 
   createTicket: (payload: CreateTicketInput) => authClient.post<CreateTicketResponse>("/api/tickets", payload),
+
+  getTicketById: (ticketId: string) => authClient.get<TicketDetail>(`/api/tickets/${ticketId}`),
+
+  changeStatus: (ticketId: string, status: TicketStatus) =>
+    authClient.patch<void>(`/api/tickets/${ticketId}/status`, { status }),
+
+  assignToMe: (ticketId: string) => authClient.patch<void>(`/api/tickets/${ticketId}/assignment/me`, {}),
 };
