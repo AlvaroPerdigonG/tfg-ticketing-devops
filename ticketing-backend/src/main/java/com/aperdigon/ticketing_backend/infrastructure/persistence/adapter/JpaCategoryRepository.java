@@ -25,9 +25,27 @@ public class JpaCategoryRepository implements CategoryRepository {
     }
 
     @Override
+    public Optional<Category> findByName(String name) {
+        return springRepo.findByNameIgnoreCase(name).map(CategoryMapper::toDomain);
+    }
+
+    @Override
+    public List<Category> findAll() {
+        return springRepo.findByOrderByNameAsc().stream()
+                .map(CategoryMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<Category> findActive() {
         return springRepo.findByIsActiveTrueOrderByNameAsc().stream()
                 .map(CategoryMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Category save(Category category) {
+        var savedEntity = springRepo.save(CategoryMapper.toJpa(category));
+        return CategoryMapper.toDomain(savedEntity);
     }
 }

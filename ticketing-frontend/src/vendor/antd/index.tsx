@@ -164,18 +164,23 @@ export type TableProps<T> = {
   rowKey: keyof T | ((row: T) => React.Key);
   columns: Array<{
     title: React.ReactNode;
-    dataIndex: keyof T;
+    dataIndex?: keyof T;
     key: string;
     width?: number;
     ellipsis?: boolean;
     render?: (value: unknown, row: T) => React.ReactNode;
   }>;
   dataSource: T[];
-  pagination?: { pageSize?: number; hideOnSinglePage?: boolean };
+  pagination?: { pageSize?: number; hideOnSinglePage?: boolean } | boolean;
+  loading?: boolean;
 };
 
-export function Table<T extends Record<string, unknown>>({ rowKey, columns, dataSource }: TableProps<T>) {
+export function Table<T extends Record<string, unknown>>({ rowKey, columns, dataSource, loading }: TableProps<T>) {
   const keyGetter = typeof rowKey === "function" ? rowKey : (row: T) => row[rowKey] as React.Key;
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -192,7 +197,7 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
         {dataSource.map((row) => (
           <tr key={keyGetter(row)}>
             {columns.map((column) => {
-              const value = row[column.dataIndex];
+              const value = column.dataIndex ? row[column.dataIndex] : undefined;
               return (
                 <td key={column.key} style={{ borderBottom: "1px solid #f3f4f6", padding: "8px 4px" }}>
                   {column.render ? column.render(value, row) : (value as React.ReactNode)}
@@ -205,3 +210,49 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
     </table>
   );
 }
+
+export function Input({ value, onChange, placeholder }: { value?: string; onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string }) {
+  return <input value={value} onChange={onChange} placeholder={placeholder} />;
+}
+
+export function Switch({ checked, onChange }: { checked?: boolean; onChange?: (checked: boolean) => void }) {
+  return <input type="checkbox" checked={checked} onChange={(event) => onChange?.(event.target.checked)} />;
+}
+
+export function Tabs({ items }: { items: Array<{ key: string; label: React.ReactNode; children: React.ReactNode }> }) {
+  const [activeKey, setActiveKey] = React.useState(items[0]?.key);
+  const active = items.find((item) => item.key === activeKey) ?? items[0];
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {items.map((item) => (
+          <button key={item.key} role="tab" onClick={() => setActiveKey(item.key)}>
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <div>{active?.children}</div>
+    </div>
+  );
+}
+
+export function Modal({ open, title, children, onCancel, onOk, okText }: { open: boolean; title: React.ReactNode; children: React.ReactNode; onCancel?: () => void; onOk?: () => void; okText?: string }) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div>
+      <h2>{title}</h2>
+      {children}
+      <button onClick={onCancel}>Cancelar</button>
+      <button onClick={onOk}>{okText ?? "OK"}</button>
+    </div>
+  );
+}
+
+export const message = {
+  success: (_text: string) => undefined,
+  error: (_text: string) => undefined,
+};

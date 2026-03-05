@@ -9,6 +9,8 @@ import { TicketsPage } from "./pages/TicketsPage";
 import { CreateTicketPage } from "../features/tickets/ui/CreateTicketPage";
 import { TicketDetailPage } from "../features/tickets/ui/TicketDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { RequireRole } from "../features/auth/ui/RequireRole";
+import { AdminPage } from "../features/admin/ui/AdminPage";
 
 function ForbiddenPage() {
   return <PlaceholderPage title="403 — Forbidden" />;
@@ -29,7 +31,7 @@ export const router = createBrowserRouter([
           { path: "/tickets/new", element: <CreateTicketPage /> },
           { path: "/tickets/:id", element: <TicketDetailPage /> },
           { path: "/profile", element: <ProfilePage /> },
-          { path: "/admin", element: <PlaceholderPage title="Administración" /> },
+          { path: "/admin", element: <RequireRole anyOf={["ADMIN"]}><AdminPage /></RequireRole> },
         ],
       },
     ],
