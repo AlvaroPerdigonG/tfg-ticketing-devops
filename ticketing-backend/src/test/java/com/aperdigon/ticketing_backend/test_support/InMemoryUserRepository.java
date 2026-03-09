@@ -6,6 +6,7 @@ import com.aperdigon.ticketing_backend.domain.user.UserId;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public final class InMemoryUserRepository implements UserRepository {
@@ -28,6 +29,13 @@ public final class InMemoryUserRepository implements UserRepository {
         return store.values().stream()
                 .filter(u -> u.email().equalsIgnoreCase(email))
                 .findFirst();
+    }
+
+    @Override
+    public List<User> findAll() {
+        return store.values().stream()
+                .sorted((left, right) -> left.displayName().compareToIgnoreCase(right.displayName()))
+                .toList();
     }
 
     @Override

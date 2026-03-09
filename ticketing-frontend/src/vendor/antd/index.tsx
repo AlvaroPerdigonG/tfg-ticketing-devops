@@ -164,18 +164,23 @@ export type TableProps<T> = {
   rowKey: keyof T | ((row: T) => React.Key);
   columns: Array<{
     title: React.ReactNode;
-    dataIndex: keyof T;
+    dataIndex?: keyof T;
     key: string;
     width?: number;
     ellipsis?: boolean;
     render?: (value: unknown, row: T) => React.ReactNode;
   }>;
   dataSource: T[];
-  pagination?: { pageSize?: number; hideOnSinglePage?: boolean };
+  pagination?: { pageSize?: number; hideOnSinglePage?: boolean } | boolean;
+  loading?: boolean;
 };
 
-export function Table<T extends Record<string, unknown>>({ rowKey, columns, dataSource }: TableProps<T>) {
+export function Table<T extends Record<string, unknown>>({ rowKey, columns, dataSource, loading }: TableProps<T>) {
   const keyGetter = typeof rowKey === "function" ? rowKey : (row: T) => row[rowKey] as React.Key;
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -192,7 +197,7 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
         {dataSource.map((row) => (
           <tr key={keyGetter(row)}>
             {columns.map((column) => {
-              const value = row[column.dataIndex];
+              const value = column.dataIndex ? row[column.dataIndex] : undefined;
               return (
                 <td key={column.key} style={{ borderBottom: "1px solid #f3f4f6", padding: "8px 4px" }}>
                   {column.render ? column.render(value, row) : (value as React.ReactNode)}
@@ -205,3 +210,118 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
     </table>
   );
 }
+
+export function Input({ value, onChange, placeholder }: { value?: string; onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string }) {
+  return (
+    <input
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      style={{
+        border: "1px solid #d9d9d9",
+        borderRadius: 6,
+        padding: "6px 10px",
+        minHeight: 32,
+      }}
+    />
+  );
+}
+
+export function Switch({ checked, onChange }: { checked?: boolean; onChange?: (checked: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={Boolean(checked)}
+      onClick={() => onChange?.(!checked)}
+      style={{
+        width: 44,
+        height: 24,
+        borderRadius: 999,
+        border: "1px solid #d9d9d9",
+        background: checked ? "#0c9136" : "#d9d9d9",
+        cursor: "pointer",
+        padding: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: checked ? "flex-end" : "flex-start",
+      }}
+    >
+      <span
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: "#fff",
+          display: "inline-block",
+        }}
+      />
+    </button>
+  );
+}
+
+export function Tabs({ items }: { items: Array<{ key: string; label: React.ReactNode; children: React.ReactNode }> }) {
+  const [activeKey, setActiveKey] = React.useState(items[0]?.key);
+  const active = items.find((item) => item.key === activeKey) ?? items[0];
+
+  return (
+    <div>
+      <div role="tablist" style={{ display: "flex", gap: 6, borderBottom: "1px solid #f0f0f0", marginBottom: 16 }}>
+        {items.map((item) => (
+          <button
+            key={item.key}
+            role="tab"
+            aria-selected={item.key === active.key}
+            onClick={() => setActiveKey(item.key)}
+            style={{
+              border: "none",
+              borderBottom: item.key === active.key ? "2px solid #0c9136" : "2px solid transparent",
+              background: "transparent",
+              color: item.key === active.key ? "#0c9136" : "#595959",
+              padding: "8px 4px",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <div>{active?.children}</div>
+    </div>
+  );
+}
+
+export function Modal({ open, title, children, onCancel, onOk, okText }: { open: boolean; title: React.ReactNode; children: React.ReactNode; onCancel?: () => void; onOk?: () => void; okText?: string }) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0, 0, 0, 0.45)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div style={{ background: "#fff", borderRadius: 8, width: 520, maxWidth: "90vw", padding: 20 }}>
+        <h2 style={{ marginTop: 0 }}>{title}</h2>
+        <div style={{ marginBottom: 16 }}>{children}</div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <Button type="default" onClick={onCancel}>Cancelar</Button>
+          <Button type="primary" onClick={onOk}>{okText ?? "OK"}</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const message = {
+  success: (_text: string) => undefined,
+  error: (_text: string) => undefined,
+};

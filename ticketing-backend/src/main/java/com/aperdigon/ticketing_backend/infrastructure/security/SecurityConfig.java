@@ -44,6 +44,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAnyRole("AGENT", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/assignment/me").hasAnyRole("AGENT", "ADMIN")
 
+                        // administración solo ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         // resto API: requiere estar autenticado
                         .requestMatchers("/api/**").authenticated()
 

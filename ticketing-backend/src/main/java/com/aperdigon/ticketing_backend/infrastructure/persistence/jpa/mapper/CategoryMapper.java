@@ -14,4 +14,12 @@ public final class CategoryMapper {
                 e.isActive()
         );
     }
+
+    public static CategoryJpaEntity toJpa(Category category) {
+        return new CategoryJpaEntity(
+                category.id().value(),
+                category.name(),
+                category.isActive()
+        );
+    }
 }
