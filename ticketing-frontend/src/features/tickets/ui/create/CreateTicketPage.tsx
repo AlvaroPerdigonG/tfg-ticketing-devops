@@ -1,8 +1,8 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Alert, Button, Card, Space, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
-import { ticketsApi } from "../api/ticketsApi";
-import type { TicketCategory, TicketPriority } from "../model/types";
+import { ticketsApi } from "../../api/ticketsApi";
+import type { TicketCategory, TicketPriority } from "../../model/types";
 
 const priorityOptions: Array<{ value: TicketPriority; label: string }> = [
   { value: "LOW", label: "Baja" },
