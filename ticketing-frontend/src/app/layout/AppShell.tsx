@@ -10,7 +10,6 @@ type AppMenuItem = Required<NonNullable<MenuProps["items"]>>[number];
 const { Header, Sider, Content } = Layout;
 
 const baseItems: AppMenuItem[] = [
-  { key: "/dashboard", icon: <MdDashboard fontSize={18} />, label: "Dashboard" },
   { key: "/tickets", icon: <HiTicket fontSize={18} />, label: "Tickets" },
   { key: "/tickets/new", icon: <MdOutlineAdd fontSize={18} />, label: "Nuevo ticket" },
   { key: "/profile", icon: <HiBars3 fontSize={18} />, label: "Perfil" },
@@ -18,7 +17,8 @@ const baseItems: AppMenuItem[] = [
 
 function getMenuItems(isAdmin: boolean): AppMenuItem[] {
   if (isAdmin) {
-    return [...baseItems, { key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" }];
+    return [{ key: "/dashboard", icon: <MdDashboard fontSize={18} />, label: "Dashboard" }, ...baseItems, 
+      { key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" }];
   }
 
   return baseItems;

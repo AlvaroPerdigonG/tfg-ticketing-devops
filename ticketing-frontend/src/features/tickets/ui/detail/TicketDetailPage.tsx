@@ -1,10 +1,10 @@
 import { Alert, Button, Card, Empty, Skeleton, Space, Tag, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { ticketsApi } from "../api/ticketsApi";
-import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../model/presentation";
-import type { TicketDetail, TicketStatus } from "../model/types";
+import { useAuth } from "../../../auth/hooks/useAuth";
+import { ticketsApi } from "../../api/ticketsApi";
+import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../../model/presentation";
+import type { TicketDetail, TicketStatus } from "../../model/types";
 
 type LoadState = "loading" | "ready" | "error";
 

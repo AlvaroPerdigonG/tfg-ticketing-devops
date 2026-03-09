@@ -6,11 +6,12 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { RoleLandingRedirect } from "./pages/RoleLandingRedirect";
 import { TicketsPage } from "./pages/TicketsPage";
-import { CreateTicketPage } from "../features/tickets/ui/CreateTicketPage";
-import { TicketDetailPage } from "../features/tickets/ui/TicketDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RequireRole } from "../features/auth/ui/RequireRole";
 import { AdminPage } from "../features/admin/ui/AdminPage";
+import { AgentAdminDashboardPage } from "src/features/tickets/ui/dashboard/AgentAdminDashboardPage";
+import { CreateTicketPage } from "src/features/tickets/ui/create/CreateTicketPage";
+import { TicketDetailPage } from "src/features/tickets/ui/detail/TicketDetailPage";
 
 function ForbiddenPage() {
   return <PlaceholderPage title="403 — Forbidden" />;
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: "/", element: <RoleLandingRedirect /> },
-          { path: "/dashboard", element: <PlaceholderPage title="Dashboard" /> },
+          { path: "/dashboard", element: <RequireRole anyOf={["ADMIN", "AGENT"]}><AgentAdminDashboardPage /></RequireRole> },
           { path: "/tickets", element: <TicketsPage /> },
           { path: "/tickets/new", element: <CreateTicketPage /> },
           { path: "/tickets/:id", element: <TicketDetailPage /> },

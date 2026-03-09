@@ -1,6 +1,7 @@
+
+import { AgentAdminTicketsPage } from "src/features/tickets/ui/ticketsPage/AgentAdminTicketsPage";
 import { useAuth } from "../../features/auth/hooks/useAuth";
-import { UserTicketsHomePage } from "../../features/tickets/ui/UserTicketsHomePage";
-import { AgentAdminTicketsPage } from "../../features/tickets/ui/AgentAdminTicketsPage";
+import { UserTicketsHomePage } from "src/features/tickets/ui/ticketsPage/UserTicketsHomePage";
 
 export function TicketsPage() {
   const { hasAnyRole } = useAuth();

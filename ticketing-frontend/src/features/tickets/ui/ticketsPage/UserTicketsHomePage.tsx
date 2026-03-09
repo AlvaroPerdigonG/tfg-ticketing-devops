@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Empty, Skeleton, Space, Table, Tag, Typography } from "antd";
 import type { TableProps } from "antd";
 import { useNavigate } from "react-router-dom";
-import { ticketsApi } from "../api/ticketsApi";
-import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../model/presentation";
-import type { TicketPriority, TicketStatus, TicketSummary } from "../model/types";
+import { ticketsApi } from "../../api/ticketsApi";
+import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../../model/presentation";
+import type { TicketPriority, TicketStatus, TicketSummary } from "../../model/types";
 
 type LoadState = "loading" | "ready" | "error";
 
