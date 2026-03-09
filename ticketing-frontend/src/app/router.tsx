@@ -4,6 +4,7 @@ import { LoginPage } from "../features/auth/ui/LoginPage";
 import { AppShell } from "./layout/AppShell";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { RoleLandingRedirect } from "./pages/RoleLandingRedirect";
 import { TicketsPage } from "./pages/TicketsPage";
 import { CreateTicketPage } from "../features/tickets/ui/CreateTicketPage";
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: "/", element: <RoleLandingRedirect /> },
-          { path: "/dashboard", element: <PlaceholderPage title="Dashboard" /> },
+          { path: "/dashboard", element: <DashboardPage /> },
           { path: "/tickets", element: <TicketsPage /> },
           { path: "/tickets/new", element: <CreateTicketPage /> },
           { path: "/tickets/:id", element: <TicketDetailPage /> },

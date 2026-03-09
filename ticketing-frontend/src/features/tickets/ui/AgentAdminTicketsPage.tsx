@@ -1,13 +1,37 @@
-import { Alert, Button, Card, Empty, Skeleton, Space, Table, Tag, Typography } from "antd";
+import { Alert, Button, Card, Empty, Input, Skeleton, Space, Table, Tag, Typography } from "antd";
 import type { TableProps } from "antd";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ticketsApi } from "../api/ticketsApi";
-import { ticketPriorityLabel, ticketStatusLabel } from "../model/presentation";
+import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../model/presentation";
 import type { TicketPriority, TicketQueueScope, TicketStatus, TicketSummary } from "../model/types";
 
 type QueueView = "unassigned" | "mine" | "all";
 type LoadState = "loading" | "ready" | "error";
+type QueueFilter = "all" | TicketStatus;
+
+const statusFilterOptions: Array<{ label: string; value: QueueFilter }> = [
+  { label: "Todos los estados", value: "all" },
+  { label: "Abierto", value: "OPEN" },
+  { label: "En progreso", value: "IN_PROGRESS" },
+  { label: "Resuelto", value: "RESOLVED" },
+];
+
+function toQueueView(value: string | null): QueueView {
+  if (value === "mine" || value === "all" || value === "unassigned") {
+    return value;
+  }
+
+  return "unassigned";
+}
+
+function toStatusFilter(value: string | null): QueueFilter {
+  if (value === "OPEN" || value === "IN_PROGRESS" || value === "RESOLVED") {
+    return value;
+  }
+
+  return "all";
+}
 
 function formatDate(isoDate: string) {
   return new Intl.DateTimeFormat("es-ES", {
@@ -24,11 +48,24 @@ function queueScopeFromView(view: QueueView): TicketQueueScope {
 
 export function AgentAdminTicketsPage() {
   const navigate = useNavigate();
-  const [view, setView] = useState<QueueView>("unassigned");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [view, setView] = useState<QueueView>(() => toQueueView(searchParams.get("view")));
+  const [statusFilter, setStatusFilter] = useState<QueueFilter>(() => toStatusFilter(searchParams.get("status")));
+  const [query, setQuery] = useState<string>(() => searchParams.get("q") ?? "");
+  const [inputQuery, setInputQuery] = useState<string>(() => searchParams.get("q") ?? "");
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tickets, setTickets] = useState<TicketSummary[]>([]);
   const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set("view", view);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (query.trim()) params.set("q", query.trim());
+    setSearchParams(params, { replace: true });
+  }, [query, setSearchParams, statusFilter, view]);
 
   useEffect(() => {
     let isMounted = true;
@@ -38,7 +75,13 @@ export function AgentAdminTicketsPage() {
       setErrorMessage(null);
 
       try {
-        const response = await ticketsApi.getQueueTickets({ scope: queueScopeFromView(view), page: 0, size: 20 });
+        const response = await ticketsApi.getQueueTickets({
+          scope: queueScopeFromView(view),
+          status: statusFilter === "all" ? undefined : statusFilter,
+          q: query.trim() || undefined,
+          page: 0,
+          size: 20,
+        });
 
         if (!isMounted) return;
 
@@ -58,7 +101,7 @@ export function AgentAdminTicketsPage() {
     return () => {
       isMounted = false;
     };
-  }, [view]);
+  }, [query, statusFilter, view]);
 
   const columns: TableProps<TicketSummary>["columns"] = useMemo(
     () => [
@@ -69,7 +112,9 @@ export function AgentAdminTicketsPage() {
         dataIndex: "status",
         key: "status",
         width: 140,
-        render: (statusValue: unknown) => <Tag>{ticketStatusLabel[statusValue as TicketStatus]}</Tag>,
+        render: (statusValue: unknown) => (
+          <Tag color={ticketStatusColor[statusValue as TicketStatus]}>{ticketStatusLabel[statusValue as TicketStatus]}</Tag>
+        ),
       },
       {
         title: "Prioridad",
@@ -117,6 +162,17 @@ export function AgentAdminTicketsPage() {
   const unassignedCount = tickets.filter((ticket) => ticket.assignedToUserId === null).length;
   const inProgressCount = tickets.filter((ticket) => ticket.status === "IN_PROGRESS").length;
 
+  const onApplySearch = () => {
+    setQuery(inputQuery);
+  };
+
+  const onClearFilters = () => {
+    setView("unassigned");
+    setStatusFilter("all");
+    setInputQuery("");
+    setQuery("");
+  };
+
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>
@@ -147,6 +203,28 @@ export function AgentAdminTicketsPage() {
         <Button type={view === "mine" ? "primary" : "default"} onClick={() => setView("mine")}>Asignados a mí</Button>
         <Button type={view === "all" ? "primary" : "default"} onClick={() => setView("all")}>Todos</Button>
       </Space>
+
+      <Card>
+        <Space>
+          <label>
+            <Typography.Text>Estado</Typography.Text>
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as QueueFilter)} style={{ marginLeft: 8, minHeight: 32 }}>
+              {statusFilterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Input
+            value={inputQuery}
+            onChange={(event) => setInputQuery(event.target.value)}
+            placeholder="Buscar por título o ID"
+          />
+          <Button onClick={onApplySearch}>Buscar</Button>
+          <Button onClick={onClearFilters}>Limpiar filtros</Button>
+        </Space>
+      </Card>
 
       <Card>
         <Space direction="vertical" size={12} style={{ width: "100%" }}>
