@@ -47,7 +47,7 @@ export function AppShell() {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider style={{ borderRight: "1px solid #f0f0f0", width: 240 }}>
+      <Sider  style={{ borderRight: "1px solid #f0f0f0", width: 240, background: "#fff" }}>
         <div style={{ padding: "16px 20px" }}>
           <Typography.Title level={4} style={{ margin: 0 }}>
             TFG Ticketing

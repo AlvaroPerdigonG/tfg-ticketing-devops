@@ -18,8 +18,8 @@ vi.mock("../api/adminApi", () => ({
 
 describe("AdminPage", () => {
   it("renders admin tabs and loaded records", async () => {
-    getCategoriesMock.mockResolvedValueOnce([{ id: "1", name: "Software", isActive: true }]);
-    getUsersMock.mockResolvedValueOnce([
+    getCategoriesMock.mockResolvedValue([{ id: "1", name: "Software", isActive: true }]);
+    getUsersMock.mockResolvedValue([
       { id: "u1", email: "admin@test.com", displayName: "Admin", role: "ADMIN", isActive: true },
     ]);
 

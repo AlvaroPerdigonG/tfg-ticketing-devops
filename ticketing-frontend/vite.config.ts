@@ -7,12 +7,12 @@ export default defineConfig({
   resolve: {
     alias: {
       src: fileURLToPath(new URL("./src", import.meta.url)),
-      antd: fileURLToPath(new URL("./src/vendor/antd/index.tsx", import.meta.url)),
     },
   },
   test: {
     environment: "jsdom",
     setupFiles: "./src/tests/setupTests.ts",
     globals: true,
+    testTimeout: 15000,
   },
 });

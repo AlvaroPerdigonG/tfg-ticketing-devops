@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Empty, Input, Skeleton, Space, Table, Tag, Typography } from "antd";
+import { Alert, Button, Card, Empty, Input, Select, Skeleton, Space, Table, Tag, Typography } from "antd";
 import type { TableProps } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -206,16 +206,13 @@ export function AgentAdminTicketsPage() {
 
       <Card>
         <Space>
-          <label>
-            <Typography.Text>Estado</Typography.Text>
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as QueueFilter)} style={{ marginLeft: 8, minHeight: 32 }}>
-              {statusFilterOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+              aria-label="Estado"
+              value={statusFilter}
+              onChange={(value) => setStatusFilter(value as QueueFilter)}
+              options={statusFilterOptions}
+              style={{ minWidth: 220 }}
+            />
           <Input
             value={inputQuery}
             onChange={(event) => setInputQuery(event.target.value)}

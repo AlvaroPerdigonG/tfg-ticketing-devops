@@ -6,7 +6,7 @@ import { UserTicketsHomePage } from "./UserTicketsHomePage";
 
 const getMyTicketsMock = vi.fn();
 
-vi.mock("../api/ticketsApi", () => ({
+vi.mock("../../api/ticketsApi", () => ({
   ticketsApi: {
     getMyTickets: () => getMyTicketsMock(),
   },
