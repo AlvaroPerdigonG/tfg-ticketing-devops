@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConfigProvider } from "antd";
 import { MemoryRouter } from "react-router-dom";
@@ -62,7 +62,16 @@ describe("CreateTicketPage", () => {
 
     await user.type(await screen.findByLabelText("Título"), "Impresora bloqueada");
     await user.type(screen.getByLabelText("Descripción"), "Da error E23 cuando intento imprimir un PDF.");
-    await user.selectOptions(screen.getByLabelText("Categoría"), "cat-1");
+    const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
+    const categorySelector = categoryCombobox.closest(".ant-select")?.querySelector(".ant-select-selector");
+    expect(categorySelector).toBeTruthy();
+    fireEvent.mouseDown(categorySelector as Element);
+    fireEvent.keyDown(categoryCombobox, { key: "ArrowDown" });
+    fireEvent.keyDown(categoryCombobox, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Crear ticket" })).toBeEnabled();
+    });
 
     await user.click(screen.getByRole("button", { name: "Crear ticket" }));
 

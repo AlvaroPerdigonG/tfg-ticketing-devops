@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ConfigProvider } from "antd";
-import esES from "../vendor/antd/locale/es_ES";
-import "../vendor/antd/reset.css";
+import esES from "antd/locale/es_ES";
+import "antd/dist/reset.css";
 import { App } from "./App";
 import "./index.css";
 import { AuthProvider } from "./providers/AuthProvider";

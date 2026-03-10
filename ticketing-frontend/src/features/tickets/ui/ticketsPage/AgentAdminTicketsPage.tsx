@@ -206,16 +206,13 @@ export function AgentAdminTicketsPage() {
 
       <Card>
         <Space>
-          <Space direction="vertical" size={4}>
-            <Typography.Text>Estado</Typography.Text>
-            <Select
+          <Select
               aria-label="Estado"
               value={statusFilter}
               onChange={(value) => setStatusFilter(value as QueueFilter)}
               options={statusFilterOptions}
               style={{ minWidth: 220 }}
             />
-          </Space>
           <Input
             value={inputQuery}
             onChange={(event) => setInputQuery(event.target.value)}
