@@ -5,7 +5,7 @@ import { AgentAdminTicketsPage } from "./AgentAdminTicketsPage";
 
 const getQueueTicketsMock = vi.fn();
 
-vi.mock("../api/ticketsApi", () => ({
+vi.mock("../../api/ticketsApi", () => ({
   ticketsApi: {
     getQueueTickets: (...args: unknown[]) => getQueueTicketsMock(...args),
   },

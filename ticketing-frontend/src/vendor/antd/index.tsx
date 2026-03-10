@@ -111,6 +111,42 @@ export const Typography = {
   ),
 };
 
+
+
+type FormProps = {
+  children: React.ReactNode;
+  layout?: "vertical" | "horizontal";
+  onFinish?: () => void;
+};
+
+type FormItemProps = {
+  children: React.ReactNode;
+  label?: React.ReactNode;
+  style?: React.CSSProperties;
+};
+
+type FormComponent = React.FC<FormProps> & {
+  Item: React.FC<FormItemProps>;
+};
+
+export const Form = (({ children, onFinish }: FormProps) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onFinish?.();
+  };
+
+  return <form onSubmit={handleSubmit}>{children}</form>;
+}) as FormComponent;
+
+Form.Item = ({ children, label, style }: FormItemProps) => {
+  return (
+    <label style={{ display: "flex", flexDirection: "column", gap: 6, ...(style ?? {}) }}>
+      {label}
+      {children}
+    </label>
+  );
+};
+
 export function Card({ children }: { children: React.ReactNode }) {
   return <section style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 20 }}>{children}</section>;
 }
@@ -211,12 +247,35 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
   );
 }
 
-export function Input({ value, onChange, placeholder }: { value?: string; onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string }) {
+type InputProps = {
+  value?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  maxLength?: number;
+  [key: `aria-${string}`]: string | undefined;
+};
+
+type TextAreaProps = {
+  value?: string;
+  onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  maxLength?: number;
+  rows?: number;
+  [key: `aria-${string}`]: string | undefined;
+};
+
+type InputComponent = React.FC<InputProps> & {
+  TextArea: React.FC<TextAreaProps>;
+};
+
+export const Input = (({ value, onChange, placeholder, maxLength, ...ariaProps }: InputProps) => {
   return (
     <input
       value={value}
       onChange={onChange}
       placeholder={placeholder}
+      maxLength={maxLength}
+      {...ariaProps}
       style={{
         border: "1px solid #d9d9d9",
         borderRadius: 6,
@@ -224,6 +283,55 @@ export function Input({ value, onChange, placeholder }: { value?: string; onChan
         minHeight: 32,
       }}
     />
+  );
+}) as InputComponent;
+
+Input.TextArea = ({ value, onChange, placeholder, maxLength, rows = 4, ...ariaProps }: TextAreaProps) => {
+  return (
+    <textarea
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      rows={rows}
+      {...ariaProps}
+      style={{
+        border: "1px solid #d9d9d9",
+        borderRadius: 6,
+        padding: "6px 10px",
+        width: "100%",
+      }}
+    />
+  );
+};
+
+type SelectOption = {
+  label: React.ReactNode;
+  value: string;
+};
+
+export function Select({ value, onChange, options, disabled, placeholder, style, ...ariaProps }: { value?: string; onChange?: (value: string) => void; options?: SelectOption[]; disabled?: boolean; placeholder?: string; style?: React.CSSProperties; [key: `aria-${string}`]: string | undefined }) {
+  return (
+    <select
+      value={value ?? ""}
+      onChange={(event) => onChange?.(event.target.value)}
+      disabled={disabled}
+      style={{
+        border: "1px solid #d9d9d9",
+        borderRadius: 6,
+        padding: "6px 10px",
+        minHeight: 32,
+        ...(style ?? {}),
+      }}
+      {...ariaProps}
+    >
+      {placeholder ? <option value="">{placeholder}</option> : null}
+      {(options ?? []).map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
   );
 }
 

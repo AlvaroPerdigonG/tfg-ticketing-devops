@@ -17,7 +17,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../api/ticketsApi", () => ({
+vi.mock("../../api/ticketsApi", () => ({
   ticketsApi: {
     getCategories: () => getCategoriesMock(),
     createTicket: (payload: unknown) => createTicketMock(payload),

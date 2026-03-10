@@ -1,5 +1,5 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { Alert, Button, Card, Space, Typography } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Button, Card, Form, Input, Select, Space, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ticketsApi } from "../../api/ticketsApi";
 import type { TicketCategory, TicketPriority } from "../../model/types";
@@ -54,9 +54,7 @@ export function CreateTicketPage() {
     };
   }, []);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     if (isSubmitDisabled) {
       return;
     }
@@ -88,66 +86,51 @@ export function CreateTicketPage() {
 
         {errorMessage && <Alert showIcon type="error" message="Error al crear ticket" description={errorMessage} />}
 
-        <form onSubmit={handleSubmit}>
+        <Form layout="vertical" onFinish={handleSubmit}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <label>
-              Título
-              <input
+            <Form.Item label="Título" style={{ marginBottom: 0 }}>
+              <Input
                 aria-label="Título"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Describe brevemente tu incidencia"
                 maxLength={200}
-                style={{ width: "100%", marginTop: 6, padding: 8 }}
               />
-            </label>
+            </Form.Item>
 
-            <label>
-              Descripción
-              <textarea
+            <Form.Item label="Descripción" style={{ marginBottom: 0 }}>
+              <Input.TextArea
                 aria-label="Descripción"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Explica qué ocurre, cuándo empezó y qué has probado"
                 maxLength={1000}
                 rows={6}
-                style={{ width: "100%", marginTop: 6, padding: 8 }}
               />
-            </label>
+            </Form.Item>
 
-            <label>
-              Categoría
-              <select
+            <Form.Item label="Categoría" style={{ marginBottom: 0 }}>
+              <Select
                 aria-label="Categoría"
-                value={categoryId}
-                onChange={(event) => setCategoryId(event.target.value)}
+                value={categoryId || undefined}
+                onChange={(value) => setCategoryId(value)}
                 disabled={isLoadingCategories}
-                style={{ width: "100%", marginTop: 6, padding: 8 }}
-              >
-                <option value="">Selecciona una categoría</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                placeholder="Selecciona una categoría"
+                options={categories.map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                }))}
+              />
+            </Form.Item>
 
-            <label>
-              Prioridad
-              <select
+            <Form.Item label="Prioridad" style={{ marginBottom: 0 }}>
+              <Select
                 aria-label="Prioridad"
                 value={priority}
-                onChange={(event) => setPriority(event.target.value as TicketPriority)}
-                style={{ width: "100%", marginTop: 6, padding: 8 }}
-              >
-                {priorityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                onChange={(value) => setPriority(value as TicketPriority)}
+                options={priorityOptions}
+              />
+            </Form.Item>
 
             <Button
               type="primary"
@@ -159,7 +142,7 @@ export function CreateTicketPage() {
               Crear ticket
             </Button>
           </Space>
-        </form>
+        </Form>
       </Space>
     </Card>
   );
