@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Ensure Maven wrapper is executable
+        run: chmod +x ticketing-backend/mvnw
+
       - name: Build and test backend
         working-directory: ticketing-backend
         run: ./mvnw -B verify
