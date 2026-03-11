@@ -140,3 +140,13 @@ El projecte pot executar-se completament mitjançant contenidors:
 docker-compose up --build
 ```
 Aquesta opció permet desplegar el sistema sencer (backend, frontend i base de dades) sense instal·lar dependències locals addicionals.
+
+## 🔎 Integració amb SonarCloud
+
+El projecte inclou workflow de GitHub Actions a `.github/workflows/sonarcloud.yml` per executar anàlisi en `push` i `pull_request`.
+
+Passos necessaris al repositori de GitHub:
+1. Crear el secret **`SONAR_TOKEN`** a *Settings → Secrets and variables → Actions*.
+2. Verificar que `sonar.organization` i `sonar.projectKey` de `sonar-project.properties` coincideixen exactament amb els del teu projecte de SonarCloud.
+
+Nota: SonarCloud pot fer *Automatic Analysis* sense workflow, però per projectes multi-mòdul (backend + frontend) és recomanable l’anàlisi via CI perquè és més completa i reproduïble.
