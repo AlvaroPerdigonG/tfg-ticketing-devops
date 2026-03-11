@@ -148,7 +148,7 @@ class AuthLoginIntegrationTest {
                 .andReturn();
 
         String body = mvcResult.getResponse().getContentAsString();
-        String token = body.replaceAll(".*\\"accessToken\\":\\"([^\\"]+)\\".*", "$1");
+        String token = body.replaceAll(".*\"accessToken\":\"([^\"]+)\".*", "$1");
         SignedJWT jwt = SignedJWT.parse(token);
 
         assertEquals(List.of("USER"), jwt.getJWTClaimsSet().getStringListClaim("roles"));
