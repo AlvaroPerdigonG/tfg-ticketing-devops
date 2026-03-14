@@ -39,15 +39,14 @@ export function TicketDetailPage() {
           <Typography.Text type="secondary">{formatDate(entry.createdAt)}</Typography.Text>
           {entry.kind === "MESSAGE" ? (
             <>
-              <Typography.Text><strong>{entry.actorUserId ?? "Sistema"}</strong></Typography.Text>
+              <Typography.Text><strong>{entry.actorDisplayName ?? "Sistema"}</strong></Typography.Text>
               <Typography.Paragraph style={{ margin: 0 }}>{entry.content}</Typography.Paragraph>
             </>
           ) : (
             <Typography.Text>
               {entry.eventType === "STATUS_CHANGED" && `Cambio de estado: ${entry.payload.from} → ${entry.payload.to}`}
-              {entry.eventType === "ASSIGNED_TO_ME" && `Asignado a ${entry.payload.assignedToUserId}`}
+              {entry.eventType === "ASSIGNED_TO_ME" && `Asignado a ${entry.actorDisplayName ?? "agente"}`}
               {entry.eventType === "TICKET_CREATED" && "Ticket creado"}
-              {entry.eventType === "COMMENT_ADDED" && "Comentario añadido"}
             </Typography.Text>
           )}
         </Space>
@@ -162,8 +161,8 @@ export function TicketDetailPage() {
               <Typography.Title level={5} style={{ margin: 0 }}>Metadata</Typography.Title>
               <Typography.Text>ID: {ticket.id}</Typography.Text>
               <Typography.Text>Categoría: {ticket.categoryId}</Typography.Text>
-              <Typography.Text>Creado por: {ticket.createdByUserId}</Typography.Text>
-              <Typography.Text>Asignado a: {ticket.assignedToUserId ?? "Sin asignar"}</Typography.Text>
+              <Typography.Text>Creado por: {ticket.createdByDisplayName}</Typography.Text>
+              <Typography.Text>Asignado a: {ticket.assignedToDisplayName ?? "Sin asignar"}</Typography.Text>
               <Typography.Text>Creado: {formatDate(ticket.createdAt)}</Typography.Text>
               <Typography.Text>Actualizado: {formatDate(ticket.updatedAt)}</Typography.Text>
             </Space>
@@ -214,7 +213,9 @@ export function TicketDetailPage() {
 
             {canManage && (
               <Space direction="vertical" style={{ width: "100%" }} size={12}>
-                <Button loading={busyAction === "assign"} onClick={handleAssignToMe}>Asignarme ticket</Button>
+                {!ticket.assignedToUserId && (
+                  <Button loading={busyAction === "assign"} onClick={handleAssignToMe}>Asignarme ticket</Button>
+                )}
                 <Typography.Title level={5} style={{ margin: 0 }}>Cambiar estado</Typography.Title>
                 {availableStatusTransitions.length === 0 && <Typography.Text type="secondary">No hay transiciones disponibles.</Typography.Text>}
                 {availableStatusTransitions.map((nextStatus) => (

@@ -6,6 +6,7 @@ import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenExc
 import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
 import com.aperdigon.ticketing_backend.domain.shared.validation.Guard;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
+import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketAlreadyAssigned;
 import com.aperdigon.ticketing_backend.domain.ticket_event.TicketEvent;
 import com.aperdigon.ticketing_backend.domain.ticket_event.TicketEventType;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,10 @@ public class AssignTicketToMeUseCase {
 
         Ticket ticket = ticketRepository.findById(command.ticketId())
                 .orElseThrow(() -> new NotFoundException("Ticket not found: " + command.ticketId().value()));
+
+        if (ticket.assignedTo() != null) {
+            throw new TicketAlreadyAssigned();
+        }
 
         ticket.assignTo(command.actor().id(), clock);
         ticketRepository.save(ticket);

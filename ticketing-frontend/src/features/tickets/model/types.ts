@@ -22,7 +22,9 @@ export type TicketDetail = {
   createdAt: string;
   updatedAt: string;
   createdByUserId: string;
+  createdByDisplayName: string;
   assignedToUserId: string | null;
+  assignedToDisplayName: string | null;
   categoryId: string;
   timeline: TimelineEntry[];
   availableTransitions: TicketStatus[];
@@ -35,6 +37,7 @@ export type TimelineEntry = {
   kind: "MESSAGE" | "EVENT";
   createdAt: string;
   actorUserId: string | null;
+  actorDisplayName: string | null;
   content: string | null;
   eventType: TicketEventType | null;
   payload: Record<string, string>;

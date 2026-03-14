@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 public record TicketDetailResponse(
         UUID id,
@@ -22,21 +23,24 @@ public record TicketDetailResponse(
         Instant createdAt,
         Instant updatedAt,
         UUID createdByUserId,
+        String createdByDisplayName,
         UUID assignedToUserId,
+        String assignedToDisplayName,
         UUID categoryId,
         List<TimelineEntryResponse> timeline,
         List<TicketStatus> availableTransitions
 ) {
-    public static TicketDetailResponse from(Ticket ticket, List<TicketEvent> events) {
+    public static TicketDetailResponse from(Ticket ticket, List<TicketEvent> events, Function<UUID, String> userDisplayNameResolver) {
         List<TimelineEntryResponse> entries = new ArrayList<>();
 
         entries.add(new TimelineEntryResponse(
-                UUID.randomUUID(),
+                ticket.id().value(),
                 "MESSAGE",
                 ticket.createdAt(),
                 ticket.createdBy().value(),
+                userDisplayNameResolver.apply(ticket.createdBy().value()),
                 ticket.description(),
-                TicketEventType.TICKET_CREATED,
+                null,
                 Map.of()
         ));
 
@@ -46,6 +50,7 @@ public record TicketDetailResponse(
                     "MESSAGE",
                     c.createdAt(),
                     c.authorId().value(),
+                    userDisplayNameResolver.apply(c.authorId().value()),
                     c.content(),
                     null,
                     Map.of()
@@ -53,11 +58,15 @@ public record TicketDetailResponse(
         }
 
         for (var event : events) {
+            if (event.type() == TicketEventType.COMMENT_ADDED) {
+                continue;
+            }
             entries.add(new TimelineEntryResponse(
                     event.id(),
                     "EVENT",
                     event.createdAt(),
                     event.actorUserId() == null ? null : event.actorUserId().value(),
+                    event.actorUserId() == null ? null : userDisplayNameResolver.apply(event.actorUserId().value()),
                     null,
                     event.type(),
                     event.payload()
@@ -75,7 +84,9 @@ public record TicketDetailResponse(
                 ticket.createdAt(),
                 ticket.updatedAt(),
                 ticket.createdBy().value(),
+                userDisplayNameResolver.apply(ticket.createdBy().value()),
                 ticket.assignedTo() == null ? null : ticket.assignedTo().value(),
+                ticket.assignedTo() == null ? null : userDisplayNameResolver.apply(ticket.assignedTo().value()),
                 ticket.categoryId().value(),
                 entries,
                 availableTransitions(ticket.status())
@@ -96,6 +107,7 @@ public record TicketDetailResponse(
             String kind,
             Instant createdAt,
             UUID actorUserId,
+            String actorDisplayName,
             String content,
             TicketEventType eventType,
             Map<String, String> payload
