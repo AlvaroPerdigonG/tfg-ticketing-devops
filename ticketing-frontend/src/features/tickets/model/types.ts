@@ -1,4 +1,4 @@
-export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED";
+export type TicketStatus = "OPEN" | "IN_PROGRESS" | "ON_HOLD" | "RESOLVED";
 export type TicketPriority = "LOW" | "MEDIUM" | "HIGH";
 export type TicketQueueScope = "UNASSIGNED" | "MINE" | "OTHERS" | "ALL";
 
@@ -24,6 +24,28 @@ export type TicketDetail = {
   createdByUserId: string;
   assignedToUserId: string | null;
   categoryId: string;
+  timeline: TimelineEntry[];
+  availableTransitions: TicketStatus[];
+};
+
+export type TicketEventType = "TICKET_CREATED" | "STATUS_CHANGED" | "ASSIGNED_TO_ME" | "COMMENT_ADDED";
+
+export type TimelineEntry = {
+  id: string;
+  kind: "MESSAGE" | "EVENT";
+  createdAt: string;
+  actorUserId: string | null;
+  content: string | null;
+  eventType: TicketEventType | null;
+  payload: Record<string, string>;
+};
+
+export type AddTicketCommentResponse = {
+  id: string;
+  ticketId: string;
+  authorUserId: string;
+  content: string;
+  createdAt: string;
 };
 
 export type TicketCategory = {

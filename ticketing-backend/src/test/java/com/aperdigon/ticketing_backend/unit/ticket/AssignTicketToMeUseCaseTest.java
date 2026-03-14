@@ -13,6 +13,7 @@ import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
+import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
@@ -30,7 +31,8 @@ public class AssignTicketToMeUseCaseTest {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, clock);
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, clock);
 
         User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
         Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
@@ -47,7 +49,8 @@ public class AssignTicketToMeUseCaseTest {
     @Test
     void user_cannot_assign_ticket() {
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, Clock.systemUTC());
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, Clock.systemUTC());
 
         assertThrows(ForbiddenException.class, () -> useCase.execute(new AssignTicketToMeCommand(
                 TicketId.of(UUID.randomUUID()),
@@ -58,7 +61,8 @@ public class AssignTicketToMeUseCaseTest {
     @Test
     void throws_not_found_if_ticket_does_not_exist() {
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, Clock.systemUTC());
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, Clock.systemUTC());
 
         assertThrows(NotFoundException.class, () -> useCase.execute(new AssignTicketToMeCommand(
                 TicketId.of(UUID.randomUUID()),
