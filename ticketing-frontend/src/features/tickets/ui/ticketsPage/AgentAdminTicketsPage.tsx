@@ -14,6 +14,7 @@ const statusFilterOptions: Array<{ label: string; value: QueueFilter }> = [
   { label: "Todos los estados", value: "all" },
   { label: "Abierto", value: "OPEN" },
   { label: "En progreso", value: "IN_PROGRESS" },
+  { label: "En espera", value: "ON_HOLD" },
   { label: "Resuelto", value: "RESOLVED" },
 ];
 
@@ -26,7 +27,7 @@ function toQueueView(value: string | null): QueueView {
 }
 
 function toStatusFilter(value: string | null): QueueFilter {
-  if (value === "OPEN" || value === "IN_PROGRESS" || value === "RESOLVED") {
+  if (value === "OPEN" || value === "IN_PROGRESS" || value === "ON_HOLD" || value === "RESOLVED") {
     return value;
   }
 

@@ -1,16 +1,22 @@
 package com.aperdigon.ticketing_backend.application.tickets.create;
 
 import com.aperdigon.ticketing_backend.application.ports.CategoryRepository;
+import com.aperdigon.ticketing_backend.application.ports.TicketEventRepository;
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
 import com.aperdigon.ticketing_backend.application.ports.UserRepository;
 import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
 import com.aperdigon.ticketing_backend.domain.category.Category;
 import com.aperdigon.ticketing_backend.domain.shared.validation.Guard;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
+import com.aperdigon.ticketing_backend.domain.ticket_event.TicketEvent;
+import com.aperdigon.ticketing_backend.domain.ticket_event.TicketEventType;
 import com.aperdigon.ticketing_backend.domain.user.User;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public final class CreateTicketUseCase {
@@ -18,17 +24,20 @@ public final class CreateTicketUseCase {
     private final TicketRepository ticketRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final TicketEventRepository ticketEventRepository;
     private final Clock clock;
 
     public CreateTicketUseCase(
             TicketRepository ticketRepository,
             CategoryRepository categoryRepository,
             UserRepository userRepository,
+            TicketEventRepository ticketEventRepository,
             Clock clock
     ) {
         this.ticketRepository = Guard.notNull(ticketRepository, "ticketRepository");
         this.categoryRepository = Guard.notNull(categoryRepository, "categoryRepository");
         this.userRepository = Guard.notNull(userRepository, "userRepository");
+        this.ticketEventRepository = Guard.notNull(ticketEventRepository, "ticketEventRepository");
         this.clock = Guard.notNull(clock, "clock");
     }
 
@@ -51,6 +60,14 @@ public final class CreateTicketUseCase {
         );
 
         Ticket saved = ticketRepository.save(ticket);
+        ticketEventRepository.save(new TicketEvent(
+                UUID.randomUUID(),
+                saved.id(),
+                TicketEventType.TICKET_CREATED,
+                creator.id(),
+                Map.of(),
+                Instant.now(clock)
+        ));
         return new CreateTicketResult(saved.id());
     }
 }
