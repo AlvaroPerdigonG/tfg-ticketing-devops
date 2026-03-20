@@ -23,6 +23,7 @@ import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
+import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
 import org.junit.jupiter.api.Test;
 
 
@@ -33,7 +34,8 @@ public final class ChangeTicketStatusUseCaseTest {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new ChangeTicketStatusUseCase(ticketRepo, clock);
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new ChangeTicketStatusUseCase(ticketRepo, eventRepo, clock);
 
         User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
         Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
@@ -59,7 +61,8 @@ public final class ChangeTicketStatusUseCaseTest {
         Clock clock = Clock.systemUTC();
 
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new ChangeTicketStatusUseCase(ticketRepo, clock);
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new ChangeTicketStatusUseCase(ticketRepo, eventRepo, clock);
 
         var cmd = new ChangeTicketStatusCommand(
                 TicketId.of(UUID.randomUUID()),
@@ -75,7 +78,8 @@ public final class ChangeTicketStatusUseCaseTest {
         Clock clock = Clock.systemUTC();
 
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new ChangeTicketStatusUseCase(ticketRepo, clock);
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new ChangeTicketStatusUseCase(ticketRepo, eventRepo, clock);
 
         var cmd = new ChangeTicketStatusCommand(
                 TicketId.of(UUID.randomUUID()),
@@ -91,7 +95,8 @@ public final class ChangeTicketStatusUseCaseTest {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
         var ticketRepo = new InMemoryTicketRepository();
-        var useCase = new ChangeTicketStatusUseCase(ticketRepo, clock);
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new ChangeTicketStatusUseCase(ticketRepo, eventRepo, clock);
 
         User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
         Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
@@ -107,5 +112,31 @@ public final class ChangeTicketStatusUseCaseTest {
         );
 
         assertThrows(TicketInvalidStatusTransition.class, () -> useCase.execute(cmd));
+    }
+
+    @Test
+    void can_move_from_in_progress_to_on_hold() {
+        Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
+
+        var ticketRepo = new InMemoryTicketRepository();
+        var eventRepo = new InMemoryTicketEventRepository();
+        var useCase = new ChangeTicketStatusUseCase(ticketRepo, eventRepo, clock);
+
+        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
+        Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
+
+        Ticket ticket = Ticket.openNew("T", "D", category, creator, clock);
+        ticket.changeStatus(TicketStatus.IN_PROGRESS, clock);
+        ticketRepo.save(ticket);
+
+        var cmd = new ChangeTicketStatusCommand(
+                ticket.id(),
+                TicketStatus.ON_HOLD,
+                new CurrentUser(UserId.of(UUID.randomUUID()), UserRole.AGENT)
+        );
+
+        ChangeTicketStatusResult result = useCase.execute(cmd);
+
+        assertEquals(TicketStatus.ON_HOLD, result.status());
     }
 }

@@ -4,6 +4,7 @@ import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenExc
 import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
 import com.aperdigon.ticketing_backend.application.shared.exception.UnauthorizedException;
 import com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException;
+import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketAlreadyAssigned;
 import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketAlreadyResolved;
 import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketInvalidStatusTransition;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError.of("BAD_REQUEST", ex.getMessage()));
     }
 
-    @ExceptionHandler({TicketInvalidStatusTransition.class, TicketAlreadyResolved.class})
+    @ExceptionHandler({TicketInvalidStatusTransition.class, TicketAlreadyResolved.class, TicketAlreadyAssigned.class})
     public ResponseEntity<ApiError> conflict(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of("CONFLICT", ex.getMessage()));
     }

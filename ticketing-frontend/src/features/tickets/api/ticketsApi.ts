@@ -1,6 +1,7 @@
 import { createApiClient } from "../../../shared/api/client";
 import type {
   CreateTicketInput,
+  AddTicketCommentResponse,
   CreateTicketResponse,
   PaginatedResponse,
   TicketCategory,
@@ -46,4 +47,7 @@ export const ticketsApi = {
     authClient.patch<void>(`/api/tickets/${ticketId}/status`, { status }),
 
   assignToMe: (ticketId: string) => authClient.patch<void>(`/api/tickets/${ticketId}/assignment/me`, {}),
+
+  addComment: (ticketId: string, content: string) =>
+    authClient.post<AddTicketCommentResponse>(`/api/tickets/${ticketId}/comments`, { content }),
 };

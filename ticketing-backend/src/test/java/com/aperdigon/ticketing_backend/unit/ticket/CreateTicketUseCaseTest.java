@@ -22,6 +22,7 @@ import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import com.aperdigon.ticketing_backend.test_support.InMemoryCategoryRepository;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
+import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
 import com.aperdigon.ticketing_backend.test_support.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,7 @@ public final class CreateTicketUseCaseTest {
         var ticketRepo = new InMemoryTicketRepository();
         var categoryRepo = new InMemoryCategoryRepository();
         var userRepo = new InMemoryUserRepository();
+        var eventRepo = new InMemoryTicketEventRepository();
 
         User creator = new User(
                 UserId.of(UUID.randomUUID()),
@@ -48,7 +50,7 @@ public final class CreateTicketUseCaseTest {
         Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
         categoryRepo.put(category);
 
-        var useCase = new CreateTicketUseCase(ticketRepo, categoryRepo, userRepo, clock);
+        var useCase = new CreateTicketUseCase(ticketRepo, categoryRepo, userRepo, eventRepo, clock);
 
         var cmd = new CreateTicketCommand(
                 "Printer not working",
@@ -76,6 +78,7 @@ public final class CreateTicketUseCaseTest {
         var ticketRepo = new InMemoryTicketRepository();
         var categoryRepo = new InMemoryCategoryRepository();
         var userRepo = new InMemoryUserRepository();
+        var eventRepo = new InMemoryTicketEventRepository();
 
         User creator = new User(
                 UserId.of(UUID.randomUUID()),
@@ -87,7 +90,7 @@ public final class CreateTicketUseCaseTest {
         );
         userRepo.put(creator);
 
-        var useCase = new CreateTicketUseCase(ticketRepo, categoryRepo, userRepo, clock);
+        var useCase = new CreateTicketUseCase(ticketRepo, categoryRepo, userRepo, eventRepo, clock);
 
         var cmd = new CreateTicketCommand(
                 "Title",

@@ -174,7 +174,8 @@ public final class Ticket {
     private static boolean isValidTransition(TicketStatus from, TicketStatus to) {
         return switch (from) {
             case OPEN -> to == TicketStatus.IN_PROGRESS;
-            case IN_PROGRESS -> to == TicketStatus.RESOLVED;
+            case IN_PROGRESS -> to == TicketStatus.ON_HOLD || to == TicketStatus.RESOLVED;
+            case ON_HOLD -> to == TicketStatus.IN_PROGRESS || to == TicketStatus.RESOLVED;
             case RESOLVED -> false;
         };
     }
