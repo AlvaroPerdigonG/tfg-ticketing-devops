@@ -63,11 +63,8 @@ describe("CreateTicketPage", () => {
     await user.type(await screen.findByLabelText("Título"), "Impresora bloqueada");
     await user.type(screen.getByLabelText("Descripción"), "Da error E23 cuando intento imprimir un PDF.");
     const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
-    const categorySelector = categoryCombobox.closest(".ant-select")?.querySelector(".ant-select-selector");
-    expect(categorySelector).toBeTruthy();
-    fireEvent.mouseDown(categorySelector as Element);
-    fireEvent.keyDown(categoryCombobox, { key: "ArrowDown" });
-    fireEvent.keyDown(categoryCombobox, { key: "Enter" });
+    fireEvent.mouseDown(categoryCombobox);
+    await user.click(await screen.findByText("General"));
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Crear ticket" })).toBeEnabled();

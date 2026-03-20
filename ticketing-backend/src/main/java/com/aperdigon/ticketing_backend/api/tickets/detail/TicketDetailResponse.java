@@ -73,7 +73,11 @@ public record TicketDetailResponse(
             ));
         }
 
-        entries.sort(Comparator.comparing(TimelineEntryResponse::createdAt));
+        entries.sort(
+                Comparator.comparing(TimelineEntryResponse::createdAt)
+                        .thenComparing(TimelineEntryResponse::kind)
+                        .thenComparing(entry -> entry.eventType() == TicketEventType.TICKET_CREATED ? 0 : 1)
+        );
 
         return new TicketDetailResponse(
                 ticket.id().value(),
