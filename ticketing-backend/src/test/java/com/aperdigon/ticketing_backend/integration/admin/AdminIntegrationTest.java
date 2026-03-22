@@ -1,26 +1,15 @@
 package com.aperdigon.ticketing_backend.integration.admin;
 
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.CategoryJpaEntity;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.UserJpaEntity;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.CategorySpringDataRepository;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
 import com.aperdigon.ticketing_backend.specification.SpecificationRef;
 import com.aperdigon.ticketing_backend.specification.TestLevel;
+import com.aperdigon.ticketing_backend.test_support.builders.CategoryTestDataBuilder;
+import com.aperdigon.ticketing_backend.test_support.integration.AbstractAuthenticatedApiIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,76 +18,36 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-class AdminIntegrationTest {
+class AdminIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
-    @DynamicPropertySource
-    static void configureDatasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    UserSpringDataRepository userRepo;
-
-    @Autowired
-    CategorySpringDataRepository categoryRepo;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private static final String DEFAULT_PASSWORD = "secret123";
 
     private UUID managedUserId;
 
     @BeforeEach
     void setUp() {
-        categoryRepo.deleteAll();
-        userRepo.deleteAll();
+        clearPersistedData();
 
-        userRepo.save(new UserJpaEntity(
-                UUID.randomUUID(),
-                "admin@test.com",
-                "Admin",
-                passwordEncoder.encode("secret123"),
-                UserRole.ADMIN,
-                true
-        ));
+        persistActiveUser("admin@test.com", "Admin", DEFAULT_PASSWORD, UserRole.ADMIN);
 
-        managedUserId = UUID.randomUUID();
-        userRepo.save(new UserJpaEntity(
-                managedUserId,
-                "user@test.com",
-                "Regular User",
-                passwordEncoder.encode("secret123"),
-                UserRole.USER,
-                true
-        ));
+        managedUserId = persistActiveUser("user@test.com", "Regular User", DEFAULT_PASSWORD, UserRole.USER).getId();
 
-        categoryRepo.save(new CategoryJpaEntity(UUID.randomUUID(), "Software", true));
+        persistCategory(CategoryTestDataBuilder.aCategory().withName("Software"));
     }
 
     @Test
     @SpecificationRef(value = "ADMIN-02", level = TestLevel.INTEGRATION, feature = "admin.feature")
     @SpecificationRef(value = "ADMIN-01", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void admin_can_list_categories_and_users() throws Exception {
-        String token = loginAndExtractToken("admin@test.com", "secret123");
+        String token = loginAndExtractAccessToken("admin@test.com", DEFAULT_PASSWORD);
 
         mockMvc.perform(get("/api/admin/categories")
-                        .header("Authorization", "Bearer " + token))
+                        .with(bearerToken(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Software"));
 
         mockMvc.perform(get("/api/admin/users")
-                        .header("Authorization", "Bearer " + token))
+                        .with(bearerToken(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.email=='user@test.com')]").exists());
     }
@@ -106,45 +55,31 @@ class AdminIntegrationTest {
     @Test
     @SpecificationRef(value = "ADMIN-03", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void admin_can_deactivate_user() throws Exception {
-        String token = loginAndExtractToken("admin@test.com", "secret123");
+        String token = loginAndExtractAccessToken("admin@test.com", DEFAULT_PASSWORD);
 
         mockMvc.perform(patch("/api/admin/users/{userId}/active", managedUserId)
-                        .header("Authorization", "Bearer " + token)
+                        .with(bearerToken(token))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"isActive":false}
-                                """))
+                        .content(toJson(Map.of("isActive", false))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isActive").value(false));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"user@test.com","password":"secret123"}
-                                """))
+                        .content(toJson(Map.of(
+                                "email", "user@test.com",
+                                "password", DEFAULT_PASSWORD
+                        ))))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @SpecificationRef(value = "ADMIN-04", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void non_admin_cannot_access_admin_endpoints() throws Exception {
-        String token = loginAndExtractToken("user@test.com", "secret123");
+        String token = loginAndExtractAccessToken("user@test.com", DEFAULT_PASSWORD);
 
         mockMvc.perform(get("/api/admin/users")
-                        .header("Authorization", "Bearer " + token))
+                        .with(bearerToken(token)))
                 .andExpect(status().isForbidden());
-    }
-
-    private String loginAndExtractToken(String email, String password) throws Exception {
-        var mvcResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"%s","password":"%s"}
-                                """.formatted(email, password)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String body = mvcResult.getResponse().getContentAsString();
-        return body.replaceAll(".*\\\"accessToken\\\":\\\"([^\\\"]+)\\\".*", "$1");
     }
 }
