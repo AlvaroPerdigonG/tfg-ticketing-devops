@@ -20,6 +20,8 @@ import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
+import com.aperdigon.ticketing_backend.specification.SpecificationRef;
+import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.aperdigon.ticketing_backend.test_support.InMemoryCategoryRepository;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.Test;
 public final class CreateTicketUseCaseTest {
 
     @Test
+    @SpecificationRef(value = "TICKET-USER-01", level = TestLevel.UNIT, feature = "tickets-user.feature")
     void creates_ticket_in_open_status_and_persists_it() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
