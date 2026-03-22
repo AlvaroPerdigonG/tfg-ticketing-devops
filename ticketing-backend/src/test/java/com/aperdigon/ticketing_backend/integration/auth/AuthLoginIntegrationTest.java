@@ -3,6 +3,8 @@ package com.aperdigon.ticketing_backend.integration.auth;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.UserJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
+import com.aperdigon.ticketing_backend.specification.SpecificationRef;
+import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,6 +97,7 @@ class AuthLoginIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "AUTH-01", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void login_returns_jwt_when_credentials_are_valid() throws Exception {
         var mvcResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -117,6 +120,7 @@ class AuthLoginIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "AUTH-02", level = TestLevel.INTEGRATION, feature = "authentication.feature", note = "Covers invalid login with wrong password.")
     void login_returns_unauthorized_when_password_is_invalid() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,6 +131,7 @@ class AuthLoginIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "AUTH-03", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void login_returns_unauthorized_when_user_is_inactive() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -137,6 +142,7 @@ class AuthLoginIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "AUTH-04", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void register_creates_user_and_returns_jwt() throws Exception {
         var mvcResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -182,6 +188,7 @@ class AuthLoginIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "AUTH-05", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void register_returns_bad_request_when_email_is_duplicated() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

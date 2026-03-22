@@ -22,6 +22,8 @@ import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketInvalidSta
 import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
+import com.aperdigon.ticketing_backend.specification.SpecificationRef;
+import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.Test;
 public final class ChangeTicketStatusUseCaseTest {
 
     @Test
+    @SpecificationRef(value = "TICKET-AGENT-01", level = TestLevel.UNIT, feature = "tickets-agent.feature", note = "Valid transition from OPEN to IN_PROGRESS.")
     void agent_can_change_status_open_to_in_progress() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
@@ -57,6 +60,7 @@ public final class ChangeTicketStatusUseCaseTest {
     }
 
     @Test
+    @SpecificationRef(value = "TICKET-USER-05", level = TestLevel.UNIT, feature = "tickets-user.feature")
     void user_cannot_change_status() {
         Clock clock = Clock.systemUTC();
 
@@ -91,6 +95,7 @@ public final class ChangeTicketStatusUseCaseTest {
     }
 
     @Test
+    @SpecificationRef(value = "TICKET-AGENT-02", level = TestLevel.UNIT, feature = "tickets-agent.feature")
     void invalid_transition_in_progress_to_open_is_rejected_by_domain() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
@@ -115,6 +120,7 @@ public final class ChangeTicketStatusUseCaseTest {
     }
 
     @Test
+    @SpecificationRef(value = "TICKET-AGENT-01", level = TestLevel.UNIT, feature = "tickets-agent.feature", note = "Another valid operational transition.")
     void can_move_from_in_progress_to_on_hold() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 

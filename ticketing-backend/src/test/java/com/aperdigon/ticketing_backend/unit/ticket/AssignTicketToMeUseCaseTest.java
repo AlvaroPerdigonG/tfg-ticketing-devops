@@ -13,6 +13,8 @@ import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketAlreadyAss
 import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
+import com.aperdigon.ticketing_backend.specification.SpecificationRef;
+import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class AssignTicketToMeUseCaseTest {
 
     @Test
+    @SpecificationRef(value = "TICKET-AGENT-04", level = TestLevel.UNIT, feature = "tickets-agent.feature")
     void agent_can_assign_ticket_to_self() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
