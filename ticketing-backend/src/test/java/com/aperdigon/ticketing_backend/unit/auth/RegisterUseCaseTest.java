@@ -4,6 +4,8 @@ import com.aperdigon.ticketing_backend.application.auth.register.RegisterCommand
 import com.aperdigon.ticketing_backend.application.auth.register.RegisterUseCase;
 import com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
+import com.aperdigon.ticketing_backend.specification.SpecificationRef;
+import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.aperdigon.ticketing_backend.test_support.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,6 +17,7 @@ class RegisterUseCaseTest {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Test
+    @SpecificationRef(value = "AUTH-04", level = TestLevel.UNIT, feature = "authentication.feature")
     void creates_user_and_returns_token_when_payload_is_valid() {
         var repo = new InMemoryUserRepository();
         var useCase = new RegisterUseCase(repo, encoder, u -> "jwt-token");
@@ -59,6 +62,7 @@ class RegisterUseCaseTest {
     }
 
     @Test
+    @SpecificationRef(value = "AUTH-05", level = TestLevel.UNIT, feature = "authentication.feature")
     void throws_generic_error_when_email_already_exists() {
         var repo = new InMemoryUserRepository();
         var useCase = new RegisterUseCase(repo, encoder, u -> "token");

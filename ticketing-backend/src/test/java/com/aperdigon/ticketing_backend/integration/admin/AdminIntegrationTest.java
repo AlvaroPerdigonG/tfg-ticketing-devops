@@ -5,6 +5,8 @@ import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.Cat
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.UserJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.CategorySpringDataRepository;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
+import com.aperdigon.ticketing_backend.specification.SpecificationRef;
+import com.aperdigon.ticketing_backend.specification.TestLevel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +87,8 @@ class AdminIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "ADMIN-02", level = TestLevel.INTEGRATION, feature = "admin.feature")
+    @SpecificationRef(value = "ADMIN-01", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void admin_can_list_categories_and_users() throws Exception {
         String token = loginAndExtractToken("admin@test.com", "secret123");
 
@@ -100,6 +104,7 @@ class AdminIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "ADMIN-03", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void admin_can_deactivate_user() throws Exception {
         String token = loginAndExtractToken("admin@test.com", "secret123");
 
@@ -121,6 +126,7 @@ class AdminIntegrationTest {
     }
 
     @Test
+    @SpecificationRef(value = "ADMIN-04", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void non_admin_cannot_access_admin_endpoints() throws Exception {
         String token = loginAndExtractToken("user@test.com", "secret123");
 
