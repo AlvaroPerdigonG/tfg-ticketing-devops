@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
@@ -88,6 +89,12 @@ public abstract class AbstractIntegrationTest {
 
     protected ResultActions postJson(String urlTemplate, Object body, Object... uriVariables) throws Exception {
         return mockMvc.perform(post(urlTemplate, uriVariables)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(body)));
+    }
+
+    protected ResultActions patchJson(String urlTemplate, Object body, Object... uriVariables) throws Exception {
+        return mockMvc.perform(patch(urlTemplate, uriVariables)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(body)));
     }
