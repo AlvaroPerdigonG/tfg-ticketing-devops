@@ -7,11 +7,13 @@ import com.aperdigon.ticketing_backend.test_support.builders.CategoryTestDataBui
 import com.aperdigon.ticketing_backend.test_support.integration.AbstractAuthenticatedApiIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,8 +55,10 @@ class AdminApiIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
     @Test
     @SpecificationRef(value = "ADMIN-03", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void admin_can_deactivate_user() throws Exception {
-        mockMvc.perform(patchJson("/api/admin/users/{userId}/active", Map.of("isActive", false), managedUserId)
-                        .with(authenticatedAs("admin@test.com", DEFAULT_PASSWORD)))
+        mockMvc.perform(patch("/api/admin/users/{userId}/active", managedUserId)
+                        .with(authenticatedAs("admin@test.com", DEFAULT_PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("isActive", false))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isActive").value(false));
 
