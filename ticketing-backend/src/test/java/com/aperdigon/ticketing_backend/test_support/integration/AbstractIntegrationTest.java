@@ -5,6 +5,7 @@ import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.Tic
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.UserJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.CategorySpringDataRepository;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.TicketSpringDataRepository;
+import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.TicketEventSpringDataRepository;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
 import com.aperdigon.ticketing_backend.test_support.builders.CategoryTestDataBuilder;
 import com.aperdigon.ticketing_backend.test_support.builders.TicketTestDataBuilder;
@@ -51,6 +52,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected TicketSpringDataRepository ticketRepository;
 
+    @Autowired
+    protected TicketEventSpringDataRepository ticketEventRepository;
+
     @DynamicPropertySource
     static void configureDatasource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
@@ -60,6 +64,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void clearPersistedData() {
+        ticketEventRepository.deleteAll();
         ticketRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
