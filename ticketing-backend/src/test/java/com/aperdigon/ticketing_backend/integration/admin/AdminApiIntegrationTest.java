@@ -14,11 +14,10 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class AdminIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
+class AdminApiIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
 
     private static final String DEFAULT_PASSWORD = "secret123";
 
@@ -37,17 +36,18 @@ class AdminIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
 
     @Test
     @SpecificationRef(value = "ADMIN-02", level = TestLevel.INTEGRATION, feature = "admin.feature")
-    @SpecificationRef(value = "ADMIN-01", level = TestLevel.INTEGRATION, feature = "admin.feature")
-    void admin_can_list_categories_and_users() throws Exception {
-        String token = loginAndExtractAccessToken("admin@test.com", DEFAULT_PASSWORD);
-
+    void admin_can_list_categories() throws Exception {
         mockMvc.perform(get("/api/admin/categories")
-                        .with(bearerToken(token)))
+                        .with(authenticatedAs("admin@test.com", DEFAULT_PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Software"));
+    }
 
+    @Test
+    @SpecificationRef(value = "ADMIN-01", level = TestLevel.INTEGRATION, feature = "admin.feature")
+    void admin_can_list_users() throws Exception {
         mockMvc.perform(get("/api/admin/users")
-                        .with(bearerToken(token)))
+                        .with(authenticatedAs("admin@test.com", DEFAULT_PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.email=='user@test.com')]").exists());
     }
@@ -55,31 +55,25 @@ class AdminIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
     @Test
     @SpecificationRef(value = "ADMIN-03", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void admin_can_deactivate_user() throws Exception {
-        String token = loginAndExtractAccessToken("admin@test.com", DEFAULT_PASSWORD);
-
         mockMvc.perform(patch("/api/admin/users/{userId}/active", managedUserId)
-                        .with(bearerToken(token))
+                        .with(authenticatedAs("admin@test.com", DEFAULT_PASSWORD))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("isActive", false))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isActive").value(false));
 
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of(
-                                "email", "user@test.com",
-                                "password", DEFAULT_PASSWORD
-                        ))))
+        postJson("/api/auth/login", Map.of(
+                "email", "user@test.com",
+                "password", DEFAULT_PASSWORD
+        ))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @SpecificationRef(value = "ADMIN-04", level = TestLevel.INTEGRATION, feature = "admin.feature")
     void non_admin_cannot_access_admin_endpoints() throws Exception {
-        String token = loginAndExtractAccessToken("user@test.com", DEFAULT_PASSWORD);
-
         mockMvc.perform(get("/api/admin/users")
-                        .with(bearerToken(token)))
+                        .with(authenticatedAs("user@test.com", DEFAULT_PASSWORD)))
                 .andExpect(status().isForbidden());
     }
 }

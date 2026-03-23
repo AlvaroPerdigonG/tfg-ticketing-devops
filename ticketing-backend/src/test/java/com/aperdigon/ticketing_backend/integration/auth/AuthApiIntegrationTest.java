@@ -8,7 +8,6 @@ import com.aperdigon.ticketing_backend.test_support.integration.AbstractAuthenti
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class AuthLoginIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
+class AuthApiIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
 
     private static final String DEFAULT_PASSWORD = "secret123";
 
