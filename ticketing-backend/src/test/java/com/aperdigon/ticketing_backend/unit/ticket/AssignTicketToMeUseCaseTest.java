@@ -47,7 +47,7 @@ public final class AssignTicketToMeUseCaseTest {
         var events = eventRepository.findByTicketId(ticket.id());
 
         assertEquals(ticket.id(), result.ticketId());
-        assertEquals(agentId, result.assignedTo());
+        assertEquals(agentId, result.assignedToUserId());
         assertEquals(agentId, ticketRepository.findById(ticket.id()).orElseThrow().assignedTo());
         assertEquals(1, events.size());
         assertEquals(TicketEventType.ASSIGNED_TO_ME, events.get(0).type());
@@ -72,7 +72,7 @@ public final class AssignTicketToMeUseCaseTest {
 
         var result = useCase.execute(new AssignTicketToMeCommand(ticket.id(), new CurrentUser(adminId, UserRole.ADMIN)));
 
-        assertEquals(adminId, result.assignedTo());
+        assertEquals(adminId, result.assignedToUserId());
         assertEquals(adminId, ticketRepository.findById(ticket.id()).orElseThrow().assignedTo());
     }
 
