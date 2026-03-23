@@ -18,6 +18,10 @@ public class InMemoryTicketEventRepository implements TicketEventRepository {
 
     @Override
     public List<TicketEvent> findByTicketId(TicketId ticketId) {
-        return store.stream().filter(e -> e.ticketId().equals(ticketId)).toList();
+        return store.stream().filter(event -> event.ticketId().equals(ticketId)).toList();
+    }
+
+    public List<TicketEvent> allEvents() {
+        return List.copyOf(store);
     }
 }

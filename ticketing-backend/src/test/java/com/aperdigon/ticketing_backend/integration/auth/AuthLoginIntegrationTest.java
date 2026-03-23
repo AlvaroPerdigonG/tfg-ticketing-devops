@@ -1,26 +1,17 @@
 package com.aperdigon.ticketing_backend.integration.auth;
 
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.UserJpaEntity;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
 import com.aperdigon.ticketing_backend.specification.SpecificationRef;
 import com.aperdigon.ticketing_backend.specification.TestLevel;
+import com.aperdigon.ticketing_backend.test_support.builders.UserTestDataBuilder;
+import com.aperdigon.ticketing_backend.test_support.integration.AbstractAuthenticatedApiIntegrationTest;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.notNullValue;
@@ -28,63 +19,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-class AuthLoginIntegrationTest {
+class AuthLoginIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
-    @DynamicPropertySource
-    static void configureDatasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    UserSpringDataRepository userRepo;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private static final String DEFAULT_PASSWORD = "secret123";
 
     private UUID activeUserId;
 
     @BeforeEach
     void setUp() {
-        userRepo.deleteAll();
-        activeUserId = UUID.randomUUID();
+        clearPersistedData();
 
-        userRepo.save(new UserJpaEntity(
-                activeUserId,
-                "user@test.com",
-                "User",
-                passwordEncoder.encode("secret123"),
-                UserRole.USER,
-                true
-        ));
+        activeUserId = persistActiveUser("user@test.com", "User", DEFAULT_PASSWORD, UserRole.USER).getId();
 
-        userRepo.save(new UserJpaEntity(
-                UUID.randomUUID(),
-                "inactive@test.com",
-                "Inactive",
-                passwordEncoder.encode("secret123"),
-                UserRole.USER,
-                false
-        ));
+        persistUser(UserTestDataBuilder.aUser()
+                .withEmail("inactive@test.com")
+                .withDisplayName("Inactive")
+                .withPassword(DEFAULT_PASSWORD)
+                .withRole(UserRole.USER)
+                .inactive());
     }
-
-
 
     @Test
     void login_preflight_returns_cors_headers_for_frontend_origin() throws Exception {
@@ -99,17 +56,15 @@ class AuthLoginIntegrationTest {
     @Test
     @SpecificationRef(value = "AUTH-01", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void login_returns_jwt_when_credentials_are_valid() throws Exception {
-        var mvcResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"user@test.com","password":"secret123"}
-                                """))
+        var mvcResult = postJson("/api/auth/login", Map.of(
+                "email", "user@test.com",
+                "password", DEFAULT_PASSWORD
+        ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken", notNullValue()))
                 .andReturn();
 
-        String body = mvcResult.getResponse().getContentAsString();
-        String token = body.replaceAll(".*\"accessToken\":\"([^\"]+)\".*", "$1");
+        String token = objectMapper.readTree(mvcResult.getResponse().getContentAsString()).get("accessToken").asText();
         SignedJWT jwt = SignedJWT.parse(token);
 
         assertEquals(activeUserId.toString(), jwt.getJWTClaimsSet().getSubject());
@@ -122,64 +77,53 @@ class AuthLoginIntegrationTest {
     @Test
     @SpecificationRef(value = "AUTH-02", level = TestLevel.INTEGRATION, feature = "authentication.feature", note = "Covers invalid login with wrong password.")
     void login_returns_unauthorized_when_password_is_invalid() throws Exception {
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"user@test.com","password":"wrong"}
-                                """))
+        postJson("/api/auth/login", Map.of(
+                "email", "user@test.com",
+                "password", "wrong"
+        ))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @SpecificationRef(value = "AUTH-03", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void login_returns_unauthorized_when_user_is_inactive() throws Exception {
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"inactive@test.com","password":"secret123"}
-                                """))
+        postJson("/api/auth/login", Map.of(
+                "email", "inactive@test.com",
+                "password", DEFAULT_PASSWORD
+        ))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @SpecificationRef(value = "AUTH-04", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void register_creates_user_and_returns_jwt() throws Exception {
-        var mvcResult = mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"new.user@test.com","displayName":"New User","password":"Secret123!","confirmPassword":"Secret123!"}
-                                """))
+        var mvcResult = postJson("/api/auth/register", Map.of(
+                "email", "new.user@test.com",
+                "displayName", "New User",
+                "password", "Secret123!",
+                "confirmPassword", "Secret123!"
+        ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken", notNullValue()))
                 .andReturn();
 
-        String body = mvcResult.getResponse().getContentAsString();
-        String token = body.replaceAll(".*\\"accessToken\\":\\"([^\\"]+)\\".*", "$1");
+        String token = objectMapper.readTree(mvcResult.getResponse().getContentAsString()).get("accessToken").asText();
         SignedJWT jwt = SignedJWT.parse(token);
 
         assertEquals(List.of("USER"), jwt.getJWTClaimsSet().getStringListClaim("roles"));
         assertNotNull(jwt.getJWTClaimsSet().getExpirationTime());
 
-        var savedUser = userRepo.findByEmailIgnoreCase("new.user@test.com").orElseThrow();
+        var savedUser = userRepository.findByEmailIgnoreCase("new.user@test.com").orElseThrow();
         assertEquals(UserRole.USER, savedUser.getRole());
         assertEquals("New User", savedUser.getDisplayName());
     }
 
     @Test
     void me_returns_profile_data_from_jwt_claims() throws Exception {
-        var loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"user@test.com","password":"secret123"}
-                                """))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String tokenBody = loginResult.getResponse().getContentAsString();
-        String token = tokenBody.replaceAll(".*\"accessToken\":\"([^\"]+)\".*", "$1");
+        String token = loginAndExtractAccessToken("user@test.com", DEFAULT_PASSWORD);
 
         mockMvc.perform(get("/api/auth/me")
-                        .header("Authorization", "Bearer " + token))
+                        .with(bearerToken(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sub").value(activeUserId.toString()))
                 .andExpect(jsonPath("$.email").value("user@test.com"))
@@ -190,22 +134,24 @@ class AuthLoginIntegrationTest {
     @Test
     @SpecificationRef(value = "AUTH-05", level = TestLevel.INTEGRATION, feature = "authentication.feature")
     void register_returns_bad_request_when_email_is_duplicated() throws Exception {
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"user@test.com","displayName":"Duplicate User","password":"Secret123!","confirmPassword":"Secret123!"}
-                                """))
+        postJson("/api/auth/register", Map.of(
+                "email", "user@test.com",
+                "displayName", "Duplicate User",
+                "password", "Secret123!",
+                "confirmPassword", "Secret123!"
+        ))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Registration failed"));
     }
 
     @Test
     void register_returns_bad_request_when_password_does_not_match_policy() throws Exception {
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email":"weak.user@test.com","displayName":"Weak User","password":"password","confirmPassword":"password"}
-                                """))
+        postJson("/api/auth/register", Map.of(
+                "email", "weak.user@test.com",
+                "displayName", "Weak User",
+                "password", "password",
+                "confirmPassword", "password"
+        ))
                 .andExpect(status().isBadRequest());
     }
 }

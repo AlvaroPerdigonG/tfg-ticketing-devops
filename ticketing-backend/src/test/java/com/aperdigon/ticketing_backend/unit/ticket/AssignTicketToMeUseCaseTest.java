@@ -5,87 +5,115 @@ import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenExc
 import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
 import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeCommand;
 import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeUseCase;
-import com.aperdigon.ticketing_backend.domain.category.Category;
-import com.aperdigon.ticketing_backend.domain.category.CategoryId;
-import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
-import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.exceptions.TicketAlreadyAssigned;
-import com.aperdigon.ticketing_backend.domain.user.User;
+import com.aperdigon.ticketing_backend.domain.ticket_event.TicketEventType;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import com.aperdigon.ticketing_backend.specification.SpecificationRef;
 import com.aperdigon.ticketing_backend.specification.TestLevel;
-import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
+import com.aperdigon.ticketing_backend.test_support.DomainTestDataFactory;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketEventRepository;
+import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class AssignTicketToMeUseCaseTest {
+public final class AssignTicketToMeUseCaseTest {
 
     @Test
     @SpecificationRef(value = "TICKET-AGENT-04", level = TestLevel.UNIT, feature = "tickets-agent.feature")
-    void agent_can_assign_ticket_to_self() {
+    void agent_can_assign_ticket_to_self_and_event_is_recorded() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
-        var ticketRepo = new InMemoryTicketRepository();
-        var eventRepo = new InMemoryTicketEventRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, clock);
+        var ticketRepository = new InMemoryTicketRepository();
+        var eventRepository = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepository, eventRepository, clock);
 
-        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
-        Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
-        Ticket ticket = Ticket.openNew("T", "D", category, creator, clock);
-        ticketRepo.save(ticket);
+        var creator = DomainTestDataFactory.activeUser("user@test.com", "User", UserRole.USER);
+        var category = DomainTestDataFactory.activeCategory("General");
+        var ticket = DomainTestDataFactory.openTicket("T", "D", category, creator, clock);
+        ticketRepository.save(ticket);
 
         UserId agentId = UserId.of(UUID.randomUUID());
 
-        useCase.execute(new AssignTicketToMeCommand(ticket.id(), new CurrentUser(agentId, UserRole.AGENT)));
+        var result = useCase.execute(new AssignTicketToMeCommand(ticket.id(), new CurrentUser(agentId, UserRole.AGENT)));
+        var events = eventRepository.findByTicketId(ticket.id());
 
-        assertEquals(agentId, ticketRepo.findById(ticket.id()).orElseThrow().assignedTo());
+        assertEquals(ticket.id(), result.ticketId());
+        assertEquals(agentId, result.assignedTo());
+        assertEquals(agentId, ticketRepository.findById(ticket.id()).orElseThrow().assignedTo());
+        assertEquals(1, events.size());
+        assertEquals(TicketEventType.ASSIGNED_TO_ME, events.get(0).type());
+        assertEquals(Map.of("assignedToUserId", agentId.value().toString()), events.get(0).payload());
+        assertEquals(Instant.parse("2026-02-14T10:00:00Z"), events.get(0).createdAt());
+    }
+
+    @Test
+    void admin_can_assign_ticket_to_self() {
+        Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
+
+        var ticketRepository = new InMemoryTicketRepository();
+        var eventRepository = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepository, eventRepository, clock);
+
+        var creator = DomainTestDataFactory.activeUser("user@test.com", "User", UserRole.USER);
+        var category = DomainTestDataFactory.activeCategory("General");
+        var ticket = DomainTestDataFactory.openTicket("T", "D", category, creator, clock);
+        ticketRepository.save(ticket);
+
+        UserId adminId = UserId.of(UUID.randomUUID());
+
+        var result = useCase.execute(new AssignTicketToMeCommand(ticket.id(), new CurrentUser(adminId, UserRole.ADMIN)));
+
+        assertEquals(adminId, result.assignedTo());
+        assertEquals(adminId, ticketRepository.findById(ticket.id()).orElseThrow().assignedTo());
     }
 
     @Test
     void user_cannot_assign_ticket() {
-        var ticketRepo = new InMemoryTicketRepository();
-        var eventRepo = new InMemoryTicketEventRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, Clock.systemUTC());
+        var ticketRepository = new InMemoryTicketRepository();
+        var eventRepository = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepository, eventRepository, Clock.systemUTC());
 
         assertThrows(ForbiddenException.class, () -> useCase.execute(new AssignTicketToMeCommand(
-                TicketId.of(UUID.randomUUID()),
+                com.aperdigon.ticketing_backend.domain.ticket.TicketId.of(UUID.randomUUID()),
                 new CurrentUser(UserId.of(UUID.randomUUID()), UserRole.USER)
         )));
+        assertEquals(0, eventRepository.allEvents().size());
     }
 
     @Test
     void throws_not_found_if_ticket_does_not_exist() {
-        var ticketRepo = new InMemoryTicketRepository();
-        var eventRepo = new InMemoryTicketEventRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, Clock.systemUTC());
+        var ticketRepository = new InMemoryTicketRepository();
+        var eventRepository = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepository, eventRepository, Clock.systemUTC());
 
         assertThrows(NotFoundException.class, () -> useCase.execute(new AssignTicketToMeCommand(
-                TicketId.of(UUID.randomUUID()),
+                com.aperdigon.ticketing_backend.domain.ticket.TicketId.of(UUID.randomUUID()),
                 new CurrentUser(UserId.of(UUID.randomUUID()), UserRole.ADMIN)
         )));
+        assertEquals(0, eventRepository.allEvents().size());
     }
 
     @Test
-    void cannot_assign_ticket_twice() {
+    void rejects_assignment_when_ticket_is_already_assigned() {
         Clock clock = Clock.fixed(Instant.parse("2026-02-14T10:00:00Z"), ZoneOffset.UTC);
 
-        var ticketRepo = new InMemoryTicketRepository();
-        var eventRepo = new InMemoryTicketEventRepository();
-        var useCase = new AssignTicketToMeUseCase(ticketRepo, eventRepo, clock);
+        var ticketRepository = new InMemoryTicketRepository();
+        var eventRepository = new InMemoryTicketEventRepository();
+        var useCase = new AssignTicketToMeUseCase(ticketRepository, eventRepository, clock);
 
-        User creator = new User(UserId.of(UUID.randomUUID()), "u@test.com", "U", "$2a$10$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", UserRole.USER, true);
-        Category category = new Category(CategoryId.of(UUID.randomUUID()), "General", true);
-        Ticket ticket = Ticket.openNew("T", "D", category, creator, clock);
-        ticketRepo.save(ticket);
+        var creator = DomainTestDataFactory.activeUser("user@test.com", "User", UserRole.USER);
+        var category = DomainTestDataFactory.activeCategory("General");
+        var ticket = DomainTestDataFactory.openTicket("T", "D", category, creator, clock);
+        ticketRepository.save(ticket);
 
         UserId firstAgent = UserId.of(UUID.randomUUID());
         useCase.execute(new AssignTicketToMeCommand(ticket.id(), new CurrentUser(firstAgent, UserRole.AGENT)));
@@ -94,5 +122,6 @@ public class AssignTicketToMeUseCaseTest {
         assertThrows(TicketAlreadyAssigned.class, () ->
                 useCase.execute(new AssignTicketToMeCommand(ticket.id(), new CurrentUser(secondAgent, UserRole.AGENT)))
         );
+        assertEquals(1, eventRepository.findByTicketId(ticket.id()).size());
     }
 }
