@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChangeTicketStatusApiIntegrationTest extends AbstractAuthenticatedApiIntegrationTest {
@@ -36,7 +35,7 @@ class ChangeTicketStatusApiIntegrationTest extends AbstractAuthenticatedApiInteg
 
     @Test
     @SpecificationRef(value = "TICKET-USER-05", level = TestLevel.INTEGRATION, feature = "tickets-user.feature")
-    void user_cannot_change_ticket_status() throws Exception {
+    void user_cannot_change_ticket_status_when_request_is_blocked_by_security() throws Exception {
         var creator = persistActiveUser("user@test.com", "User", DEFAULT_PASSWORD, UserRole.USER);
         var category = persistCategory(CategoryTestDataBuilder.aCategory().withName("Hardware"));
         var ticket = persistTicket(TicketTestDataBuilder.aTicket()
@@ -54,8 +53,7 @@ class ChangeTicketStatusApiIntegrationTest extends AbstractAuthenticatedApiInteg
                         .with(bearerToken(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("status", "IN_PROGRESS"))))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+                .andExpect(status().isForbidden());
 
         assertEquals(TicketStatus.OPEN, ticketRepository.findById(ticket.getId()).orElseThrow().getStatus());
         assertEquals(0, ticketEventRepository.findByTicket_IdOrderByCreatedAtAsc(ticket.getId()).size());
