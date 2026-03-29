@@ -9,7 +9,7 @@ type JwtPayload = {
 };
 
 function toBase64Url(value: string): string {
-  return btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  return btoa(value).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
 export function buildJwt(payload: JwtPayload): string {
