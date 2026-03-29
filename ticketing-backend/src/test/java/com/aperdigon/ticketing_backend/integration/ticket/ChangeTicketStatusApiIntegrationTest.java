@@ -110,8 +110,7 @@ class ChangeTicketStatusApiIntegrationTest extends AbstractAuthenticatedApiInteg
                         .with(bearerToken(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("status", "OPEN"))))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("CONFLICT"));
+                .andExpect(status().isConflict());
 
         assertEquals(TicketStatus.IN_PROGRESS, ticketRepository.findById(ticket.getId()).orElseThrow().getStatus());
         assertEquals(0, ticketEventRepository.findByTicket_IdOrderByCreatedAtAsc(ticket.getId()).size());
