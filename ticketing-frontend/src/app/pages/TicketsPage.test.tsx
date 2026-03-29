@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { screen } from "@testing-library/react";
+import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import { vi } from "vitest";
 import { TicketsPage } from "./TicketsPage";
 
@@ -27,11 +27,7 @@ describe("TicketsPage", () => {
   it("shows USER tickets page for normal users", () => {
     hasAnyRoleMock.mockReturnValue(false);
 
-    render(
-      <MemoryRouter>
-        <TicketsPage />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<TicketsPage />, { router: {} });
 
     expect(screen.getByRole("heading", { name: "Mis tickets" })).toBeInTheDocument();
   });
@@ -39,11 +35,7 @@ describe("TicketsPage", () => {
   it("shows AGENT/ADMIN tickets page", () => {
     hasAnyRoleMock.mockReturnValue(true);
 
-    render(
-      <MemoryRouter>
-        <TicketsPage />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<TicketsPage />, { router: {} });
 
     expect(screen.getByRole("heading", { name: "Gestión de tickets" })).toBeInTheDocument();
   });

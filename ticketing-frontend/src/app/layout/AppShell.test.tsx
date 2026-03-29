@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ConfigProvider } from "antd";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { vi } from "vitest";
 import { AppShell } from "./AppShell";
+import { renderWithProviders } from "src/test/utils/renderWithProviders";
 
 const hasRoleMock = vi.fn<(role: "USER" | "AGENT" | "ADMIN") => boolean>();
 const logoutMock = vi.fn();
@@ -31,11 +31,7 @@ function renderWithRouter(initialEntries: string[] = ["/dashboard"]) {
     { initialEntries },
   );
 
-  return render(
-    <ConfigProvider>
-      <RouterProvider router={router} />
-    </ConfigProvider>,
-  );
+  return renderWithProviders(<RouterProvider router={router} />);
 }
 
 describe("AppShell", () => {

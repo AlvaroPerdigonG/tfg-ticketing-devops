@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { ConfigProvider } from "antd";
+import { screen } from "@testing-library/react";
+import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import { AdminPage } from "./AdminPage";
 import { vi } from "vitest";
 
@@ -23,11 +23,7 @@ describe("AdminPage", () => {
       { id: "u1", email: "admin@test.com", displayName: "Admin", role: "ADMIN", isActive: true },
     ]);
 
-    render(
-      <ConfigProvider>
-        <AdminPage />
-      </ConfigProvider>,
-    );
+    renderWithProviders(<AdminPage />);
 
     expect(screen.getByRole("heading", { name: "Administración" })).toBeInTheDocument();
     expect(await screen.findByText("Software")).toBeInTheDocument();
