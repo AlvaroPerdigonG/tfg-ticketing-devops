@@ -1,7 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import userEvent from "@testing-library/user-event";
-import { ConfigProvider } from "antd";
-import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import { CreateTicketPage } from "./CreateTicketPage";
 
@@ -34,13 +33,7 @@ describe("CreateTicketPage", () => {
   it("keeps submit disabled while required fields are empty", async () => {
     getCategoriesMock.mockResolvedValueOnce([{ id: "cat-1", name: "General" }]);
 
-    render(
-      <ConfigProvider>
-        <MemoryRouter>
-          <CreateTicketPage />
-        </MemoryRouter>
-      </ConfigProvider>,
-    );
+    renderWithProviders(<CreateTicketPage />, { router: {} });
 
     const submitButton = await screen.findByRole("button", { name: "Crear ticket" });
     expect(submitButton).toBeDisabled();
@@ -52,13 +45,7 @@ describe("CreateTicketPage", () => {
     getCategoriesMock.mockResolvedValueOnce([{ id: "cat-1", name: "General" }]);
     createTicketMock.mockResolvedValueOnce({ ticketId: "t-100" });
 
-    render(
-      <ConfigProvider>
-        <MemoryRouter>
-          <CreateTicketPage />
-        </MemoryRouter>
-      </ConfigProvider>,
-    );
+    renderWithProviders(<CreateTicketPage />, { router: {} });
 
     await user.type(await screen.findByLabelText("Título"), "Impresora bloqueada");
     await user.type(screen.getByLabelText("Descripción"), "Da error E23 cuando intento imprimir un PDF.");
