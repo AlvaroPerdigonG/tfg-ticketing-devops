@@ -174,6 +174,18 @@ Examples:
 
 The backend is the system of record for business rules, so integration coverage is especially important for demonstrating robustness in the TFG.
 
+### Coverage policy for CI
+
+Backend coverage should be treated as a **diagnostic signal**, not as a target to game.
+
+Therefore:
+
+- CI should publish JaCoCo XML/HTML reports for both unit and integration execution,
+- SonarCloud should consume the merged XML report,
+- and any future quality gate should use a **moderate and explainable threshold** only after a stable baseline has been observed.
+
+Coverage is useful for highlighting untested code paths, but it does **not** prove scenario quality, assertion strength, or business relevance. For this TFG, traceability plus meaningful unit/integration tests is more valuable than artificially increasing percentages with low-value tests.
+
 ---
 
 ## What is tested in the frontend
