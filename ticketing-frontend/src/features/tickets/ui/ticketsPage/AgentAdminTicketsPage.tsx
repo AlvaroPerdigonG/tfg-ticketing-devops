@@ -1,10 +1,27 @@
-import { Alert, Button, Card, Empty, Input, Select, Skeleton, Space, Table, Tag, Typography } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Empty,
+  Input,
+  Select,
+  Skeleton,
+  Space,
+  Table,
+  Tag,
+  Typography,
+} from "antd";
 import type { TableProps } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ticketsApi } from "../../api/ticketsApi";
 import { ticketPriorityLabel } from "../../model/presentation";
-import type { TicketPriority, TicketQueueScope, TicketStatus, TicketSummary } from "../../model/types";
+import type {
+  TicketPriority,
+  TicketQueueScope,
+  TicketStatus,
+  TicketSummary,
+} from "../../model/types";
 import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 
 type QueueView = "unassigned" | "mine" | "all";
@@ -53,7 +70,9 @@ export function AgentAdminTicketsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [view, setView] = useState<QueueView>(() => toQueueView(searchParams.get("view")));
-  const [statusFilter, setStatusFilter] = useState<QueueFilter>(() => toStatusFilter(searchParams.get("status")));
+  const [statusFilter, setStatusFilter] = useState<QueueFilter>(() =>
+    toStatusFilter(searchParams.get("status")),
+  );
   const [query, setQuery] = useState<string>(() => searchParams.get("q") ?? "");
   const [inputQuery, setInputQuery] = useState<string>(() => searchParams.get("q") ?? "");
   const [loadState, setLoadState] = useState<LoadState>("loading");
@@ -94,7 +113,9 @@ export function AgentAdminTicketsPage() {
         if (!isMounted) return;
 
         setLoadState("error");
-        setErrorMessage(error instanceof Error ? error.message : "No se pudo cargar la cola de tickets.");
+        setErrorMessage(
+          error instanceof Error ? error.message : "No se pudo cargar la cola de tickets.",
+        );
       }
     };
 
@@ -123,7 +144,9 @@ export function AgentAdminTicketsPage() {
         dataIndex: "priority",
         key: "priority",
         width: 120,
-        render: (priorityValue: unknown) => <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>,
+        render: (priorityValue: unknown) => (
+          <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>
+        ),
       },
       {
         title: "Asignado",
@@ -178,43 +201,60 @@ export function AgentAdminTicketsPage() {
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>
-        Gestión de tickets
+        <span data-testid="agent-tickets-title">Gestión de tickets</span>
       </Typography.Title>
 
       <Space style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
         <Card>
           <Typography.Text type="secondary">Sin asignar (vista)</Typography.Text>
-          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>{unassignedCount}</Typography.Title>
+          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
+            {unassignedCount}
+          </Typography.Title>
         </Card>
         <Card>
           <Typography.Text type="secondary">Total (vista)</Typography.Text>
-          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>{total}</Typography.Title>
+          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
+            {total}
+          </Typography.Title>
         </Card>
         <Card>
           <Typography.Text type="secondary">En progreso (vista)</Typography.Text>
-          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>{inProgressCount}</Typography.Title>
+          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
+            {inProgressCount}
+          </Typography.Title>
         </Card>
         <Card>
           <Typography.Text type="secondary">Scope actual</Typography.Text>
-          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>{queueScopeFromView(view)}</Typography.Title>
+          <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
+            {queueScopeFromView(view)}
+          </Typography.Title>
         </Card>
       </Space>
 
       <Space>
-        <Button type={view === "unassigned" ? "primary" : "default"} onClick={() => setView("unassigned")}>Sin asignar</Button>
-        <Button type={view === "mine" ? "primary" : "default"} onClick={() => setView("mine")}>Asignados a mí</Button>
-        <Button type={view === "all" ? "primary" : "default"} onClick={() => setView("all")}>Todos</Button>
+        <Button
+          type={view === "unassigned" ? "primary" : "default"}
+          onClick={() => setView("unassigned")}
+        >
+          Sin asignar
+        </Button>
+        <Button type={view === "mine" ? "primary" : "default"} onClick={() => setView("mine")}>
+          Asignados a mí
+        </Button>
+        <Button type={view === "all" ? "primary" : "default"} onClick={() => setView("all")}>
+          Todos
+        </Button>
       </Space>
 
       <Card>
         <Space>
           <Select
-              aria-label="Estado"
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value as QueueFilter)}
-              options={statusFilterOptions}
-              style={{ minWidth: 220 }}
-            />
+            aria-label="Estado"
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value as QueueFilter)}
+            options={statusFilterOptions}
+            style={{ minWidth: 220 }}
+          />
           <Input
             value={inputQuery}
             onChange={(event) => setInputQuery(event.target.value)}
@@ -247,7 +287,12 @@ export function AgentAdminTicketsPage() {
           )}
 
           {loadState === "ready" && tickets.length > 0 && (
-            <Table<TicketSummary> rowKey="id" columns={columns} dataSource={tickets} pagination={{ pageSize: 10 }} />
+            <Table<TicketSummary>
+              rowKey="id"
+              columns={columns}
+              dataSource={tickets}
+              pagination={{ pageSize: 10 }}
+            />
           )}
         </Space>
       </Card>

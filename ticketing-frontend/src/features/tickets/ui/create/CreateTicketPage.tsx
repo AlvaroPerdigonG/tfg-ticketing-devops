@@ -39,7 +39,9 @@ export function CreateTicketPage() {
         setCategories(loadedCategories);
       } catch (error) {
         if (!isMounted) return;
-        setErrorMessage(error instanceof Error ? error.message : "No se pudieron cargar las categorías.");
+        setErrorMessage(
+          error instanceof Error ? error.message : "No se pudieron cargar las categorías.",
+        );
       } finally {
         if (isMounted) {
           setIsLoadingCategories(false);
@@ -84,7 +86,9 @@ export function CreateTicketPage() {
           Crear ticket
         </Typography.Title>
 
-        {errorMessage && <Alert showIcon type="error" message="Error al crear ticket" description={errorMessage} />}
+        {errorMessage && (
+          <Alert showIcon type="error" message="Error al crear ticket" description={errorMessage} />
+        )}
 
         <Form layout="vertical" onFinish={handleSubmit}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
@@ -111,6 +115,7 @@ export function CreateTicketPage() {
 
             <Form.Item label="Categoría" style={{ marginBottom: 0 }}>
               <Select
+                data-testid="create-ticket-category"
                 aria-label="Categoría"
                 value={categoryId || undefined}
                 onChange={(value) => setCategoryId(value)}
@@ -133,6 +138,7 @@ export function CreateTicketPage() {
             </Form.Item>
 
             <Button
+              data-testid="create-ticket-submit"
               type="primary"
               htmlType="submit"
               loading={isSubmitting}

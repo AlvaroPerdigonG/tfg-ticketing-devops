@@ -83,6 +83,7 @@ export function LoginPage() {
           <label>
             Email
             <input
+              data-testid="auth-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"
@@ -106,6 +107,7 @@ export function LoginPage() {
           <label>
             Contraseña
             <input
+              data-testid="auth-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
@@ -127,7 +129,8 @@ export function LoginPage() {
                 />
               </label>
               <p className="auth-password-hint">
-                La contraseña debe tener mínimo 8 caracteres e incluir mayúsculas, minúsculas, número y símbolo.
+                La contraseña debe tener mínimo 8 caracteres e incluir mayúsculas, minúsculas,
+                número y símbolo.
               </p>
             </>
           )}
@@ -143,7 +146,12 @@ export function LoginPage() {
 
           {error && <p className="auth-error">{error}</p>}
 
-          <button type="submit" disabled={loading} className="auth-submit">
+          <button
+            type="submit"
+            disabled={loading}
+            className="auth-submit"
+            data-testid="auth-submit"
+          >
             {submitText}
           </button>
         </form>
