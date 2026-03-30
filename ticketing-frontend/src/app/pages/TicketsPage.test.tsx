@@ -11,11 +11,11 @@ vi.mock("../../features/auth/hooks/useAuth", () => ({
   }),
 }));
 
-vi.mock("../../features/tickets/ui/UserTicketsHomePage", () => ({
+vi.mock("src/features/tickets/ui/ticketsPage/UserTicketsHomePage", () => ({
   UserTicketsHomePage: () => <h1>Mis tickets</h1>,
 }));
 
-vi.mock("../../features/tickets/ui/AgentAdminTicketsPage", () => ({
+vi.mock("src/features/tickets/ui/ticketsPage/AgentAdminTicketsPage", () => ({
   AgentAdminTicketsPage: () => <h1>Gestión de tickets</h1>,
 }));
 
@@ -24,7 +24,7 @@ describe("TicketsPage", () => {
     hasAnyRoleMock.mockReset();
   });
 
-  it("shows USER tickets page for normal users", () => {
+  it("renderiza vista USER cuando no tiene rol agent/admin", () => {
     hasAnyRoleMock.mockReturnValue(false);
 
     renderWithProviders(<TicketsPage />, { router: {} });
@@ -32,7 +32,7 @@ describe("TicketsPage", () => {
     expect(screen.getByRole("heading", { name: "Mis tickets" })).toBeInTheDocument();
   });
 
-  it("shows AGENT/ADMIN tickets page", () => {
+  it("renderiza vista de gestión cuando tiene rol AGENT/ADMIN", () => {
     hasAnyRoleMock.mockReturnValue(true);
 
     renderWithProviders(<TicketsPage />, { router: {} });
