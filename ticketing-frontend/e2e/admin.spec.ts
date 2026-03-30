@@ -1,17 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
-import { hasAdminCredentials } from "./utils/env";
 
-test("ADMIN-01 admin puede listar usuarios", async ({ page }) => {
-  test.skip(
-    !hasAdminCredentials(),
-    "Define E2E_ADMIN_EMAIL y E2E_ADMIN_PASSWORD para ejecutar ADMIN-01.",
-  );
-
-  await loginAs(page, "admin");
+test("ADMIN-04 usuario no autorizado no accede a administración", async ({ page }) => {
+  await loginAs(page, "user");
   await page.goto("/admin");
 
-  await expect(page.getByTestId("admin-title")).toBeVisible();
-  await page.getByRole("tab", { name: "Usuarios" }).click();
-  await expect(page.getByText("Email")).toBeVisible();
+  await expect(page).toHaveURL(/\/forbidden$/);
+  await expect(page.getByText("403 — Forbidden")).toBeVisible();
 });
