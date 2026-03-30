@@ -3,7 +3,10 @@ import { loginAs } from "./fixtures/auth";
 import { hasAdminCredentials } from "./utils/env";
 
 test("ADMIN-01 admin puede listar usuarios", async ({ page }) => {
-  test.skip(!hasAdminCredentials(), "Define E2E_ADMIN_EMAIL y E2E_ADMIN_PASSWORD para ejecutar ADMIN-01.");
+  test.skip(
+    !hasAdminCredentials(),
+    "Define E2E_ADMIN_EMAIL y E2E_ADMIN_PASSWORD para ejecutar ADMIN-01.",
+  );
 
   await loginAs(page, "admin");
   await page.goto("/admin");

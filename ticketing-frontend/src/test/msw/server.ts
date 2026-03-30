@@ -7,7 +7,10 @@ let initialHandlers: RequestHandler[] = [...handlers];
 let originalFetch: typeof globalThis.fetch | undefined;
 let onUnhandledRequest: UnhandledRequestPolicy = "error";
 
-async function toMockedRequest(input: RequestInfo | URL, init?: RequestInit): Promise<MockedRequest> {
+async function toMockedRequest(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<MockedRequest> {
   const request = input instanceof Request ? input : new Request(input, init);
   const contentType = request.headers.get("content-type");
 
@@ -53,7 +56,6 @@ export const server = {
 
       const message = `Unhandled request: ${request.method} ${request.url.toString()}`;
       if (onUnhandledRequest === "warn") {
-        // eslint-disable-next-line no-console
         console.warn(message);
         return originalFetch!(input, init);
       }

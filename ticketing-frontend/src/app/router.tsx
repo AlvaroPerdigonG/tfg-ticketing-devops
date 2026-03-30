@@ -27,12 +27,26 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: "/", element: <RoleLandingRedirect /> },
-          { path: "/dashboard", element: <RequireRole anyOf={["ADMIN", "AGENT"]}><AgentAdminDashboardPage /></RequireRole> },
+          {
+            path: "/dashboard",
+            element: (
+              <RequireRole anyOf={["ADMIN", "AGENT"]}>
+                <AgentAdminDashboardPage />
+              </RequireRole>
+            ),
+          },
           { path: "/tickets", element: <TicketsPage /> },
           { path: "/tickets/new", element: <CreateTicketPage /> },
           { path: "/tickets/:id", element: <TicketDetailPage /> },
           { path: "/profile", element: <ProfilePage /> },
-          { path: "/admin", element: <RequireRole anyOf={["ADMIN"]}><AdminPage /></RequireRole> },
+          {
+            path: "/admin",
+            element: (
+              <RequireRole anyOf={["ADMIN"]}>
+                <AdminPage />
+              </RequireRole>
+            ),
+          },
         ],
       },
     ],

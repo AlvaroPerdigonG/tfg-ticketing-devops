@@ -30,7 +30,11 @@ export type TicketDetail = {
   availableTransitions: TicketStatus[];
 };
 
-export type TicketEventType = "TICKET_CREATED" | "STATUS_CHANGED" | "ASSIGNED_TO_ME" | "COMMENT_ADDED";
+export type TicketEventType =
+  | "TICKET_CREATED"
+  | "STATUS_CHANGED"
+  | "ASSIGNED_TO_ME"
+  | "COMMENT_ADDED";
 
 export type TimelineEntry = {
   id: string;

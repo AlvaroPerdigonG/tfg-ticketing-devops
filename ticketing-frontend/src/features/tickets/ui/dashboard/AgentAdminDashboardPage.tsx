@@ -58,7 +58,9 @@ export function AgentAdminDashboardPage() {
 
         if (!isMounted) return;
 
-        const requiresAttention = waitingResponse.items.filter((ticket) => ticket.assignedToUserId !== null);
+        const requiresAttention = waitingResponse.items.filter(
+          (ticket) => ticket.assignedToUserId !== null,
+        );
 
         setUnassignedCount(unassigned.total);
         setMineCount(mine.total);
@@ -70,7 +72,9 @@ export function AgentAdminDashboardPage() {
         if (!isMounted) return;
 
         setLoadState("error");
-        setErrorMessage(error instanceof Error ? error.message : "No se pudo cargar el dashboard de tickets.");
+        setErrorMessage(
+          error instanceof Error ? error.message : "No se pudo cargar el dashboard de tickets.",
+        );
       }
     };
 
@@ -84,8 +88,20 @@ export function AgentAdminDashboardPage() {
   const metrics: DashboardMetric[] = [
     { key: "unassigned", label: "Sin asignar", value: unassignedCount, view: "unassigned" },
     { key: "mine", label: "Asignados a mí", value: mineCount, view: "mine" },
-    { key: "inProgress", label: "En progreso", value: inProgressCount, view: "all", status: "IN_PROGRESS" },
-    { key: "waitingResponse", label: "Esperando respuesta", value: waitingResponseCount, view: "mine", status: "OPEN" },
+    {
+      key: "inProgress",
+      label: "En progreso",
+      value: inProgressCount,
+      view: "all",
+      status: "IN_PROGRESS",
+    },
+    {
+      key: "waitingResponse",
+      label: "Esperando respuesta",
+      value: waitingResponseCount,
+      view: "mine",
+      status: "OPEN",
+    },
   ];
 
   const columns: TableProps<TicketSummary>["columns"] = useMemo(
@@ -106,7 +122,9 @@ export function AgentAdminDashboardPage() {
         dataIndex: "priority",
         key: "priority",
         width: 120,
-        render: (priorityValue: unknown) => <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>,
+        render: (priorityValue: unknown) => (
+          <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>
+        ),
       },
       {
         title: "Actualizado",
@@ -135,12 +153,19 @@ export function AgentAdminDashboardPage() {
       <Typography.Title level={3} style={{ margin: 0 }}>
         Dashboard de soporte
       </Typography.Title>
-      <Typography.Text type="secondary">Resumen operativo para agentes y administradores.</Typography.Text>
+      <Typography.Text type="secondary">
+        Resumen operativo para agentes y administradores.
+      </Typography.Text>
 
       {loadState === "loading" && <Skeleton active paragraph={{ rows: 5 }} />}
 
       {loadState === "error" && (
-        <Alert type="error" showIcon message="No se ha podido cargar el dashboard" description={errorMessage} />
+        <Alert
+          type="error"
+          showIcon
+          message="No se ha podido cargar el dashboard"
+          description={errorMessage}
+        />
       )}
 
       {loadState === "ready" && (
@@ -151,7 +176,13 @@ export function AgentAdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => navigate(buildTicketsLink(metric))}
-                  style={{ border: "none", background: "transparent", cursor: "pointer", textAlign: "left", width: "100%" }}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
                 >
                   <Typography.Text type="secondary">{metric.label}</Typography.Text>
                   <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
@@ -171,7 +202,12 @@ export function AgentAdminDashboardPage() {
               {attentionTickets.length === 0 ? (
                 <Empty description="No hay tickets pendientes de atención inmediata" />
               ) : (
-                <Table<TicketSummary> rowKey="id" columns={columns} dataSource={attentionTickets} pagination={false} />
+                <Table<TicketSummary>
+                  rowKey="id"
+                  columns={columns}
+                  dataSource={attentionTickets}
+                  pagination={false}
+                />
               )}
             </Space>
           </Card>

@@ -24,10 +24,7 @@ export async function toApiError(response: Response): Promise<ApiError> {
   }
 
   const message =
-    body?.message ||
-    body?.error ||
-    response.statusText ||
-    `Request failed with status ${status}`;
+    body?.message || body?.error || response.statusText || `Request failed with status ${status}`;
 
   const code = body?.code;
   return new ApiError(message, status, code, body);

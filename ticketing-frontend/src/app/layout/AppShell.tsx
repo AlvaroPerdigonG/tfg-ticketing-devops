@@ -17,8 +17,11 @@ const baseItems: AppMenuItem[] = [
 
 function getMenuItems(isAdmin: boolean): AppMenuItem[] {
   if (isAdmin) {
-    return [{ key: "/dashboard", icon: <MdDashboard fontSize={18} />, label: "Dashboard" }, ...baseItems, 
-      { key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" }];
+    return [
+      { key: "/dashboard", icon: <MdDashboard fontSize={18} />, label: "Dashboard" },
+      ...baseItems,
+      { key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" },
+    ];
   }
 
   return baseItems;
@@ -47,7 +50,7 @@ export function AppShell() {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider  style={{ borderRight: "1px solid #f0f0f0", width: 240, background: "#fff" }}>
+      <Sider style={{ borderRight: "1px solid #f0f0f0", width: 240, background: "#fff" }}>
         <div style={{ padding: "16px 20px" }}>
           <Typography.Title level={4} style={{ margin: 0 }}>
             TFG Ticketing

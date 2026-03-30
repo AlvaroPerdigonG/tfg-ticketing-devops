@@ -9,7 +9,8 @@ const authClient = createApiClient({
 
 export const adminApi = {
   getCategories: () => authClient.get<AdminCategory[]>("/api/admin/categories"),
-  createCategory: (name: string) => authClient.post<AdminCategory>("/api/admin/categories", { name }),
+  createCategory: (name: string) =>
+    authClient.post<AdminCategory>("/api/admin/categories", { name }),
   updateCategory: (categoryId: string, payload: { name: string; isActive: boolean }) =>
     authClient.patch<AdminCategory>(`/api/admin/categories/${categoryId}`, payload),
   getUsers: () => authClient.get<AdminUser[]>("/api/admin/users"),

@@ -35,7 +35,6 @@ function renderLogin(initialState?: { from?: string }) {
   );
 }
 
-
 function getSubmitButton(name: RegExp | string = /^Iniciar sesión$/i) {
   const buttons = screen.getAllByRole("button", { name });
   const submit = buttons.find((button) => button.getAttribute("type") === "submit");

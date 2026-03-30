@@ -23,10 +23,7 @@ function AuthStateProbe() {
     <section>
       <p>Estado: {isAuthenticated ? "autenticado" : "anonimo"}</p>
       <p>Usuario: {state.user?.email ?? "sin usuario"}</p>
-      <button
-        type="button"
-        onClick={() => login("admin@test.com", "Password.123", true)}
-      >
+      <button type="button" onClick={() => login("admin@test.com", "Password.123", true)}>
         Login
       </button>
     </section>

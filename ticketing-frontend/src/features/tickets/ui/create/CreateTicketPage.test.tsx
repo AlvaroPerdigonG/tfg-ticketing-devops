@@ -59,8 +59,12 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    fireEvent.change(await screen.findByLabelText("Título"), { target: { value: "  Impresora bloqueada  " } });
-    fireEvent.change(screen.getByLabelText("Descripción"), { target: { value: "  Error E23 al imprimir PDF  " } });
+    fireEvent.change(await screen.findByLabelText("Título"), {
+      target: { value: "  Impresora bloqueada  " },
+    });
+    fireEvent.change(screen.getByLabelText("Descripción"), {
+      target: { value: "  Error E23 al imprimir PDF  " },
+    });
 
     const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
     fireEvent.mouseDown(categoryCombobox);
@@ -82,7 +86,6 @@ describe("CreateTicketPage", () => {
       expect(navigateMock).toHaveBeenCalledWith("/tickets/t-100");
     });
   });
-
 
   it("deshabilita botón durante el envío para evitar doble submit", async () => {
     const user = userEvent.setup();

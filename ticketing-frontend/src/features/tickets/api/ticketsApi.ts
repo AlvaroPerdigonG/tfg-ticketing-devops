@@ -34,19 +34,26 @@ export const ticketsApi = {
   getMyTickets: (params?: { page?: number; size?: number; status?: TicketStatus; q?: string }) =>
     authClient.get<PaginatedResponse<TicketSummary>>(`/api/tickets/me${buildQuery(params ?? {})}`),
 
-  getQueueTickets: (params?: { page?: number; size?: number; status?: TicketStatus; q?: string; scope?: TicketQueueScope }) =>
-    authClient.get<PaginatedResponse<TicketSummary>>(`/api/tickets${buildQuery(params ?? {})}`),
+  getQueueTickets: (params?: {
+    page?: number;
+    size?: number;
+    status?: TicketStatus;
+    q?: string;
+    scope?: TicketQueueScope;
+  }) => authClient.get<PaginatedResponse<TicketSummary>>(`/api/tickets${buildQuery(params ?? {})}`),
 
   getCategories: () => authClient.get<TicketCategory[]>("/api/categories"),
 
-  createTicket: (payload: CreateTicketInput) => authClient.post<CreateTicketResponse>("/api/tickets", payload),
+  createTicket: (payload: CreateTicketInput) =>
+    authClient.post<CreateTicketResponse>("/api/tickets", payload),
 
   getTicketById: (ticketId: string) => authClient.get<TicketDetail>(`/api/tickets/${ticketId}`),
 
   changeStatus: (ticketId: string, status: TicketStatus) =>
     authClient.patch<void>(`/api/tickets/${ticketId}/status`, { status }),
 
-  assignToMe: (ticketId: string) => authClient.patch<void>(`/api/tickets/${ticketId}/assignment/me`, {}),
+  assignToMe: (ticketId: string) =>
+    authClient.patch<void>(`/api/tickets/${ticketId}/assignment/me`, {}),
 
   addComment: (ticketId: string, content: string) =>
     authClient.post<AddTicketCommentResponse>(`/api/tickets/${ticketId}/comments`, { content }),

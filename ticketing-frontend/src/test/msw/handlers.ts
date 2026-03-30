@@ -11,11 +11,16 @@ export type MockedResponse = {
   body?: BodyInit | null;
 };
 
-export type RequestHandler = (request: MockedRequest) => MockedResponse | undefined | Promise<MockedResponse | undefined>;
+export type RequestHandler = (
+  request: MockedRequest,
+) => MockedResponse | undefined | Promise<MockedResponse | undefined>;
 
 export const handlers: RequestHandler[] = [];
 
-export function jsonResponse(body: unknown, init: Omit<MockedResponse, "body"> = {}): MockedResponse {
+export function jsonResponse(
+  body: unknown,
+  init: Omit<MockedResponse, "body"> = {},
+): MockedResponse {
   return {
     ...init,
     headers: {

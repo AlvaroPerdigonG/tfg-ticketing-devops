@@ -3,13 +3,7 @@ import { Navigate } from "react-router-dom";
 import type { Role } from "../model/types";
 import { useAuth } from "../hooks/useAuth";
 
-export function RequireRole({
-  anyOf,
-  children,
-}: {
-  anyOf: Role[];
-  children: React.ReactNode;
-}) {
+export function RequireRole({ anyOf, children }: { anyOf: Role[]; children: React.ReactNode }) {
   const { hasAnyRole } = useAuth();
 
   if (!hasAnyRole(anyOf)) {

@@ -1,12 +1,12 @@
 export type Role = "USER" | "AGENT" | "ADMIN";
 
 export type AuthUser = {
-  id: string;      // sub
+  id: string; // sub
   email: string;
   displayName: string;
   role: Role;
-  roles: Role[];   // claim roles
-  exp: number;     // unix seconds
+  roles: Role[]; // claim roles
+  exp: number; // unix seconds
 };
 
 export type AuthState = {

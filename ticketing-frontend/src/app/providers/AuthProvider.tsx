@@ -35,21 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ token: null, user: null });
   }, []);
 
-  const loginWithToken = useCallback(
-    (token: string, remember = false) => {
-      const user = toAuthUser(token);
+  const loginWithToken = useCallback((token: string, remember = false) => {
+    const user = toAuthUser(token);
 
-      if (isExpired(user.exp)) {
-        throw new Error("Token expired");
-      }
+    if (isExpired(user.exp)) {
+      throw new Error("Token expired");
+    }
 
-      if (remember) localStorage.setItem(STORAGE_KEY, token);
-      else localStorage.removeItem(STORAGE_KEY);
+    if (remember) localStorage.setItem(STORAGE_KEY, token);
+    else localStorage.removeItem(STORAGE_KEY);
 
-      setState({ token, user });
-    },
-    [],
-  );
+    setState({ token, user });
+  }, []);
 
   const login = useCallback(
     async (email: string, password: string, remember = false) => {
@@ -60,7 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const register = useCallback(
-    async ({ email, displayName, password, confirmPassword, remember = false }: {
+    async ({
+      email,
+      displayName,
+      password,
+      confirmPassword,
+      remember = false,
+    }: {
       email: string;
       displayName: string;
       password: string;

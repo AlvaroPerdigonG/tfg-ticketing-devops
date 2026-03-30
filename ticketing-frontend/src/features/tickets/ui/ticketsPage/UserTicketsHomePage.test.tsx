@@ -61,7 +61,9 @@ describe("UserTicketsHomePage", () => {
   });
 
   it("muestra error state cuando falla la carga", async () => {
-    server.use(http.get("/api/tickets/me", () => jsonResponse({ message: "boom" }, { status: 500 })));
+    server.use(
+      http.get("/api/tickets/me", () => jsonResponse({ message: "boom" }, { status: 500 })),
+    );
 
     renderWithProviders(<UserTicketsHomePage />, { router: {} });
 

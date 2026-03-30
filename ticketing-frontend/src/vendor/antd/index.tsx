@@ -21,7 +21,13 @@ export function ConfigProvider({ children, theme, locale }: ConfigProviderProps)
 
   return (
     <ThemeContext.Provider value={theme}>
-      <div style={colorPrimary ? ({ ["--color-primary" as string]: colorPrimary } as React.CSSProperties) : undefined}>
+      <div
+        style={
+          colorPrimary
+            ? ({ ["--color-primary" as string]: colorPrimary } as React.CSSProperties)
+            : undefined
+        }
+      >
         {children}
       </div>
     </ThemeContext.Provider>
@@ -84,7 +90,7 @@ export function Menu({ items = [], selectedKeys = [], onClick, style }: MenuProp
               textAlign: "left",
               border: "none",
               background: isSelected ? "#f0fdf4" : "transparent",
-              color: isSelected ? theme?.token?.colorPrimary ?? "#0c9136" : "#111827",
+              color: isSelected ? (theme?.token?.colorPrimary ?? "#0c9136") : "#111827",
               padding: "10px 16px",
               cursor: "pointer",
             }}
@@ -99,19 +105,35 @@ export function Menu({ items = [], selectedKeys = [], onClick, style }: MenuProp
 }
 
 export const Typography = {
-  Title: ({ level = 1, style, children }: { level?: 1 | 2 | 3 | 4 | 5; style?: React.CSSProperties; children: React.ReactNode }) => {
+  Title: ({
+    level = 1,
+    style,
+    children,
+  }: {
+    level?: 1 | 2 | 3 | 4 | 5;
+    style?: React.CSSProperties;
+    children: React.ReactNode;
+  }) => {
     const Tag = `h${level}` as keyof React.JSX.IntrinsicElements;
     return <Tag style={style}>{children}</Tag>;
   },
-  Text: ({ children, style }: { children: React.ReactNode; type?: "secondary"; style?: React.CSSProperties }) => (
-    <span style={{ color: "#6b7280", ...style }}>{children}</span>
-  ),
-  Paragraph: ({ children, style }: { children: React.ReactNode; type?: "secondary"; style?: React.CSSProperties }) => (
-    <p style={{ color: "#6b7280", ...style }}>{children}</p>
-  ),
+  Text: ({
+    children,
+    style,
+  }: {
+    children: React.ReactNode;
+    type?: "secondary";
+    style?: React.CSSProperties;
+  }) => <span style={{ color: "#6b7280", ...style }}>{children}</span>,
+  Paragraph: ({
+    children,
+    style,
+  }: {
+    children: React.ReactNode;
+    type?: "secondary";
+    style?: React.CSSProperties;
+  }) => <p style={{ color: "#6b7280", ...style }}>{children}</p>,
 };
-
-
 
 type FormProps = {
   children: React.ReactNode;
@@ -148,24 +170,65 @@ Form.Item = ({ children, label, style }: FormItemProps) => {
 };
 
 export function Card({ children }: { children: React.ReactNode }) {
-  return <section style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 20 }}>{children}</section>;
+  return (
+    <section style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 20 }}>
+      {children}
+    </section>
+  );
 }
 
-export function Button({ children, onClick, type, size, disabled, style, htmlType, loading }: { children: React.ReactNode; onClick?: () => void; type?: "primary" | "default"; size?: "small" | "middle" | "large"; disabled?: boolean; style?: React.CSSProperties; htmlType?: "button" | "submit" | "reset"; loading?: boolean }) {
+export function Button({
+  children,
+  onClick,
+  type,
+  size,
+  disabled,
+  style,
+  htmlType,
+  loading,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  type?: "primary" | "default";
+  size?: "small" | "middle" | "large";
+  disabled?: boolean;
+  style?: React.CSSProperties;
+  htmlType?: "button" | "submit" | "reset";
+  loading?: boolean;
+}) {
   const theme = useContext(ThemeContext);
   return (
     <button
       type={htmlType ?? "button"}
       onClick={onClick}
       disabled={disabled || loading}
-      style={{ background: type === "primary" || !type ? theme?.token?.colorPrimary ?? "#0c9136" : "#fff", color: type === "primary" || !type ? "#fff" : "#111827", border: type === "primary" || !type ? "none" : "1px solid #d1d5db", padding: size === "large" ? "10px 16px" : "8px 12px", borderRadius: 6, opacity: disabled || loading ? 0.6 : 1, cursor: disabled || loading ? "not-allowed" : "pointer", ...(style ?? {}) }}
+      style={{
+        background:
+          type === "primary" || !type ? (theme?.token?.colorPrimary ?? "#0c9136") : "#fff",
+        color: type === "primary" || !type ? "#fff" : "#111827",
+        border: type === "primary" || !type ? "none" : "1px solid #d1d5db",
+        padding: size === "large" ? "10px 16px" : "8px 12px",
+        borderRadius: 6,
+        opacity: disabled || loading ? 0.6 : 1,
+        cursor: disabled || loading ? "not-allowed" : "pointer",
+        ...(style ?? {}),
+      }}
     >
       {loading ? "Cargando..." : children}
     </button>
   );
 }
 
-export function Result({ title, subTitle, extra }: { status?: string; title: string; subTitle?: string; extra?: React.ReactNode }) {
+export function Result({
+  title,
+  subTitle,
+  extra,
+}: {
+  status?: string;
+  title: string;
+  subTitle?: string;
+  extra?: React.ReactNode;
+}) {
   return (
     <section style={{ textAlign: "center", padding: 32 }}>
       <h1>{title}</h1>
@@ -175,13 +238,37 @@ export function Result({ title, subTitle, extra }: { status?: string; title: str
   );
 }
 
-
-export function Space({ children, direction = "horizontal", size = 8, style }: { children: React.ReactNode; direction?: "horizontal" | "vertical"; size?: number; style?: React.CSSProperties }) {
-  return <div style={{ display: "flex", flexDirection: direction === "vertical" ? "column" : "row", gap: size, ...(style ?? {}) }}>{children}</div>;
+export function Space({
+  children,
+  direction = "horizontal",
+  size = 8,
+  style,
+}: {
+  children: React.ReactNode;
+  direction?: "horizontal" | "vertical";
+  size?: number;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: direction === "vertical" ? "column" : "row",
+        gap: size,
+        ...(style ?? {}),
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function Tag({ children }: { children: React.ReactNode; color?: string }) {
-  return <span style={{ background: "#f3f4f6", borderRadius: 999, padding: "2px 8px", fontSize: 12 }}>{children}</span>;
+  return (
+    <span style={{ background: "#f3f4f6", borderRadius: 999, padding: "2px 8px", fontSize: 12 }}>
+      {children}
+    </span>
+  );
 }
 
 export function Skeleton({ paragraph }: { active?: boolean; paragraph?: { rows: number } }) {
@@ -192,8 +279,21 @@ export function Empty({ description }: { description?: React.ReactNode }) {
   return <div>{description ?? "Sin datos"}</div>;
 }
 
-export function Alert({ message, description }: { type?: string; showIcon?: boolean; message: React.ReactNode; description?: React.ReactNode }) {
-  return <div><strong>{message}</strong>{description ? <p>{description}</p> : null}</div>;
+export function Alert({
+  message,
+  description,
+}: {
+  type?: string;
+  showIcon?: boolean;
+  message: React.ReactNode;
+  description?: React.ReactNode;
+}) {
+  return (
+    <div>
+      <strong>{message}</strong>
+      {description ? <p>{description}</p> : null}
+    </div>
+  );
 }
 
 export type TableProps<T> = {
@@ -211,7 +311,12 @@ export type TableProps<T> = {
   loading?: boolean;
 };
 
-export function Table<T extends Record<string, unknown>>({ rowKey, columns, dataSource, loading }: TableProps<T>) {
+export function Table<T extends Record<string, unknown>>({
+  rowKey,
+  columns,
+  dataSource,
+  loading,
+}: TableProps<T>) {
   const keyGetter = typeof rowKey === "function" ? rowKey : (row: T) => row[rowKey] as React.Key;
 
   if (loading) {
@@ -223,7 +328,10 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
       <thead>
         <tr>
           {columns.map((column) => (
-            <th key={column.key} style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "8px 4px" }}>
+            <th
+              key={column.key}
+              style={{ textAlign: "left", borderBottom: "1px solid #e5e7eb", padding: "8px 4px" }}
+            >
               {column.title}
             </th>
           ))}
@@ -235,7 +343,10 @@ export function Table<T extends Record<string, unknown>>({ rowKey, columns, data
             {columns.map((column) => {
               const value = column.dataIndex ? row[column.dataIndex] : undefined;
               return (
-                <td key={column.key} style={{ borderBottom: "1px solid #f3f4f6", padding: "8px 4px" }}>
+                <td
+                  key={column.key}
+                  style={{ borderBottom: "1px solid #f3f4f6", padding: "8px 4px" }}
+                >
                   {column.render ? column.render(value, row) : (value as React.ReactNode)}
                 </td>
               );
@@ -286,7 +397,14 @@ export const Input = (({ value, onChange, placeholder, maxLength, ...ariaProps }
   );
 }) as InputComponent;
 
-Input.TextArea = ({ value, onChange, placeholder, maxLength, rows = 4, ...ariaProps }: TextAreaProps) => {
+Input.TextArea = ({
+  value,
+  onChange,
+  placeholder,
+  maxLength,
+  rows = 4,
+  ...ariaProps
+}: TextAreaProps) => {
   return (
     <textarea
       value={value}
@@ -310,7 +428,23 @@ type SelectOption = {
   value: string;
 };
 
-export function Select({ value, onChange, options, disabled, placeholder, style, ...ariaProps }: { value?: string; onChange?: (value: string) => void; options?: SelectOption[]; disabled?: boolean; placeholder?: string; style?: React.CSSProperties; [key: `aria-${string}`]: string | undefined }) {
+export function Select({
+  value,
+  onChange,
+  options,
+  disabled,
+  placeholder,
+  style,
+  ...ariaProps
+}: {
+  value?: string;
+  onChange?: (value: string) => void;
+  options?: SelectOption[];
+  disabled?: boolean;
+  placeholder?: string;
+  style?: React.CSSProperties;
+  [key: `aria-${string}`]: string | undefined;
+}) {
   return (
     <select
       value={value ?? ""}
@@ -335,7 +469,13 @@ export function Select({ value, onChange, options, disabled, placeholder, style,
   );
 }
 
-export function Switch({ checked, onChange }: { checked?: boolean; onChange?: (checked: boolean) => void }) {
+export function Switch({
+  checked,
+  onChange,
+}: {
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+}) {
   return (
     <button
       type="button"
@@ -368,13 +508,20 @@ export function Switch({ checked, onChange }: { checked?: boolean; onChange?: (c
   );
 }
 
-export function Tabs({ items }: { items: Array<{ key: string; label: React.ReactNode; children: React.ReactNode }> }) {
+export function Tabs({
+  items,
+}: {
+  items: Array<{ key: string; label: React.ReactNode; children: React.ReactNode }>;
+}) {
   const [activeKey, setActiveKey] = React.useState(items[0]?.key);
   const active = items.find((item) => item.key === activeKey) ?? items[0];
 
   return (
     <div>
-      <div role="tablist" style={{ display: "flex", gap: 6, borderBottom: "1px solid #f0f0f0", marginBottom: 16 }}>
+      <div
+        role="tablist"
+        style={{ display: "flex", gap: 6, borderBottom: "1px solid #f0f0f0", marginBottom: 16 }}
+      >
         {items.map((item) => (
           <button
             key={item.key}
@@ -400,7 +547,21 @@ export function Tabs({ items }: { items: Array<{ key: string; label: React.React
   );
 }
 
-export function Modal({ open, title, children, onCancel, onOk, okText }: { open: boolean; title: React.ReactNode; children: React.ReactNode; onCancel?: () => void; onOk?: () => void; okText?: string }) {
+export function Modal({
+  open,
+  title,
+  children,
+  onCancel,
+  onOk,
+  okText,
+}: {
+  open: boolean;
+  title: React.ReactNode;
+  children: React.ReactNode;
+  onCancel?: () => void;
+  onOk?: () => void;
+  okText?: string;
+}) {
   if (!open) {
     return null;
   }
@@ -417,12 +578,18 @@ export function Modal({ open, title, children, onCancel, onOk, okText }: { open:
         zIndex: 1000,
       }}
     >
-      <div style={{ background: "#fff", borderRadius: 8, width: 520, maxWidth: "90vw", padding: 20 }}>
+      <div
+        style={{ background: "#fff", borderRadius: 8, width: 520, maxWidth: "90vw", padding: 20 }}
+      >
         <h2 style={{ marginTop: 0 }}>{title}</h2>
         <div style={{ marginBottom: 16 }}>{children}</div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button type="default" onClick={onCancel}>Cancelar</Button>
-          <Button type="primary" onClick={onOk}>{okText ?? "OK"}</Button>
+          <Button type="default" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="primary" onClick={onOk}>
+            {okText ?? "OK"}
+          </Button>
         </div>
       </div>
     </div>

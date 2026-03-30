@@ -6,10 +6,7 @@ type ApiClientOptions = {
 };
 
 export function createApiClient(opts: ApiClientOptions) {
-  async function request<T>(
-    path: string,
-    init?: RequestInit & { json?: unknown },
-  ): Promise<T> {
+  async function request<T>(path: string, init?: RequestInit & { json?: unknown }): Promise<T> {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
 
     const headers = new Headers(init?.headers);

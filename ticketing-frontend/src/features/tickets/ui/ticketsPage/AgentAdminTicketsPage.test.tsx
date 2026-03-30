@@ -71,7 +71,9 @@ describe("AgentAdminTicketsPage", () => {
     });
 
     expect(container.querySelector(".ant-skeleton")).toBeInTheDocument();
-    expect(await screen.findByText("No hay tickets para mostrar con los filtros actuales")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No hay tickets para mostrar con los filtros actuales"),
+    ).toBeInTheDocument();
   });
 
   it("muestra error state cuando falla la cola", async () => {
@@ -79,7 +81,9 @@ describe("AgentAdminTicketsPage", () => {
 
     renderWithProviders(<AgentAdminTicketsPage />, { router: { initialEntries: ["/tickets"] } });
 
-    expect(await screen.findByText("No se ha podido cargar la cola de tickets")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No se ha podido cargar la cola de tickets"),
+    ).toBeInTheDocument();
   });
 
   it("[TICKET-AGENT-01] muestra acciones de UI para gestión de estado si existen", async () => {

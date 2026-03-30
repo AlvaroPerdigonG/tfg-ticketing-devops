@@ -6,5 +6,6 @@ const publicClient = createApiClient({ getToken: () => null });
 export const authApi = {
   login: (req: LoginRequest) => publicClient.post<LoginResponse>("/api/auth/login", req),
   register: (req: RegisterRequest) => publicClient.post<LoginResponse>("/api/auth/register", req),
-  me: (token: string) => createApiClient({ getToken: () => token }).get<ProfileResponse>("/api/auth/me"),
+  me: (token: string) =>
+    createApiClient({ getToken: () => token }).get<ProfileResponse>("/api/auth/me"),
 };
