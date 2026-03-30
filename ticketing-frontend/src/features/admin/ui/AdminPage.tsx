@@ -55,7 +55,8 @@ export function AdminPage() {
       {
         title: "Estado",
         key: "isActive",
-        render: (_: unknown, record: AdminCategory) => (record.isActive ? <Tag color="success">Activa</Tag> : <Tag>Inactiva</Tag>),
+        render: (_: unknown, record: AdminCategory) =>
+          record.isActive ? <Tag color="success">Activa</Tag> : <Tag>Inactiva</Tag>,
       },
       {
         title: "Acciones",
@@ -80,7 +81,12 @@ export function AdminPage() {
     () => [
       { title: "Nombre", dataIndex: "displayName", key: "displayName" },
       { title: "Email", dataIndex: "email", key: "email" },
-      { title: "Rol", dataIndex: "role", key: "role", render: (role: unknown) => <Tag>{String(role)}</Tag> },
+      {
+        title: "Rol",
+        dataIndex: "role",
+        key: "role",
+        render: (role: unknown) => <Tag>{String(role)}</Tag>,
+      },
       {
         title: "Activo",
         key: "isActive",
@@ -106,7 +112,7 @@ export function AdminPage() {
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>
-        Administración
+        <span data-testid="admin-title">Administración</span>
       </Typography.Title>
       <Typography.Text type="secondary">
         Gestiona categorías y usuarios de la plataforma. Solo los administradores tienen acceso.
@@ -120,7 +126,11 @@ export function AdminPage() {
             children: (
               <Space direction="vertical" size={16} style={{ width: "100%" }}>
                 <Space>
-                  <Input value={newCategoryName} onChange={(event) => setNewCategoryName(event.target.value)} placeholder="Nueva categoría" />
+                  <Input
+                    value={newCategoryName}
+                    onChange={(event) => setNewCategoryName(event.target.value)}
+                    placeholder="Nueva categoría"
+                  />
                   <Button
                     type="primary"
                     loading={creatingCategory}
@@ -134,7 +144,9 @@ export function AdminPage() {
                       setCreatingCategory(true);
                       try {
                         const created = await adminApi.createCategory(name);
-                        setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+                        setCategories((prev) =>
+                          [...prev, created].sort((a, b) => a.name.localeCompare(b.name)),
+                        );
                         setNewCategoryName("");
                         message.success("Categoría creada");
                       } catch {
@@ -148,14 +160,28 @@ export function AdminPage() {
                   </Button>
                 </Space>
 
-                <Table rowKey="id" loading={loadingCategories} dataSource={categories} columns={categoryColumns} pagination={false} />
+                <Table
+                  rowKey="id"
+                  loading={loadingCategories}
+                  dataSource={categories}
+                  columns={categoryColumns}
+                  pagination={false}
+                />
               </Space>
             ),
           },
           {
             key: "users",
             label: "Usuarios",
-            children: <Table rowKey="id" loading={loadingUsers} dataSource={users} columns={userColumns} pagination={false} />,
+            children: (
+              <Table
+                rowKey="id"
+                loading={loadingUsers}
+                dataSource={users}
+                columns={userColumns}
+                pagination={false}
+              />
+            ),
           },
         ]}
       />
@@ -180,7 +206,9 @@ export function AdminPage() {
               name,
               isActive: editingActive,
             });
-            setCategories((prev) => prev.map((category) => (category.id === updated.id ? updated : category)));
+            setCategories((prev) =>
+              prev.map((category) => (category.id === updated.id ? updated : category)),
+            );
             setEditingCategory(null);
             message.success("Categoría actualizada");
           } catch {
@@ -190,7 +218,11 @@ export function AdminPage() {
         okText="Guardar"
       >
         <Space direction="vertical" style={{ width: "100%" }}>
-          <Input value={editingName} onChange={(event) => setEditingName(event.target.value)} placeholder="Nombre" />
+          <Input
+            value={editingName}
+            onChange={(event) => setEditingName(event.target.value)}
+            placeholder="Nombre"
+          />
           <Space>
             <Typography.Text>Activa</Typography.Text>
             <Switch checked={editingActive} onChange={setEditingActive} />

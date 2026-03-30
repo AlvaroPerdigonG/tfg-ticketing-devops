@@ -1,3 +1,5 @@
 # To complete
 ticketing-backend/src/main/resources/keys/jwt-private.pem
 ticketing-backend/src/main/resources/keys/jwt-private.pem
+ticketing-frontend/playwright-report/
+ticketing-frontend/test-results/

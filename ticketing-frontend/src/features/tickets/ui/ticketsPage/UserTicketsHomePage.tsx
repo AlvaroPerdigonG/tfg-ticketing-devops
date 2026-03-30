@@ -40,7 +40,9 @@ export function UserTicketsHomePage() {
         if (!isMounted) return;
 
         setLoadState("error");
-        setErrorMessage(error instanceof Error ? error.message : "No se pudieron cargar tus tickets.");
+        setErrorMessage(
+          error instanceof Error ? error.message : "No se pudieron cargar tus tickets.",
+        );
       }
     };
 
@@ -80,7 +82,9 @@ export function UserTicketsHomePage() {
         dataIndex: "priority",
         key: "priority",
         width: 120,
-        render: (priorityValue: unknown) => <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>,
+        render: (priorityValue: unknown) => (
+          <Tag>{ticketPriorityLabel[priorityValue as TicketPriority]}</Tag>
+        ),
       },
       {
         title: "Fecha creación",
@@ -108,9 +112,14 @@ export function UserTicketsHomePage() {
     <Space direction="vertical" size={20} style={{ width: "100%" }}>
       <Space style={{ width: "100%", justifyContent: "space-between" }}>
         <Typography.Title level={3} style={{ margin: 0 }}>
-          Mis tickets
+          <span data-testid="user-tickets-title">Mis tickets</span>
         </Typography.Title>
-        <Button type="primary" size="large" onClick={() => navigate("/tickets/new")}>
+        <Button
+          data-testid="user-create-ticket-cta"
+          type="primary"
+          size="large"
+          onClick={() => navigate("/tickets/new")}
+        >
           Crear ticket
         </Button>
       </Space>
