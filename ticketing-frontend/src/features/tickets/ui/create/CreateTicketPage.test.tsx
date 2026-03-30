@@ -1,11 +1,12 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "src/test/utils/renderWithProviders";
+import { jsonResponse } from "src/test/msw/handlers";
+import { http } from "src/test/msw/http";
+import { server } from "src/test/msw/server";
 import { vi } from "vitest";
 import { CreateTicketPage } from "./CreateTicketPage";
 
-const getCategoriesMock = vi.fn();
-const createTicketMock = vi.fn();
 const navigateMock = vi.fn();
 
 vi.mock("react-router-dom", async () => {
@@ -16,22 +17,13 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../../api/ticketsApi", () => ({
-  ticketsApi: {
-    getCategories: () => getCategoriesMock(),
-    createTicket: (payload: unknown) => createTicketMock(payload),
-  },
-}));
-
 describe("CreateTicketPage", () => {
   beforeEach(() => {
-    getCategoriesMock.mockReset();
-    createTicketMock.mockReset();
     navigateMock.mockReset();
   });
 
-  it("keeps submit disabled while required fields are empty", async () => {
-    getCategoriesMock.mockResolvedValueOnce([{ id: "cat-1", name: "General" }]);
+  it("mantiene submit deshabilitado mientras faltan campos requeridos", async () => {
+    server.use(http.get("/api/categories", () => jsonResponse([{ id: "cat-1", name: "General" }])));
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
@@ -39,16 +31,37 @@ describe("CreateTicketPage", () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it("submits form and redirects to ticket detail", async () => {
-    const user = userEvent.setup();
-
-    getCategoriesMock.mockResolvedValueOnce([{ id: "cat-1", name: "General" }]);
-    createTicketMock.mockResolvedValueOnce({ ticketId: "t-100" });
+  it("deshabilita envío mientras carga categorías", async () => {
+    server.use(
+      http.get("/api/categories", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        return jsonResponse([{ id: "cat-1", name: "General" }]);
+      }),
+    );
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    await user.type(await screen.findByLabelText("Título"), "Impresora bloqueada");
-    await user.type(screen.getByLabelText("Descripción"), "Da error E23 cuando intento imprimir un PDF.");
+    const submitButton = screen.getByRole("button", { name: "Crear ticket" });
+    expect(submitButton).toBeDisabled();
+  });
+
+  it("[TICKET-USER-01] Usuario crea ticket correctamente", async () => {
+    const user = userEvent.setup();
+    let payload: unknown;
+
+    server.use(
+      http.get("/api/categories", () => jsonResponse([{ id: "cat-1", name: "General" }])),
+      http.post("/api/tickets", (request) => {
+        payload = request.body;
+        return jsonResponse({ ticketId: "t-100" }, { status: 201 });
+      }),
+    );
+
+    renderWithProviders(<CreateTicketPage />, { router: {} });
+
+    await user.type(await screen.findByLabelText("Título"), "  Impresora bloqueada  ");
+    await user.type(screen.getByLabelText("Descripción"), "  Error E23 al imprimir PDF  ");
+
     const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
     fireEvent.mouseDown(categoryCombobox);
     await user.click(await screen.findByText("General"));
@@ -59,12 +72,59 @@ describe("CreateTicketPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Crear ticket" }));
 
-    expect(createTicketMock).toHaveBeenCalledWith({
-      title: "Impresora bloqueada",
-      description: "Da error E23 cuando intento imprimir un PDF.",
-      categoryId: "cat-1",
-      priority: "MEDIUM",
+    await waitFor(() => {
+      expect(payload).toEqual({
+        title: "Impresora bloqueada",
+        description: "Error E23 al imprimir PDF",
+        categoryId: "cat-1",
+        priority: "MEDIUM",
+      });
+      expect(navigateMock).toHaveBeenCalledWith("/tickets/t-100");
     });
-    expect(navigateMock).toHaveBeenCalledWith("/tickets/t-100");
+  });
+
+
+  it("deshabilita botón durante el envío para evitar doble submit", async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.get("/api/categories", () => jsonResponse([{ id: "cat-1", name: "General" }])),
+      http.post("/api/tickets", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return jsonResponse({ ticketId: "t-777" }, { status: 201 });
+      }),
+    );
+
+    renderWithProviders(<CreateTicketPage />, { router: {} });
+
+    await user.type(await screen.findByLabelText("Título"), "Ticket en cola");
+    await user.type(screen.getByLabelText("Descripción"), "Descripción completa");
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Categoría" }));
+    await user.click(await screen.findByText("General"));
+
+    const submitButton = screen.getByRole("button", { name: "Crear ticket" });
+    await user.click(submitButton);
+
+    expect(submitButton).toHaveClass("ant-btn-loading");
+  });
+
+  it("muestra error visible cuando falla el envío", async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.get("/api/categories", () => jsonResponse([{ id: "cat-1", name: "General" }])),
+      http.post("/api/tickets", () => jsonResponse({ message: "No autorizado" }, { status: 403 })),
+    );
+
+    renderWithProviders(<CreateTicketPage />, { router: {} });
+
+    await user.type(await screen.findByLabelText("Título"), "No imprime");
+    await user.type(screen.getByLabelText("Descripción"), "Error de cola de impresión");
+
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Categoría" }));
+    await user.click(await screen.findByText("General"));
+    await user.click(screen.getByRole("button", { name: "Crear ticket" }));
+
+    expect(await screen.findByText("Error al crear ticket")).toBeInTheDocument();
   });
 });

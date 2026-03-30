@@ -3,8 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../../auth/hooks/useAuth";
 import { ticketsApi } from "../../api/ticketsApi";
-import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../../model/presentation";
+import { ticketPriorityLabel, ticketStatusLabel } from "../../model/presentation";
 import type { TicketDetail, TicketStatus, TimelineEntry } from "../../model/types";
+import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -156,7 +157,7 @@ export function TicketDetailPage() {
           <Card>
             <Space direction="vertical" size={12} style={{ width: "100%" }}>
               <Typography.Title level={4} style={{ margin: 0 }}>{ticket.title}</Typography.Title>
-              <Tag color={ticketStatusColor[ticket.status]}>{ticketStatusLabel[ticket.status]}</Tag>
+              <TicketStatusBadge status={ticket.status} />
               <Tag>{ticketPriorityLabel[ticket.priority]}</Tag>
               <Typography.Title level={5} style={{ margin: 0 }}>Metadata</Typography.Title>
               <Typography.Text>ID: {ticket.id}</Typography.Text>

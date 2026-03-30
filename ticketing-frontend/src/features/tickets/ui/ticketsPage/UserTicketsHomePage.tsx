@@ -3,8 +3,9 @@ import { Alert, Button, Empty, Skeleton, Space, Table, Tag, Typography } from "a
 import type { TableProps } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ticketsApi } from "../../api/ticketsApi";
-import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../../model/presentation";
+import { ticketPriorityLabel } from "../../model/presentation";
 import type { TicketPriority, TicketStatus, TicketSummary } from "../../model/types";
+import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -71,7 +72,7 @@ export function UserTicketsHomePage() {
         width: 140,
         render: (statusValue: unknown) => {
           const status = statusValue as TicketStatus;
-          return <Tag color={ticketStatusColor[status]}>{ticketStatusLabel[status]}</Tag>;
+          return <TicketStatusBadge status={status} />;
         },
       },
       {

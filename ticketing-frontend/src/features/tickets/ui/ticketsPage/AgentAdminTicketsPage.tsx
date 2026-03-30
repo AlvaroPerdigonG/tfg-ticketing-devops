@@ -3,8 +3,9 @@ import type { TableProps } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ticketsApi } from "../../api/ticketsApi";
-import { ticketPriorityLabel, ticketStatusColor, ticketStatusLabel } from "../../model/presentation";
+import { ticketPriorityLabel } from "../../model/presentation";
 import type { TicketPriority, TicketQueueScope, TicketStatus, TicketSummary } from "../../model/types";
+import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 
 type QueueView = "unassigned" | "mine" | "all";
 type LoadState = "loading" | "ready" | "error";
@@ -114,7 +115,7 @@ export function AgentAdminTicketsPage() {
         key: "status",
         width: 140,
         render: (statusValue: unknown) => (
-          <Tag color={ticketStatusColor[statusValue as TicketStatus]}>{ticketStatusLabel[statusValue as TicketStatus]}</Tag>
+          <TicketStatusBadge status={statusValue as TicketStatus} />
         ),
       },
       {
