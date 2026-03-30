@@ -144,7 +144,11 @@ export function LoginPage() {
             Recordar sesión
           </label>
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && (
+            <p className="auth-error" data-testid="auth-error">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"

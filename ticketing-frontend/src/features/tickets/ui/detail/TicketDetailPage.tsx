@@ -176,9 +176,11 @@ export function TicketDetailPage() {
           <Card>
             <Space direction="vertical" size={12} style={{ width: "100%" }}>
               <Typography.Title level={4} style={{ margin: 0 }}>
-                {ticket.title}
+                <span data-testid="ticket-detail-title">{ticket.title}</span>
               </Typography.Title>
-              <TicketStatusBadge status={ticket.status} />
+              <div data-testid="ticket-detail-status">
+                <TicketStatusBadge status={ticket.status} />
+              </div>
               <Tag>{ticketPriorityLabel[ticket.priority]}</Tag>
               <Typography.Title level={5} style={{ margin: 0 }}>
                 Metadata
@@ -270,6 +272,7 @@ export function TicketDetailPage() {
                 {availableStatusTransitions.map((nextStatus) => (
                   <Button
                     key={nextStatus}
+                    data-testid={`ticket-status-transition-${nextStatus}`}
                     type="primary"
                     loading={busyAction === "status"}
                     onClick={() => handleStatusChange(nextStatus)}
