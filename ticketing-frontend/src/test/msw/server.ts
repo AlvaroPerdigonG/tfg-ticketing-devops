@@ -4,7 +4,7 @@ type UnhandledRequestPolicy = "error" | "warn" | "bypass";
 
 const runtimeHandlers: RequestHandler[] = [];
 let initialHandlers: RequestHandler[] = [...handlers];
-let originalFetch: typeof global.fetch | undefined;
+let originalFetch: typeof globalThis.fetch | undefined;
 let onUnhandledRequest: UnhandledRequestPolicy = "error";
 
 async function toMockedRequest(input: RequestInfo | URL, init?: RequestInit): Promise<MockedRequest> {
@@ -32,9 +32,9 @@ export const server = {
     initialHandlers = [...handlers];
     runtimeHandlers.splice(0, runtimeHandlers.length, ...initialHandlers);
 
-    originalFetch = global.fetch.bind(global);
+    originalFetch = globalThis.fetch.bind(globalThis);
 
-    global.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const request = await toMockedRequest(input, init);
 
       for (const handler of runtimeHandlers) {
@@ -72,7 +72,7 @@ export const server = {
 
   close: () => {
     if (originalFetch) {
-      global.fetch = originalFetch;
+      globalThis.fetch = originalFetch;
     }
   },
 };

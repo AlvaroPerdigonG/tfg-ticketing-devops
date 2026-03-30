@@ -59,8 +59,8 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    await user.type(await screen.findByLabelText("Título"), "  Impresora bloqueada  ");
-    await user.type(screen.getByLabelText("Descripción"), "  Error E23 al imprimir PDF  ");
+    fireEvent.change(await screen.findByLabelText("Título"), { target: { value: "  Impresora bloqueada  " } });
+    fireEvent.change(screen.getByLabelText("Descripción"), { target: { value: "  Error E23 al imprimir PDF  " } });
 
     const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
     fireEvent.mouseDown(categoryCombobox);
