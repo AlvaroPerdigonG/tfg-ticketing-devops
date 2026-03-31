@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
+import { selectFirstTicketCategory } from "./fixtures/tickets";
 
 test("TICKET-USER-01 usuario crea ticket y llega al detalle", async ({ page }) => {
   await loginAs(page, "user");
@@ -11,7 +12,7 @@ test("TICKET-USER-01 usuario crea ticket y llega al detalle", async ({ page }) =
   await page.getByLabel("Título").fill(`E2E ticket ${uniqueSuffix}`);
   await page.getByLabel("Descripción").fill("Flujo E2E mínimo para validar creación de ticket.");
 
-  await page.getByTestId("create-ticket-category").selectOption({ index: 1 });
+  await selectFirstTicketCategory(page);
   await page.getByTestId("create-ticket-submit").click();
 
   await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);

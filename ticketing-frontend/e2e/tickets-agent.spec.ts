@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
+import { selectFirstTicketCategory } from "./fixtures/tickets";
 
 async function createTicketAsUser(page: Page) {
   const uniqueSuffix = Date.now();
@@ -11,7 +12,7 @@ async function createTicketAsUser(page: Page) {
 
   await page.getByLabel("Título").fill(title);
   await page.getByLabel("Descripción").fill("Ticket creado para validar cambio de estado por agente.");
-  await page.getByTestId("create-ticket-category").selectOption({ index: 1 });
+  await selectFirstTicketCategory(page);
   await page.getByTestId("create-ticket-submit").click();
 
   await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);
