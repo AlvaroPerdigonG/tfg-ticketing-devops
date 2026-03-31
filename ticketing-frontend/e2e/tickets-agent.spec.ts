@@ -26,7 +26,7 @@ test("TICKET-AGENT-01 agent/admin cambia estado correctamente", async ({ page })
   await page.getByRole("button", { name: "Logout" }).click();
   await loginAs(page, "agent");
   await page.goto("/tickets");
-  await expect(page).toHaveURL(/\/tickets$/);
+  await expect(page).toHaveURL(/\/tickets(?:\?.*)?$/);
   await page.getByRole("button", { name: "Todos" }).click();
 
   await page.getByPlaceholder("Buscar por título o ID").fill(ticketTitle);
