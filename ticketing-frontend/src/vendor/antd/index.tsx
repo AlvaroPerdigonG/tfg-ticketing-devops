@@ -598,6 +598,6 @@ export function Modal({
 }
 
 export const message = {
-  success: () => undefined,
-  error: () => undefined,
+  success: (_content?: React.ReactNode) => undefined,
+  error: (_content?: React.ReactNode) => undefined,
 };
