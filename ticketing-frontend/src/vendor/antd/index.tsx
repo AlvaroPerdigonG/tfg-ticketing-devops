@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext } from "react";
 
 type ThemeConfig = {
@@ -597,6 +598,6 @@ export function Modal({
 }
 
 export const message = {
-  success: (_text: string) => undefined,
-  error: (_text: string) => undefined,
+  success: () => undefined,
+  error: () => undefined,
 };

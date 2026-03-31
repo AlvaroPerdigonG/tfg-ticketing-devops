@@ -16,16 +16,21 @@ export async function toApiError(response: Response): Promise<ApiError> {
   const status = response.status;
 
   // Intentamos leer cuerpo JSON tipo { message, code, ... }
-  let body: any = null;
+  let body: unknown = null;
   try {
     body = await response.clone().json();
   } catch {
     // ignore
   }
 
-  const message =
-    body?.message || body?.error || response.statusText || `Request failed with status ${status}`;
+  const bodyRecord = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : null;
 
-  const code = body?.code;
+  const messageCandidate = bodyRecord?.message ?? bodyRecord?.error;
+  const message =
+    typeof messageCandidate === "string"
+      ? messageCandidate
+      : response.statusText || `Request failed with status ${status}`;
+
+  const code = typeof bodyRecord?.code === "string" ? bodyRecord.code : undefined;
   return new ApiError(message, status, code, body);
 }
