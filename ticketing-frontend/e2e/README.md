@@ -16,9 +16,9 @@ Esta carpeta contiene una suite E2E intencionalmente pequeña y orientada a valo
 ```bash
 export E2E_BASE_URL=http://localhost:4173
 export E2E_USER_EMAIL=user@local.test
-export E2E_USER_PASSWORD=password
+export E2E_USER_PASSWORD=password123!
 export E2E_AGENT_EMAIL=agent@local.test
-export E2E_AGENT_PASSWORD=password
+export E2E_AGENT_PASSWORD=password123!
 ```
 
 ## Ejecución
