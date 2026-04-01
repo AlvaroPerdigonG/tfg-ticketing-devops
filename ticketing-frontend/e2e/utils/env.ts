@@ -8,11 +8,11 @@ type Credentials = {
 const credentialsByRole: Record<Role, Credentials> = {
   user: {
     email: process.env.E2E_USER_EMAIL ?? "user@local.test",
-    password: process.env.E2E_USER_PASSWORD ?? "password",
+    password: process.env.E2E_USER_PASSWORD ?? "password123!",
   },
   agent: {
     email: process.env.E2E_AGENT_EMAIL ?? "agent@local.test",
-    password: process.env.E2E_AGENT_PASSWORD ?? "password",
+    password: process.env.E2E_AGENT_PASSWORD ?? "password123!",
   },
   admin: {
     email: process.env.E2E_ADMIN_EMAIL ?? "",
