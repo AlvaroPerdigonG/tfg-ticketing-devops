@@ -80,6 +80,7 @@ docker build -t ticketing-backend:cloud-ready .
 ### Ejecución local del contenedor simulando cloud
 > Importante: si usas rutas `file:/run/secrets/...`, debes montar esos ficheros dentro del contenedor.
 
+#### Linux/macOS (bash/zsh) desde `ticketing-backend/`
 ```bash
 docker run --rm -p 8080:8080 \
   -v "$(pwd)/src/main/resources/keys:/run/secrets:ro" \
@@ -94,7 +95,7 @@ docker run --rm -p 8080:8080 \
   ticketing-backend:cloud-ready
 ```
 
-### Variante PowerShell (Windows)
+#### PowerShell (Windows) desde `ticketing-backend/`
 ```powershell
 docker run --rm -p 8080:8080 `
   -v "${PWD}/src/main/resources/keys:/run/secrets:ro" `
@@ -106,6 +107,22 @@ docker run --rm -p 8080:8080 `
   -e SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY_LOCATION='file:/run/secrets/jwt-public.pem' `
   -e APP_SECURITY_JWT_PRIVATE_KEY_LOCATION='file:/run/secrets/jwt-private.pem' `
   -e APP_SECURITY_CORS_ALLOWED_ORIGINS='http://localhost:5173' `
+  ticketing-backend:cloud-ready
+```
+
+#### CMD (Windows) desde la raíz del repo
+Si ejecutas desde `C:\...\tfg-ticketing-devops>` en **CMD** (no PowerShell), usa `%cd%` y la ruta del monorepo:
+```cmd
+docker run --rm -p 8080:8080 ^
+  -v "%cd%\ticketing-backend\src\main\resources\keys:/run/secrets:ro" ^
+  -e SPRING_PROFILES_ACTIVE=cloud ^
+  -e PORT=8080 ^
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/ticketing ^
+  -e SPRING_DATASOURCE_USERNAME=user ^
+  -e SPRING_DATASOURCE_PASSWORD=password ^
+  -e SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY_LOCATION=file:/run/secrets/jwt-public.pem ^
+  -e APP_SECURITY_JWT_PRIVATE_KEY_LOCATION=file:/run/secrets/jwt-private.pem ^
+  -e APP_SECURITY_CORS_ALLOWED_ORIGINS=http://localhost:5173 ^
   ticketing-backend:cloud-ready
 ```
 
