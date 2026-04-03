@@ -115,7 +115,7 @@ jobs:
         run: npm ci
 
       - name: Run frontend unit tests
-        run: npm run test:run
+        run: npm run test:run -- --exclude='e2e/**'
 
   frontend-build:
     name: frontend-build

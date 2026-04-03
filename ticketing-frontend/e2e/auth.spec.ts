@@ -9,7 +9,9 @@ test("AUTH-01 login correcto redirige al área autenticada", async ({ page }) =>
   await expect(page.getByTestId("user-tickets-title")).toBeVisible();
 });
 
-test("AUTH-02 login incorrecto muestra error y mantiene sesión no autenticada", async ({ page }) => {
+test("AUTH-02 login incorrecto muestra error y mantiene sesión no autenticada", async ({
+  page,
+}) => {
   const user = getCredentials("user");
 
   await page.goto("/login");

@@ -11,7 +11,9 @@ async function createTicketAsUser(page: Page) {
   await expect(page).toHaveURL(/\/tickets\/new$/);
 
   await page.getByLabel("Título").fill(title);
-  await page.getByLabel("Descripción").fill("Ticket creado para validar cambio de estado por agente.");
+  await page
+    .getByLabel("Descripción")
+    .fill("Ticket creado para validar cambio de estado por agente.");
   await selectFirstTicketCategory(page);
   await page.getByTestId("create-ticket-submit").click();
 
