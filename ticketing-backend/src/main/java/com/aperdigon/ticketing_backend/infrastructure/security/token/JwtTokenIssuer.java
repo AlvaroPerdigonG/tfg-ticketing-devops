@@ -30,7 +30,7 @@ public class JwtTokenIssuer implements TokenIssuer {
     private final long expirationSeconds;
 
     public JwtTokenIssuer(
-            @Value("${app.security.jwt.private-key-location:classpath:keys/jwt-private.pem}") Resource privateKeyResource,
+            @Value("${app.security.jwt.private-key-location}") Resource privateKeyResource,
             @Value("${app.security.jwt.expiration-seconds:3600}") long expirationSeconds,
             Clock clock
     ) {
