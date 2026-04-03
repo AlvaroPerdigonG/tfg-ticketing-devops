@@ -33,7 +33,7 @@ Se organiza la configuración de Spring por perfiles:
 - `application.yml` (base compartida)
   - `server.port` parametrizado con `PORT` (fallback `8080`),
   - CORS configurable por env var,
-  - ajustes comunes no sensibles.
+  - fallback de claves JWT de desarrollo (`classpath`) para compatibilidad local/tests sin perfil explícito.
 
 - `application-local.yml` (perfil `local`)
   - datasource local (PostgreSQL local),
@@ -57,9 +57,9 @@ Se organiza la configuración de Spring por perfiles:
 
 ### Seguridad JWT (cloud)
 - `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY_LOCATION`
-  - Ejemplo: `file:/etc/secrets/jwt-public.pem`
+  - En cloud debe apuntar a secreto externo. Ejemplo: `file:/etc/secrets/jwt-public.pem`
 - `APP_SECURITY_JWT_PRIVATE_KEY_LOCATION`
-  - Ejemplo: `file:/etc/secrets/jwt-private.pem`
+  - En cloud debe apuntar a secreto externo. Ejemplo: `file:/etc/secrets/jwt-private.pem`
 - `APP_SECURITY_JWT_EXPIRATION_SECONDS` (opcional, por defecto `3600`)
 
 ### CORS por entorno
