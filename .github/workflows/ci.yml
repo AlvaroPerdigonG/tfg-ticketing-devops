@@ -1,0 +1,188 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  backend-unit:
+    name: backend-unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ticketing-backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: ticketing-backend/pom.xml
+
+      - name: Run backend unit tests
+        run: ./mvnw -B -ntp test -DskipITs=true
+
+  backend-integration:
+    name: backend-integration
+    needs: backend-unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ticketing-backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: ticketing-backend/pom.xml
+
+      - name: Run backend integration tests and coverage report
+        run: ./mvnw -B -ntp verify -DskipITs=false
+
+      - name: Upload backend test and coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-coverage-reports
+          if-no-files-found: warn
+          path: |
+            ticketing-backend/target/surefire-reports/**
+            ticketing-backend/target/failsafe-reports/**
+            ticketing-backend/target/site/jacoco-merged/**
+
+  frontend-quality:
+    name: frontend-quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ticketing-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ticketing-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint frontend
+        run: npm run lint
+
+  frontend-unit:
+    name: frontend-unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ticketing-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ticketing-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend unit tests
+        run: npm run test:run
+
+  frontend-build:
+    name: frontend-build
+    needs: [frontend-quality, frontend-unit]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ticketing-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ticketing-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+  traceability-check:
+    name: traceability-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Run traceability check
+        run: node scripts/traceability/check-traceability.mjs
+
+      - name: Upload traceability artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: traceability-report
+          if-no-files-found: error
+          path: |
+            artifacts/traceability/traceability-report.md
+            artifacts/traceability/traceability-report.json
+
+  sonarcloud:
+    name: sonarcloud
+    needs: [backend-integration, frontend-build, traceability-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download backend reports
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-test-coverage-reports
+          path: .
+
+      - name: SonarQube Cloud scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
