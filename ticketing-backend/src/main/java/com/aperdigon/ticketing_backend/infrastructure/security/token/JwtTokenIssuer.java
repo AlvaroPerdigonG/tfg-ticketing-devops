@@ -30,7 +30,7 @@ public class JwtTokenIssuer implements TokenIssuer {
     private final long expirationSeconds;
 
     public JwtTokenIssuer(
-            @Value("${app.security.jwt.private-key-location:classpath:keys/jwt-private.pem}") Resource privateKeyResource,
+            @Value("${app.security.jwt.private-key-location}") Resource privateKeyResource,
             @Value("${app.security.jwt.expiration-seconds:3600}") long expirationSeconds,
             Clock clock
     ) {
@@ -76,7 +76,7 @@ public class JwtTokenIssuer implements TokenIssuer {
             var spec = new PKCS8EncodedKeySpec(der);
             return (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(spec);
         } catch (Exception ex) {
-            throw new IllegalStateException("Cannot load RSA private key", ex);
+            throw new IllegalStateException("Cannot load RSA private key from resource: " + resource.getDescription(), ex);
         }
     }
 }

@@ -1,0 +1,25 @@
+.git
+.gitignore
+.github
+.idea
+.vscode
+
+# Build outputs
+/target
+**/target
+
+# Local runtime artifacts
+*.log
+logs/
+*.tmp
+*.swp
+*.swo
+
+# Test and coverage artifacts
+surefire-reports/
+failsafe-reports/
+coverage/
+
+# OS noise
+.DS_Store
+Thumbs.db

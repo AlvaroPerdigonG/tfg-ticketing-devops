@@ -5,19 +5,21 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          public-key-location: classpath:keys/jwt-public.pem
+          public-key-location: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY_LOCATION:classpath:keys/jwt-public.pem}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
 app:
   security:
     cors:
-      allowed-origins:
-        - http://localhost:5173
-        - http://localhost:4173
-        - http://127.0.0.1:5173
-        - http://127.0.0.1:4173
+      allowed-origins: ${APP_SECURITY_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:4173}
     jwt:
-      private-key-location: classpath:keys/jwt-private.pem
-      expiration-seconds: 3600
+      private-key-location: ${APP_SECURITY_JWT_PRIVATE_KEY_LOCATION:classpath:keys/jwt-private.pem}
+      expiration-seconds: ${APP_SECURITY_JWT_EXPIRATION_SECONDS:3600}
