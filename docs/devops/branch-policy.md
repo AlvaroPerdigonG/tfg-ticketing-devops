@@ -30,7 +30,6 @@ Estas reglas deben configurarse en GitHub (Rulesets o Branch Protection):
 1. **Require pull request before merging**: habilitado.
 2. **Required approvals**: mínimo 1.
 3. **Dismiss stale approvals** cuando haya nuevos commits en la PR.
-4. **Require conversation resolution** antes del merge.
 5. **Require status checks to pass** (cuando existan workflows CI).
 6. **Restrict direct pushes** a `main`.
 7. **Block force pushes**.
@@ -66,13 +65,3 @@ Si se requiere un hotfix urgente:
 
 ## 9. Excepciones
 Cualquier bypass de esta política debe quedar justificado en el hilo de la PR y documentado en el changelog técnico del proyecto.
-
-## 10. Checklist de implantación en GitHub
-- [ ] `main` protegida.
-- [ ] Push directo bloqueado.
-- [ ] PR obligatoria.
-- [ ] 1 aprobación mínima.
-- [ ] Resolución de conversaciones obligatoria.
-- [ ] Force-push deshabilitado.
-- [ ] Borrado de `main` deshabilitado.
-- [ ] (Cuando aplique) checks CI marcados como requeridos.
