@@ -23,7 +23,8 @@ export async function toApiError(response: Response): Promise<ApiError> {
     // ignore
   }
 
-  const bodyRecord = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : null;
+  const bodyRecord =
+    typeof body === "object" && body !== null ? (body as Record<string, unknown>) : null;
 
   const messageCandidate = bodyRecord?.message ?? bodyRecord?.error;
   const message =
