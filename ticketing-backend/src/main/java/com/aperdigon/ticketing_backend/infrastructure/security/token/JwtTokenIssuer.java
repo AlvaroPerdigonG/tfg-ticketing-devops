@@ -76,7 +76,7 @@ public class JwtTokenIssuer implements TokenIssuer {
             var spec = new PKCS8EncodedKeySpec(der);
             return (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(spec);
         } catch (Exception ex) {
-            throw new IllegalStateException("Cannot load RSA private key", ex);
+            throw new IllegalStateException("Cannot load RSA private key from resource: " + resource.getDescription(), ex);
         }
     }
 }
