@@ -111,7 +111,9 @@ docker run --rm -p 8080:8080 `
 ```
 
 #### CMD (Windows) desde la raíz del repo
-Si ejecutas desde `C:\...\tfg-ticketing-devops>` en **CMD** (no PowerShell), usa `%cd%` y la ruta del monorepo:
+Si ejecutas desde `C:\...\tfg-ticketing-devops>` en **CMD** (no PowerShell), usa `%cd%` y la ruta del monorepo.
+
+> En CMD no uses comillas simples en variables (`'valor'`), porque se envían como parte del valor y rompen JDBC (por ejemplo en `SPRING_DATASOURCE_URL`).
 ```cmd
 docker run --rm -p 8080:8080 ^
   -v "%cd%\ticketing-backend\src\main\resources\keys:/run/secrets:ro" ^
