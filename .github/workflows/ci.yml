@@ -64,10 +64,10 @@ jobs:
           name: backend-test-coverage-reports
           if-no-files-found: warn
           path: |
-            ticketing-backend/target/classes/**
-            ticketing-backend/target/surefire-reports/**
-            ticketing-backend/target/failsafe-reports/**
-            ticketing-backend/target/site/jacoco-merged/**
+            ticketing-backend/target/classes
+            ticketing-backend/target/surefire-reports
+            ticketing-backend/target/failsafe-reports
+            ticketing-backend/target/site/jacoco-merged
 
   frontend-quality:
     name: frontend-quality
@@ -181,6 +181,18 @@ jobs:
         with:
           name: backend-test-coverage-reports
           path: .
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: ticketing-backend/pom.xml
+
+      - name: Compile backend classes for Sonar Java analysis
+        working-directory: ticketing-backend
+        run: ./mvnw -B -ntp -DskipTests compile
 
       - name: SonarQube Cloud scan
         uses: SonarSource/sonarqube-scan-action@v6
