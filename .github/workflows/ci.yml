@@ -64,6 +64,7 @@ jobs:
           name: backend-test-coverage-reports
           if-no-files-found: warn
           path: |
+            ticketing-backend/target/classes/**
             ticketing-backend/target/surefire-reports/**
             ticketing-backend/target/failsafe-reports/**
             ticketing-backend/target/site/jacoco-merged/**
