@@ -5,10 +5,6 @@ import com.aperdigon.ticketing_backend.application.auth.login.LoginUseCase;
 import com.aperdigon.ticketing_backend.application.auth.register.RegisterCommand;
 import com.aperdigon.ticketing_backend.application.auth.register.RegisterUseCase;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +32,6 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login with email and password")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful login",
-                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request payload")
-    })
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         var result = loginUseCase.execute(new LoginCommand(request.email(), request.password()));
         return ResponseEntity.ok(new LoginResponse(result.accessToken()));
@@ -48,11 +39,6 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user account")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful registration",
-                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request payload")
-    })
     public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
         var result = registerUseCase.execute(new RegisterCommand(
                 request.email(),
@@ -66,11 +52,6 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Get profile of the authenticated user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profile loaded",
-                    content = @Content(schema = @Schema(implementation = AuthProfileResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
-    })
     public ResponseEntity<AuthProfileResponse> me(JwtAuthenticationToken authentication) {
         var jwt = authentication.getToken();
         var roles = jwt.getClaimAsStringList("roles");

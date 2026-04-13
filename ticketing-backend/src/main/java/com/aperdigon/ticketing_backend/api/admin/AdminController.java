@@ -8,10 +8,6 @@ import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException;
@@ -37,11 +33,6 @@ public class AdminController {
 
     @GetMapping("/categories")
     @Operation(summary = "List all categories (admin)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Categories loaded"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
     public List<AdminCategoryResponse> listCategories() {
         return categoryRepository.findAll().stream()
                 .map(AdminCategoryResponse::from)
@@ -50,13 +41,6 @@ public class AdminController {
 
     @PostMapping("/categories")
     @Operation(summary = "Create category (admin)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Category created",
-                    content = @Content(schema = @Schema(implementation = AdminCategoryResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
     public ResponseEntity<AdminCategoryResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
         var trimmedName = request.name().trim();
         if (categoryRepository.findByName(trimmedName).isPresent()) {
@@ -72,14 +56,6 @@ public class AdminController {
 
     @PatchMapping("/categories/{categoryId}")
     @Operation(summary = "Update category (admin)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Category updated",
-                    content = @Content(schema = @Schema(implementation = AdminCategoryResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Category not found")
-    })
     public AdminCategoryResponse updateCategory(
             @PathVariable UUID categoryId,
             @Valid @RequestBody UpdateCategoryRequest request
@@ -94,11 +70,6 @@ public class AdminController {
 
     @GetMapping("/users")
     @Operation(summary = "List all users (admin)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Users loaded"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
     public List<AdminUserResponse> listUsers() {
         return userRepository.findAll().stream()
                 .map(AdminUserResponse::from)
@@ -107,14 +78,6 @@ public class AdminController {
 
     @PatchMapping("/users/{userId}/active")
     @Operation(summary = "Activate or deactivate user (admin)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User status updated",
-                    content = @Content(schema = @Schema(implementation = AdminUserResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
     public AdminUserResponse updateUserActive(
             @PathVariable UUID userId,
             @Valid @RequestBody UpdateUserActiveRequest request
