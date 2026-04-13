@@ -1,56 +1,60 @@
-# Revisión de autenticación (frontend + backend)
+# Authentication and authorization review (frontend + backend)
 
-## Backend (estado actual)
+## Backend (current state)
 
-### Endpoints reales
+### Auth endpoints
 - `POST /api/auth/login`
-  - Request DTO: `{ email: string, password: string }`
-  - Response DTO: `{ accessToken: string }`
+  - Request: `{ email: string, password: string }`
+  - Response: `{ accessToken: string }`
 - `POST /api/auth/register`
-  - Request DTO: `{ email: string, displayName: string, password: string, confirmPassword: string }`
-  - Response DTO: `{ accessToken: string }`
+  - Request: `{ email: string, displayName: string, password: string, confirmPassword: string }`
+  - Response: `{ accessToken: string }`
+- `GET /api/auth/me`
+  - Requires valid JWT
+  - Returns authenticated profile (`id`, `email`, `displayName`, `role`, `roles`)
 
-### Seguridad JWT
-- Firma: `RS256`.
-- Claims relevantes en token:
-  - `sub` (UUID del usuario)
-  - `roles` (array con roles, ejemplo `['USER']`)
-  - `exp` (timestamp unix segundos)
-- Expiración configurable (por defecto 3600s).
+### JWT security
+- Signature: `RS256`
+- Relevant claims:
+  - `sub` (user UUID)
+  - `email`
+  - `displayName`
+  - `roles` (role array)
+  - `exp` (Unix timestamp in seconds)
+- Expiration configurable via `app.security.jwt.expiration-seconds` (default 3600s)
 
-### Reglas de autorización
-- `POST /api/auth/**` → público.
-- `/api/tickets` → `USER|AGENT|ADMIN`.
-- `/api/tickets/*/status` → `AGENT|ADMIN`.
-- Resto de `/api/**` → autenticado.
+### Effective authorization rules
+- Public:
+  - `POST /api/auth/**`
+  - `GET /api/health` and `/actuator/health`
+- Tickets:
+  - `POST /api/tickets` -> `USER|AGENT|ADMIN`
+  - `GET /api/tickets/me` -> `USER|AGENT|ADMIN`
+  - `GET /api/tickets` -> `AGENT|ADMIN`
+  - `GET /api/tickets/{id}` -> `USER|AGENT|ADMIN` (with ownership checks for `USER`)
+  - `PATCH /api/tickets/{id}/status` -> `AGENT|ADMIN`
+  - `PATCH /api/tickets/{id}/assignment/me` -> `AGENT|ADMIN`
+  - `POST /api/tickets/{id}/comments` -> authenticated
+- Administration:
+  - `/api/admin/**` -> `ADMIN`
+- Remaining `/api/**` -> authenticated
 
-## Frontend (estado actual)
+## Frontend (current state)
 
-### Flujo implementado
-- Login/registro contra endpoints reales `/api/auth/login` y `/api/auth/register`.
-- Token almacenado en `localStorage` con clave `ticketing_access_token` cuando `remember=true`.
-- Parseo local del JWT (sin validar firma) para obtener `sub`, `roles` y `exp`.
-- `ProtectedRoute`:
-  - Si no autenticado o token expirado, redirige a `/login`.
-- Guard de roles (`RequireRole`) redirige a `/forbidden`.
+### Implemented flow
+- Login/register against `/api/auth/login` and `/api/auth/register`
+- Optional profile retrieval via `/api/auth/me`
+- Token stored in `localStorage` as `ticketing_access_token`
+- Local JWT parsing for session bootstrap (`sub`, `roles`, `exp`)
+- `ProtectedRoute` redirects to `/login` for invalid sessions
+- `RequireRole` redirects to `/forbidden` when role is not allowed
 
-### Ajustes realizados en este commit
-- Sidebar dinámico por rol:
-  - USER/AGENT no ven `Administración`.
-  - ADMIN sí ve `Administración`.
-- Tests añadidos para validar:
-  - visibilidad de menú admin por rol;
-  - redirect de `ProtectedRoute` a `/login` sin token.
+### Current strengths
+- Frontend/backend auth contracts are aligned
+- Backend authorization and frontend guards are consistent
+- Stateless Bearer JWT approach fits SPA architecture
 
-## Valoración
-
-### Lo que está bien
-- Contrato frontend-backend consistente (DTOs y rutas de auth).
-- JWT con claims necesarios para MVP (`sub`, `roles`, `exp`).
-- Control de sesión correcto para SPA (stateless, Bearer token).
-- Guards en frontend y reglas de autorización en backend alineadas.
-
-### Mejoras recomendadas (no bloqueantes para MVP)
-1. Añadir refresh token o estrategia de renovación para evitar relogin cada 1h.
-2. Exponer endpoint `/api/auth/me` opcional para perfil canónico (aunque JWT ya cubre MVP).
-3. Añadir pruebas E2E de rutas protegidas por rol cuando el flujo principal esté completo.
+## Recommended next improvements
+1. Keep OpenAPI/Swagger docs updated as API evolves
+2. Evaluate refresh-token strategy for longer sessions
+3. Expand E2E coverage for role-protected routes

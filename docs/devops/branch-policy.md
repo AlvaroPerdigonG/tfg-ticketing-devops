@@ -1,67 +1,68 @@
-# Política de ramas (Branch Policy) — TFG Ticketing
+# Branch policy (TFG Ticketing)
 
-## 1. Objetivo
-Definir una política de ramas simple, estricta y operativa para proteger la calidad del monorepo (`ticketing-backend` + `ticketing-frontend`) y asegurar trazabilidad de cambios durante el TFG.
+## 1. Objective
+Protect repository quality and preserve traceability while keeping workflow practical for a monorepo with backend, frontend, docs, and DevOps configuration.
 
-## 2. Alcance
-Esta política aplica a todo el repositorio y a cualquier contribución que afecte backend, frontend, documentación o configuración DevOps.
+## 2. Scope
+Applies to all contributions affecting:
 
-## 3. Ramas oficiales
+- backend code
+- frontend code
+- infrastructure/devops config
+- documentation
+
+## 3. Official branches
 
 ### `main`
-- Rama estable y protegida.
-- No se permiten pushes directos.
-- Solo se aceptan cambios mediante Pull Request (PR).
+- protected stable branch
+- no direct pushes
+- merge only through PR
 
-### Ramas de trabajo
-- `feature/<descripcion-corta>` para nuevas funcionalidades.
-- `fix/<descripcion-corta>` para correcciones.
-- `chore/<descripcion-corta>` para tareas técnicas/mantenimiento.
-- `docs/<descripcion-corta>` para documentación.
+### Working branches
+- `feature/<short-description>` for features
+- `fix/<short-description>` for bug fixes
+- `chore/<short-description>` for maintenance
+- `docs/<short-description>` for documentation changes
 
-Ejemplos:
-- `feature/auth-refresh-token`
-- `fix/tickets-filter-pagination`
-- `chore/devops-sonar-baseline`
+## 4. Mandatory rules for `main`
+Configure in GitHub protection/rulesets:
 
-## 4. Reglas obligatorias para `main`
-Estas reglas deben configurarse en GitHub (Rulesets o Branch Protection):
+1. Require pull request before merging
+2. Require at least one approval
+3. Dismiss stale approvals on new commits
+4. Require status checks to pass
+5. Restrict direct pushes
+6. Block force pushes
+7. Block branch deletion
 
-1. **Require pull request before merging**: habilitado.
-2. **Required approvals**: mínimo 1.
-3. **Dismiss stale approvals** cuando haya nuevos commits en la PR.
-5. **Require status checks to pass** (cuando existan workflows CI).
-6. **Restrict direct pushes** a `main`.
-7. **Block force pushes**.
-8. **Block branch deletion**.
+## 5. Required workflow
+1. Create branch from updated `main`
+2. Implement change in isolation
+3. Run local checks
+4. Push branch and open PR to `main`
+5. Wait for CI + review
+6. Address feedback
+7. Merge when checks/approval are green
 
-## 5. Flujo de trabajo obligatorio
-1. Crear rama desde `main` actualizada.
-2. Implementar cambios en la rama de trabajo.
-3. Ejecutar validaciones locales mínimas.
-4. Subir rama y abrir PR hacia `main`.
-5. Esperar checks automáticos y revisión.
-6. Corregir feedback si aplica.
-7. Hacer merge cuando todo esté en verde.
+## 6. Minimum PR requirements
+Each PR should include:
 
-## 6. Requisitos mínimos de Pull Request
-Cada PR debe incluir:
-- propósito del cambio,
-- alcance técnico,
-- evidencias de validación (tests/comandos),
-- impacto esperado,
-- riesgos conocidos (si los hubiera).
+- change purpose
+- technical scope
+- validation evidence (commands/tests)
+- expected impact
+- known risks (if any)
 
-## 7. Estrategia de merge recomendada
-- Recomendado: **Squash merge** para mantener historial limpio y trazable por PR.
-- Activar borrado automático de la rama tras merge.
+## 7. Recommended merge strategy
+- Prefer **Squash merge** for clean traceable history
+- Enable auto-delete of branch after merge
 
-## 8. Gestión de hotfix
-Si se requiere un hotfix urgente:
-1. Crear `fix/<descripcion>` desde `main`.
-2. Aplicar corrección mínima.
-3. Abrir PR con prioridad alta.
-4. Mantener igualmente revisión + checks obligatorios (salvo incidente crítico excepcional justificado).
+## 8. Hotfix handling
+For urgent fixes:
+1. Branch from `main` using `fix/<description>`
+2. Apply minimal safe correction
+3. Open high-priority PR
+4. Keep checks/review unless explicitly justified exception
 
-## 9. Excepciones
-Cualquier bypass de esta política debe quedar justificado en el hilo de la PR y documentado en el changelog técnico del proyecto.
+## 9. Exceptions
+Any policy bypass must be explicitly justified in PR discussion and recorded in project technical notes.

@@ -7,6 +7,8 @@ import com.aperdigon.ticketing_backend.domain.category.Category;
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin")
+@Tag(name = "Admin", description = "Administrative endpoints")
 public class AdminController {
 
     private final CategoryRepository categoryRepository;
@@ -29,6 +32,7 @@ public class AdminController {
     }
 
     @GetMapping("/categories")
+    @Operation(summary = "List all categories (admin)")
     public List<AdminCategoryResponse> listCategories() {
         return categoryRepository.findAll().stream()
                 .map(AdminCategoryResponse::from)
@@ -36,6 +40,7 @@ public class AdminController {
     }
 
     @PostMapping("/categories")
+    @Operation(summary = "Create category (admin)")
     public ResponseEntity<AdminCategoryResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
         var trimmedName = request.name().trim();
         if (categoryRepository.findByName(trimmedName).isPresent()) {
@@ -50,6 +55,7 @@ public class AdminController {
     }
 
     @PatchMapping("/categories/{categoryId}")
+    @Operation(summary = "Update category (admin)")
     public AdminCategoryResponse updateCategory(
             @PathVariable UUID categoryId,
             @Valid @RequestBody UpdateCategoryRequest request
@@ -63,6 +69,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
+    @Operation(summary = "List all users (admin)")
     public List<AdminUserResponse> listUsers() {
         return userRepository.findAll().stream()
                 .map(AdminUserResponse::from)
@@ -70,6 +77,7 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{userId}/active")
+    @Operation(summary = "Activate or deactivate user (admin)")
     public AdminUserResponse updateUserActive(
             @PathVariable UUID userId,
             @Valid @RequestBody UpdateUserActiveRequest request

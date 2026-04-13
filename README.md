@@ -39,26 +39,6 @@ El repositori és públic amb finalitats educatives i de recerca aplicada, i pre
 ### Infraestructura
 - Desplegament en entorn de núvol
 
-- ## ⚖️ Llicència
-
-Aquest projecte es distribueix sota llicència **MIT**.  
-Consulta el fitxer [LICENSE](LICENSE) per a més informació.
-
----
-
-## 👤 Autor
-
-Treball de Final de Grau realitzat per:
-
-**Álvaro Perdigón Gordillo**  
-Grau en Enginyeria Informàtica de Gestió i Sistemes d'Informació - Tecnocampus
-
----
-
-## 📬 Contacte
-
-Per a consultes acadèmiques relacionades amb aquest projecte, es pot contactar amb l’autor mitjançant el repositori GitHub.
-
 ---
 
 ## 🧰 Prerequisits i execució local
@@ -72,12 +52,10 @@ Per executar el projecte en un entorn local és necessari disposar de les següe
 ### Backend
 - Java Development Kit (JDK) 17 (LTS)
 - Maven (o Maven Wrapper inclòs al projecte)
-- IntelliJ IDEA (recomanat)
 
 ### Frontend
 - Node.js (versió LTS, 20.x recomanada)
 - npm (inclòs amb Node.js)
-- Visual Studio Code (recomanat)
 
 ---
 
@@ -91,52 +69,87 @@ cd tfg-ticketing-devops
 ```
 
 ### 2. Iniciar la base de dades amb Docker
-El projecte utilitza una base de dades PostgreSQL executada en un contenidor Docker.
+El projecte utilitza una base de dades PostgreSQL dins `ticketing-backend/docker-compose.yml`.
+
 ```bash
-docker-compose up -d
+cd ticketing-backend
+docker compose up -d
 ```
 
 ### 3. Executar el backend
+Des del directori `ticketing-backend`:
+
 ```bash
-cd backend
 ./mvnw spring-boot:run
 ```
+
 El backend quedarà accessible a: http://localhost:8080
 
 ### 4. Executar el frontend
-Des del directori frontend:
+En una altra terminal, des de la ruta arrel del repositori:
+
 ```bash
-cd frontend
+cd ticketing-frontend
 npm install
 npm run dev
 ```
+
 El frontend quedarà accessible a: http://localhost:5173
 
 ### ⚙ Configuració
 Les variables de configuració s’estableixen mitjançant fitxers d’entorn i perfils d’execució:
 
-Backend: application.yml / application-local.yml
+- Backend: `ticketing-backend/src/main/resources/application.yml` i perfils (`application-local.yml`, `application-cloud.yml`).
+- Frontend: variables d’entorn amb Vite (p. ex. `.env.local`).
 
-Frontend: .env
-
-No s’inclouen credencials ni secrets al repositori.
-Es proporciona un fitxer d’exemple per a la configuració (.env.example).
+No s’inclouen credencials ni secrets productius al repositori.
 
 ### 🧪 Execució de proves
 Backend:
 ```bash
-cd backend
+cd ticketing-backend
 ./mvnw test
 ```
+
 Frontend:
 ```bash
-cd frontend
-npm run test
+cd ticketing-frontend
+npm run test:run
 ```
 
-### 🐳 Execució completa amb Docker (opcional)
-El projecte pot executar-se completament mitjançant contenidors:
+E2E (Playwright):
 ```bash
-docker-compose up --build
+cd ticketing-frontend
+npm run test:e2e
 ```
-Aquesta opció permet desplegar el sistema sencer (backend, frontend i base de dades) sense instal·lar dependències locals addicionals.
+
+---
+
+## 📚 Documentació funcional i tècnica
+
+- Endpoints i contractes API actuals: `docs/tickets-endpoints-proposal.md`
+- Estratègia de testing: `docs/testing/testing-strategy.md`
+- Matriu de traçabilitat: `docs/testing/traceability-matrix.md`
+- Estratègia CI/CD: `docs/devops/cicd-strategy.md`
+
+### OpenAPI / Swagger (local)
+
+Amb el backend en marxa (`http://localhost:8080`):
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
+---
+
+## ⚖️ Llicència
+
+Aquest projecte es distribueix sota llicència **MIT**.  
+Consulta el fitxer [LICENSE](LICENSE) per a més informació.
+
+---
+
+## 👤 Autor
+
+Treball de Final de Grau realitzat per:
+
+**Álvaro Perdigón Gordillo**  
+Grau en Enginyeria Informàtica de Gestió i Sistemes d'Informació - Tecnocampus

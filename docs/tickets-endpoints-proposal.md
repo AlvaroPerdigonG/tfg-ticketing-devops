@@ -1,45 +1,128 @@
-# Tickets API - estado actual y próximos pasos
+# Ticketing API HTTP Reference (current state)
 
-Este documento queda actualizado tras implementar los endpoints de tickets del MVP sin `slaState`.
+> This document is the current source of truth for backend endpoints.
 
-## Endpoints implementados
+## 1) General conventions
+
+- API base path: `/api`
+- Authentication: Bearer JWT (`Authorization: Bearer <token>`)
+- Roles: `USER`, `AGENT`, `ADMIN`
+- Errors are handled centrally by `GlobalExceptionHandler`
+
+## 2) Authentication (`/api/auth`)
+
+### `POST /api/auth/login`
+- Public endpoint
+- Request:
+```json
+{ "email": "user@local.test", "password": "password" }
+```
+- Response:
+```json
+{ "accessToken": "<jwt>" }
+```
+
+### `POST /api/auth/register`
+- Public endpoint
+- Request:
+```json
+{
+  "email": "new@local.test",
+  "displayName": "New User",
+  "password": "password",
+  "confirmPassword": "password"
+}
+```
+- Response:
+```json
+{ "accessToken": "<jwt>" }
+```
+
+### `GET /api/auth/me`
+- Requires a valid token
+- Returns profile of the authenticated user
+
+## 3) Tickets (`/api/tickets`)
+
+### Supported statuses
+`OPEN | IN_PROGRESS | ON_HOLD | RESOLVED`
+
+### Supported priorities
+`LOW | MEDIUM | HIGH`
+
+### `POST /api/tickets`
+- Roles: `USER | AGENT | ADMIN`
+- Creates a ticket
 
 ### `GET /api/tickets/me`
-Listado paginado de tickets creados por el usuario autenticado (`USER`, `AGENT`, `ADMIN`).
-
-Query params:
-- `status`: `OPEN|IN_PROGRESS|RESOLVED` (opcional)
-- `q`: búsqueda por título (opcional)
-- `page`: base 0 (default `0`)
-- `size`: tamaño página (default `20`, max `100`)
+- Roles: `USER | AGENT | ADMIN`
+- Paginated list of tickets created by the authenticated user
+- Query params:
+  - `status` (optional)
+  - `q` (optional)
+  - `page` (default `0`)
+  - `size` (default `20`, max `100`)
 
 ### `GET /api/tickets`
-Listado paginado de cola operativa para `AGENT/ADMIN`.
-
-Query params:
-- `scope`: `UNASSIGNED|MINE|OTHERS|ALL` (default `MINE`)
-- `status`: `OPEN|IN_PROGRESS|RESOLVED` (opcional)
-- `q`: búsqueda por título (opcional)
-- `page`, `size`
-
-Semántica de `scope`:
-- `UNASSIGNED`: tickets sin agente asignado
-- `MINE`: tickets asignados al agente autenticado
-- `OTHERS`: tickets asignados a otros agentes
-- `ALL`: todos
+- Roles: `AGENT | ADMIN`
+- Paginated list of operational queue
+- Query params:
+  - `scope`: `UNASSIGNED | MINE | OTHERS | ALL` (default `MINE`)
+  - `status` (optional)
+  - `q` (optional)
+  - `page`, `size`
 
 ### `GET /api/tickets/{id}`
-Detalle de ticket.
-- `USER`: solo sus propios tickets (createdBy)
-- `AGENT/ADMIN`: acceso completo
+- Roles: `USER | AGENT | ADMIN`
+- Ticket detail
+- Access rules:
+  - `USER`: only own tickets
+  - `AGENT/ADMIN`: full access
 
-### Ya existentes
-- `POST /api/tickets`
-- `PATCH /api/tickets/{id}/status`
+### `PATCH /api/tickets/{id}/status`
+- Roles: `AGENT | ADMIN`
+- Changes ticket status
 
-## Modelo de paginación usado
+### `PATCH /api/tickets/{id}/assignment/me`
+- Roles: `AGENT | ADMIN`
+- Assigns ticket to authenticated user
 
-Se usa respuesta uniforme:
+### `POST /api/tickets/{id}/comments`
+- Requires authentication
+- Adds a comment to the ticket
+
+## 4) Categories
+
+### `GET /api/categories`
+- Requires authentication
+- Returns active categories
+
+## 5) Administration (`/api/admin`)
+
+All `/api/admin/**` routes require role `ADMIN`.
+
+### `GET /api/admin/categories`
+List categories.
+
+### `POST /api/admin/categories`
+Create category.
+
+### `PATCH /api/admin/categories/{categoryId}`
+Update category name and active flag.
+
+### `GET /api/admin/users`
+List users.
+
+### `PATCH /api/admin/users/{userId}/active`
+Activate/deactivate user.
+
+## 6) Health
+
+### `GET /api/health`
+- Public endpoint
+- Expected response: `ok`
+
+## 7) Pagination format
 
 ```json
 {
@@ -50,20 +133,6 @@ Se usa respuesta uniforme:
 }
 ```
 
-Este formato es simple, estable para frontend y fácil de testear en el contexto del TFG.
+## 8) Evolution note
 
-## Cambios de dominio aplicados
-
-- Añadido `priority` en `Ticket` con enum:
-  - `LOW`, `MEDIUM`, `HIGH`
-- Se inicializa por defecto en creación como `MEDIUM`.
-- Se persiste en base de datos (`tickets.priority`).
-
-## Próximos endpoints sugeridos (no implementados aún)
-
-- `PATCH /api/tickets/{id}/assign`
-- `PATCH /api/tickets/{id}/priority`
-- `GET /api/tickets/{id}/comments`
-- `POST /api/tickets/{id}/comments`
-
-> `slaState` queda fuera por ahora para evitar complejidad innecesaria en el MVP.
+If new endpoints are added, update this file to keep a single API reference aligned with implementation.

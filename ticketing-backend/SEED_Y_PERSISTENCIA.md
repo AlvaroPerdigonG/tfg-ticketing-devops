@@ -1,48 +1,54 @@
-# Seed local y persistencia de datos
+# Local seed and data persistence
 
-## Objetivo
-Tener datos base al arrancar en local (usuario, agente y categoría), pero que **los datos persistan** entre reinicios.
+## Objective
+Have base local data ready after startup (user, agent, category) while preserving database data across normal restarts.
 
-## Cómo funciona ahora
-- `LocalSeedRunner` solo se ejecuta en perfil `local`.
-- Inserta datos base **solo si no existen**:
-  - categoría `General`
-  - usuario `user@local.test`
-  - agente `agent@local.test`
-- La comprobación de usuarios se hace por email (`findByEmailIgnoreCase`) para no chocar con el índice único de email.
+## Current behavior
+- `LocalSeedRunner` runs only under `local` profile.
+- Seed records are inserted **only if missing**:
+  - category `General`
+  - user `user@local.test`
+  - agent `agent@local.test`
+- User existence checks are done by email (`findByEmailIgnoreCase`) to avoid collisions with unique constraints.
 
-## Persistencia entre reinicios
-`docker-compose.yml` ya monta un volumen nombrado (`ticketing_pgdata`) para PostgreSQL.
-Si no eliminas ese volumen, los datos permanecen.
+## Persistence between restarts
+Local PostgreSQL uses a named Docker volume (`ticketing_pgdata`) in `docker-compose.yml`.
+As long as the volume is not removed, data remains available.
 
-## Script `run.ps1`
-El script ahora conserva la base de datos por defecto.
+## `run.ps1` script behavior
+The script preserves DB data by default.
 
-- Arranque normal (conserva datos):
-  ```powershell
-  .\run.ps1
-  ```
+### Default startup (keep data)
+```powershell
+.\run.ps1
+```
 
-- Arranque con limpieza total de base de datos:
-  ```powershell
-  .\run.ps1 -ResetDatabase
-  ```
+### Full reset startup
+```powershell
+.\run.ps1 -ResetDatabase
+```
 
-## Insertar usuarios manualmente y poder hacer login
-Para que un usuario creado manualmente pueda iniciar sesión, su `password_hash` debe ser BCrypt.
+With `-ResetDatabase`, the PostgreSQL volume is removed before startup.
 
-Ejemplo SQL (password en claro: `secret123`):
+## Manual user creation and login
+If you insert users manually, `password_hash` must contain a valid BCrypt hash for login to work.
+
+Example SQL:
 
 ```sql
 INSERT INTO users (id, email, display_name, role, is_active, password_hash)
 VALUES (
   gen_random_uuid(),
-  'nuevo@local.test',
-  'Nuevo Usuario',
+  'new@local.test',
+  'New User',
   'USER',
   true,
-  '$2a$10$8E7Mzy8M2Q0dQkN4kD7a3eN9WQfN3st9sSk6cZy4xkS9t2C5K8E4i'
+  '<bcrypt-hash>'
 );
 ```
 
-> Nota: el hash de ejemplo es ilustrativo. Genera un hash BCrypt real para la contraseña que quieras usar.
+## Troubleshooting quick checks
+1. Ensure PostgreSQL container is healthy (`docker ps`).
+2. Confirm local profile is active (`SPRING_PROFILES_ACTIVE=local`).
+3. Verify seed users by querying `users` table.
+4. If you need a clean slate, run `-ResetDatabase`.

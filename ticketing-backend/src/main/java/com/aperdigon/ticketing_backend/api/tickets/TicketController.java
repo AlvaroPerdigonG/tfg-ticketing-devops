@@ -29,6 +29,8 @@ import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tickets")
+@Tag(name = "Tickets", description = "Ticket management endpoints")
 public class TicketController {
 
     private final CreateTicketUseCase createTicketUseCase;
@@ -82,6 +85,7 @@ public class TicketController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new ticket")
     public ResponseEntity<CreateTicketResponse> create(@Valid @RequestBody CreateTicketRequest request) {
         var actor = currentUserProvider.getCurrentUser();
 
@@ -99,6 +103,7 @@ public class TicketController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "List tickets created by the authenticated user")
     public PageResponse<TicketSummaryResponse> listMine(
             @RequestParam(required = false) TicketStatus status,
             @RequestParam(required = false) String q,
@@ -113,6 +118,7 @@ public class TicketController {
     }
 
     @GetMapping
+    @Operation(summary = "List operational ticket queue for agents/admins")
     public PageResponse<TicketSummaryResponse> listQueue(
             @RequestParam(defaultValue = "MINE") TicketQueueScope scope,
             @RequestParam(required = false) TicketStatus status,
@@ -128,6 +134,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get full ticket detail by id")
     public TicketDetailResponse getById(@PathVariable UUID id) {
         var actor = currentUserProvider.getCurrentUser();
         var ticket = getTicketUseCase.execute(new TicketId(id), actor);
@@ -157,6 +164,7 @@ public class TicketController {
     }
 
     @PostMapping("/{id}/comments")
+    @Operation(summary = "Add a comment to a ticket")
     public ResponseEntity<AddTicketCommentResponse> addComment(@PathVariable UUID id, @Valid @RequestBody AddTicketCommentRequest request) {
         var actor = currentUserProvider.getCurrentUser();
         var result = addTicketCommentUseCase.execute(new AddTicketCommentCommand(new TicketId(id), request.content(), actor));
@@ -165,6 +173,7 @@ public class TicketController {
     }
 
     @PatchMapping("/{id}/status")
+    @Operation(summary = "Change ticket status")
     public ResponseEntity<Void> changeStatus(@PathVariable UUID id, @Valid @RequestBody ChangeTicketStatusRequest request) {
         var actor = currentUserProvider.getCurrentUser();
 
@@ -178,6 +187,7 @@ public class TicketController {
     }
 
     @PatchMapping("/{id}/assignment/me")
+    @Operation(summary = "Assign ticket to the authenticated agent/admin")
     public ResponseEntity<Void> assignToMe(@PathVariable UUID id) {
         var actor = currentUserProvider.getCurrentUser();
         assignTicketToMeUseCase.execute(new AssignTicketToMeCommand(new TicketId(id), actor));
