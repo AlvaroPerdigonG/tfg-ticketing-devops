@@ -29,6 +29,13 @@ import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +51,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tickets")
+@Tag(name = "Tickets", description = "Ticket management endpoints")
 public class TicketController {
 
     private final CreateTicketUseCase createTicketUseCase;
@@ -82,6 +90,13 @@ public class TicketController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new ticket")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Ticket created",
+                    content = @Content(schema = @Schema(implementation = CreateTicketResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<CreateTicketResponse> create(@Valid @RequestBody CreateTicketRequest request) {
         var actor = currentUserProvider.getCurrentUser();
 
@@ -99,10 +114,20 @@ public class TicketController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "List tickets created by the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tickets loaded",
+                    content = @Content(schema = @Schema(implementation = PageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public PageResponse<TicketSummaryResponse> listMine(
+            @Parameter(description = "Filter by ticket status", example = "OPEN")
             @RequestParam(required = false) TicketStatus status,
+            @Parameter(description = "Free text search in ticket title", example = "Login issue")
             @RequestParam(required = false) String q,
+            @Parameter(description = "Zero-based page index", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (1..100)", example = "20")
             @RequestParam(defaultValue = "20") int size
     ) {
         var actor = currentUserProvider.getCurrentUser();
@@ -113,11 +138,23 @@ public class TicketController {
     }
 
     @GetMapping
+    @Operation(summary = "List operational ticket queue for agents/admins")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Queue loaded",
+                    content = @Content(schema = @Schema(implementation = PageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+    })
     public PageResponse<TicketSummaryResponse> listQueue(
+            @Parameter(description = "Queue scope filter", example = "MINE")
             @RequestParam(defaultValue = "MINE") TicketQueueScope scope,
+            @Parameter(description = "Filter by ticket status", example = "IN_PROGRESS")
             @RequestParam(required = false) TicketStatus status,
+            @Parameter(description = "Free text search in ticket title", example = "Payment")
             @RequestParam(required = false) String q,
+            @Parameter(description = "Zero-based page index", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (1..100)", example = "20")
             @RequestParam(defaultValue = "20") int size
     ) {
         var actor = currentUserProvider.getCurrentUser();
@@ -128,6 +165,14 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get full ticket detail by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ticket detail loaded",
+                    content = @Content(schema = @Schema(implementation = TicketDetailResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Ticket not found")
+    })
     public TicketDetailResponse getById(@PathVariable UUID id) {
         var actor = currentUserProvider.getCurrentUser();
         var ticket = getTicketUseCase.execute(new TicketId(id), actor);
@@ -157,6 +202,14 @@ public class TicketController {
     }
 
     @PostMapping("/{id}/comments")
+    @Operation(summary = "Add a comment to a ticket")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Comment created",
+                    content = @Content(schema = @Schema(implementation = AddTicketCommentResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Ticket not found")
+    })
     public ResponseEntity<AddTicketCommentResponse> addComment(@PathVariable UUID id, @Valid @RequestBody AddTicketCommentRequest request) {
         var actor = currentUserProvider.getCurrentUser();
         var result = addTicketCommentUseCase.execute(new AddTicketCommentCommand(new TicketId(id), request.content(), actor));
@@ -165,6 +218,14 @@ public class TicketController {
     }
 
     @PatchMapping("/{id}/status")
+    @Operation(summary = "Change ticket status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Status changed"),
+            @ApiResponse(responseCode = "400", description = "Invalid status transition or payload"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Ticket not found")
+    })
     public ResponseEntity<Void> changeStatus(@PathVariable UUID id, @Valid @RequestBody ChangeTicketStatusRequest request) {
         var actor = currentUserProvider.getCurrentUser();
 
@@ -178,6 +239,13 @@ public class TicketController {
     }
 
     @PatchMapping("/{id}/assignment/me")
+    @Operation(summary = "Assign ticket to the authenticated agent/admin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Ticket assigned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Ticket not found")
+    })
     public ResponseEntity<Void> assignToMe(@PathVariable UUID id) {
         var actor = currentUserProvider.getCurrentUser();
         assignTicketToMeUseCase.execute(new AssignTicketToMeCommand(new TicketId(id), actor));
