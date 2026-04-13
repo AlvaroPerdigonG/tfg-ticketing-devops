@@ -1,6 +1,7 @@
 # E2E suite with Playwright
 
 ## Scope
+
 This folder contains a minimal but high-value browser suite:
 
 - `auth.spec.ts` -> `AUTH-01`, `AUTH-02`
@@ -11,6 +12,7 @@ This folder contains a minimal but high-value browser suite:
 The suite is intentionally focused on critical cross-page flows.
 
 ## Local prerequisites
+
 1. Backend running and reachable
 2. Frontend running (usually via `npm run preview`)
 3. Playwright dependencies installed
@@ -28,16 +30,19 @@ export E2E_AGENT_PASSWORD=password123!
 ## Execute tests
 
 ### Headless
+
 ```bash
 npm run test:e2e
 ```
 
 ### Headed
+
 ```bash
 npm run test:e2e:headed
 ```
 
 ## Frequent setup issue
+
 If you get:
 
 `Cannot find package '@playwright/test'`
@@ -50,10 +55,12 @@ npx playwright install
 ```
 
 ## Debugging tips
+
 - Debug mode: `npx playwright test --debug`
 - Open report: `npx playwright show-report`
 
 ## Best practices
+
 - Prefer stable selectors (`data-testid`)
 - Avoid fixed sleeps (`waitForTimeout`)
 - Assert user-visible behavior
