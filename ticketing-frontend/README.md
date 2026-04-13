@@ -1,19 +1,58 @@
-# React + TypeScript + Vite
+# Ticketing Frontend (React + TypeScript + Vite)
 
-This project starts from the standard Vite React + TypeScript template and includes additional frontend testing and E2E setup.
+## Overview
+This frontend is built with React, TypeScript and Vite. It includes unit/UI testing with Vitest and an E2E layer with Playwright.
 
-## Available React plugins
-- `@vitejs/plugin-react` (Babel/oxc)
-- `@vitejs/plugin-react-swc` (SWC)
+## Tech stack
+- React
+- TypeScript
+- Vite
+- Vitest + React Testing Library
+- Playwright (E2E)
 
-## E2E with Playwright
-A minimal E2E suite is available in `e2e/` with high-value scenarios aligned with functional IDs.
+## Local development
 
-Commands:
+### Install dependencies
+```bash
+npm install
+```
 
+### Start dev server
+```bash
+npm run dev
+```
+
+### Build production bundle
+```bash
+npm run build
+```
+
+### Preview production build
+```bash
+npm run preview
+```
+
+## Quality and tests
+
+### Lint and format checks
+```bash
+npm run lint
+npm run format:check
+```
+
+### Unit/UI tests
+```bash
+npm run test:run
+```
+
+### E2E tests
 ```bash
 npm run test:e2e
 npm run test:e2e:headed
 ```
 
-See `e2e/README.md` for environment setup details.
+For E2E setup details, see `e2e/README.md`.
+
+## Notes
+- The frontend expects backend API availability and valid auth flows.
+- Use stable selectors (`data-testid`) for robust E2E and UI tests.
