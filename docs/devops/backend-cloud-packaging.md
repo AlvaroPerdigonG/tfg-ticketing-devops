@@ -1,8 +1,8 @@
-# Backend cloud-ready packaging (DevOps batch)
+# Backend cloud-ready packaging documentation
 
-## 1. Goal
-Prepare `ticketing-backend` for cloud deployment without forcing deployment in this step. The target is a practical cloud-ready baseline:
+This document goes over some considerations and decisions made when preparing the application to be deployed on the cloud.
 
+## 1. Cloud-ready baseline
 - Docker image packaging
 - Runtime config via environment variables
 - Compatibility with PaaS platforms (Render-like model)
