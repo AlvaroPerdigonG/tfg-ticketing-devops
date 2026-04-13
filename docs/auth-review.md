@@ -1,60 +1,60 @@
-# Revisión de autenticación y autorización (frontend + backend)
+# Authentication and authorization review (frontend + backend)
 
-## Backend (estado actual)
+## Backend (current state)
 
-### Endpoints reales de auth
+### Auth endpoints
 - `POST /api/auth/login`
-  - Request DTO: `{ email: string, password: string }`
-  - Response DTO: `{ accessToken: string }`
+  - Request: `{ email: string, password: string }`
+  - Response: `{ accessToken: string }`
 - `POST /api/auth/register`
-  - Request DTO: `{ email: string, displayName: string, password: string, confirmPassword: string }`
-  - Response DTO: `{ accessToken: string }`
+  - Request: `{ email: string, displayName: string, password: string, confirmPassword: string }`
+  - Response: `{ accessToken: string }`
 - `GET /api/auth/me`
-  - Requiere JWT válido.
-  - Devuelve perfil del usuario autenticado (`id`, `email`, `displayName`, `role`, `roles`).
+  - Requires valid JWT
+  - Returns authenticated profile (`id`, `email`, `displayName`, `role`, `roles`)
 
-### Seguridad JWT
-- Firma: `RS256`.
-- Claims relevantes:
-  - `sub` (UUID del usuario)
+### JWT security
+- Signature: `RS256`
+- Relevant claims:
+  - `sub` (user UUID)
   - `email`
   - `displayName`
-  - `roles` (array de roles)
-  - `exp` (timestamp unix en segundos)
-- Expiración configurable (`app.security.jwt.expiration-seconds`, default 3600s).
+  - `roles` (role array)
+  - `exp` (Unix timestamp in seconds)
+- Expiration configurable via `app.security.jwt.expiration-seconds` (default 3600s)
 
-### Reglas de autorización vigentes
-- Públicos:
+### Effective authorization rules
+- Public:
   - `POST /api/auth/**`
-  - `GET /api/health` y `/actuator/health`
+  - `GET /api/health` and `/actuator/health`
 - Tickets:
   - `POST /api/tickets` -> `USER|AGENT|ADMIN`
   - `GET /api/tickets/me` -> `USER|AGENT|ADMIN`
   - `GET /api/tickets` -> `AGENT|ADMIN`
-  - `GET /api/tickets/{id}` -> `USER|AGENT|ADMIN` (con validación de ownership para `USER`)
+  - `GET /api/tickets/{id}` -> `USER|AGENT|ADMIN` (with ownership checks for `USER`)
   - `PATCH /api/tickets/{id}/status` -> `AGENT|ADMIN`
   - `PATCH /api/tickets/{id}/assignment/me` -> `AGENT|ADMIN`
-  - `POST /api/tickets/{id}/comments` -> autenticado
-- Administración:
+  - `POST /api/tickets/{id}/comments` -> authenticated
+- Administration:
   - `/api/admin/**` -> `ADMIN`
-- Resto de `/api/**` -> autenticado.
+- Remaining `/api/**` -> authenticated
 
-## Frontend (estado actual)
+## Frontend (current state)
 
-### Flujo implementado
-- Login y registro contra `/api/auth/login` y `/api/auth/register`.
-- Consulta de perfil con `/api/auth/me` cuando aplica.
-- Token en `localStorage` (`ticketing_access_token`).
-- Parseo local del JWT para bootstrap de sesión (`sub`, `roles`, `exp`).
-- `ProtectedRoute` redirige a `/login` si no hay sesión válida.
-- `RequireRole` redirige a `/forbidden` en acceso no autorizado.
+### Implemented flow
+- Login/register against `/api/auth/login` and `/api/auth/register`
+- Optional profile retrieval via `/api/auth/me`
+- Token stored in `localStorage` as `ticketing_access_token`
+- Local JWT parsing for session bootstrap (`sub`, `roles`, `exp`)
+- `ProtectedRoute` redirects to `/login` for invalid sessions
+- `RequireRole` redirects to `/forbidden` when role is not allowed
 
-### Fortalezas actuales
-- Contrato frontend-backend alineado para auth y perfil.
-- Reglas de autorización backend y guards frontend consistentes.
-- Seguridad stateless (Bearer JWT) adaptada al contexto SPA.
+### Current strengths
+- Frontend/backend auth contracts are aligned
+- Backend authorization and frontend guards are consistent
+- Stateless Bearer JWT approach fits SPA architecture
 
-## Mejoras recomendadas (siguiente iteración)
-1. Incorporar documentación OpenAPI/Swagger para visibilidad de contratos.
-2. Valorar estrategia de refresh token (si se busca mejor UX en sesiones largas).
-3. Ampliar E2E de rutas protegidas y escenarios de permisos por rol.
+## Recommended next improvements
+1. Keep OpenAPI/Swagger docs updated as API evolves
+2. Evaluate refresh-token strategy for longer sessions
+3. Expand E2E coverage for role-protected routes

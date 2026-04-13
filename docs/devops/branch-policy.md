@@ -1,67 +1,29 @@
-# Política de ramas (Branch Policy) — TFG Ticketing
+# Branch policy — TFG Ticketing
 
-## 1. Objetivo
-Definir una política de ramas simple, estricta y operativa para proteger la calidad del monorepo (`ticketing-backend` + `ticketing-frontend`) y asegurar trazabilidad de cambios durante el TFG.
+## Objective
+Define a strict and practical branch policy to protect code quality and traceability.
 
-## 2. Alcance
-Esta política aplica a todo el repositorio y a cualquier contribución que afecte backend, frontend, documentación o configuración DevOps.
+## Official branches
+- `main`: protected, stable branch
+- Working branches:
+  - `feature/<short-description>`
+  - `fix/<short-description>`
+  - `chore/<short-description>`
+  - `docs/<short-description>`
 
-## 3. Ramas oficiales
+## Mandatory rules for `main`
+1. Pull request required before merge
+2. At least 1 approval
+3. Dismiss stale approvals on new commits
+4. Required status checks
+5. No direct pushes
+6. No force pushes
+7. No branch deletion
 
-### `main`
-- Rama estable y protegida.
-- No se permiten pushes directos.
-- Solo se aceptan cambios mediante Pull Request (PR).
-
-### Ramas de trabajo
-- `feature/<descripcion-corta>` para nuevas funcionalidades.
-- `fix/<descripcion-corta>` para correcciones.
-- `chore/<descripcion-corta>` para tareas técnicas/mantenimiento.
-- `docs/<descripcion-corta>` para documentación.
-
-Ejemplos:
-- `feature/auth-refresh-token`
-- `fix/tickets-filter-pagination`
-- `chore/devops-sonar-baseline`
-
-## 4. Reglas obligatorias para `main`
-Estas reglas deben configurarse en GitHub (Rulesets o Branch Protection):
-
-1. **Require pull request before merging**: habilitado.
-2. **Required approvals**: mínimo 1.
-3. **Dismiss stale approvals** cuando haya nuevos commits en la PR.
-5. **Require status checks to pass** (cuando existan workflows CI).
-6. **Restrict direct pushes** a `main`.
-7. **Block force pushes**.
-8. **Block branch deletion**.
-
-## 5. Flujo de trabajo obligatorio
-1. Crear rama desde `main` actualizada.
-2. Implementar cambios en la rama de trabajo.
-3. Ejecutar validaciones locales mínimas.
-4. Subir rama y abrir PR hacia `main`.
-5. Esperar checks automáticos y revisión.
-6. Corregir feedback si aplica.
-7. Hacer merge cuando todo esté en verde.
-
-## 6. Requisitos mínimos de Pull Request
-Cada PR debe incluir:
-- propósito del cambio,
-- alcance técnico,
-- evidencias de validación (tests/comandos),
-- impacto esperado,
-- riesgos conocidos (si los hubiera).
-
-## 7. Estrategia de merge recomendada
-- Recomendado: **Squash merge** para mantener historial limpio y trazable por PR.
-- Activar borrado automático de la rama tras merge.
-
-## 8. Gestión de hotfix
-Si se requiere un hotfix urgente:
-1. Crear `fix/<descripcion>` desde `main`.
-2. Aplicar corrección mínima.
-3. Abrir PR con prioridad alta.
-4. Mantener igualmente revisión + checks obligatorios (salvo incidente crítico excepcional justificado).
-
-## 9. Excepciones
-Cualquier bypass de esta política debe quedar justificado en el hilo de la PR y documentado en el changelog técnico del proyecto.
+## Required workflow
+1. Create branch from updated `main`
+2. Implement changes
+3. Run local checks
+4. Open PR
+5. Wait for CI + review
+6. Merge only when green

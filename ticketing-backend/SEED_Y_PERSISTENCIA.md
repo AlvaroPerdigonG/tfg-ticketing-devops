@@ -1,48 +1,23 @@
-# Seed local y persistencia de datos
+# Local seed and data persistence
 
-## Objetivo
-Tener datos base al arrancar en local (usuario, agente y categoría), pero que **los datos persistan** entre reinicios.
+## Objective
+Provide base local data at startup while keeping database data persistent across restarts.
 
-## Cómo funciona ahora
-- `LocalSeedRunner` solo se ejecuta en perfil `local`.
-- Inserta datos base **solo si no existen**:
-  - categoría `General`
-  - usuario `user@local.test`
-  - agente `agent@local.test`
-- La comprobación de usuarios se hace por email (`findByEmailIgnoreCase`) para no chocar con el índice único de email.
+## Current behavior
+- `LocalSeedRunner` runs only in `local` profile
+- Inserts base data only if missing:
+  - category `General`
+  - user `user@local.test`
+  - agent `agent@local.test`
+- User lookup is by email (`findByEmailIgnoreCase`)
 
-## Persistencia entre reinicios
-`docker-compose.yml` ya monta un volumen nombrado (`ticketing_pgdata`) para PostgreSQL.
-Si no eliminas ese volumen, los datos permanecen.
+## Persistence across restarts
+`docker-compose.yml` uses a named PostgreSQL volume (`ticketing_pgdata`).
+If you do not remove the volume, data remains available.
 
-## Script `run.ps1`
-El script ahora conserva la base de datos por defecto.
+## `run.ps1` behavior
+- Default run keeps DB data
+- `-ResetDatabase` removes the PostgreSQL volume and starts fresh
 
-- Arranque normal (conserva datos):
-  ```powershell
-  .\run.ps1
-  ```
-
-- Arranque con limpieza total de base de datos:
-  ```powershell
-  .\run.ps1 -ResetDatabase
-  ```
-
-## Insertar usuarios manualmente y poder hacer login
-Para que un usuario creado manualmente pueda iniciar sesión, su `password_hash` debe ser BCrypt.
-
-Ejemplo SQL (password en claro: `secret123`):
-
-```sql
-INSERT INTO users (id, email, display_name, role, is_active, password_hash)
-VALUES (
-  gen_random_uuid(),
-  'nuevo@local.test',
-  'Nuevo Usuario',
-  'USER',
-  true,
-  '$2a$10$8E7Mzy8M2Q0dQkN4kD7a3eN9WQfN3st9sSk6cZy4xkS9t2C5K8E4i'
-);
-```
-
-> Nota: el hash de ejemplo es ilustrativo. Genera un hash BCrypt real para la contraseña que quieras usar.
+## Manual users and login
+A manually inserted user must have a BCrypt password hash in `password_hash` to login.

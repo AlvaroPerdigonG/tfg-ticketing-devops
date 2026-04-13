@@ -1,18 +1,18 @@
-# API HTTP del proyecto Ticketing (estado actual)
+# Ticketing API HTTP Reference (current state)
 
-> Este documento sustituye el enfoque de “proposal” y pasa a ser la referencia práctica de endpoints actuales del backend.
+> This document is the current source of truth for backend endpoints.
 
-## 1) Convenciones generales
+## 1) General conventions
 
-- Base path de la API: `/api`
-- Autenticación: Bearer JWT (`Authorization: Bearer <token>`)
-- Roles funcionales: `USER`, `AGENT`, `ADMIN`
-- Errores: gestionados por el `GlobalExceptionHandler` del backend
+- API base path: `/api`
+- Authentication: Bearer JWT (`Authorization: Bearer <token>`)
+- Roles: `USER`, `AGENT`, `ADMIN`
+- Errors are handled centrally by `GlobalExceptionHandler`
 
-## 2) Autenticación (`/api/auth`)
+## 2) Authentication (`/api/auth`)
 
 ### `POST /api/auth/login`
-- Público.
+- Public endpoint
 - Request:
 ```json
 { "email": "user@local.test", "password": "password" }
@@ -23,12 +23,12 @@
 ```
 
 ### `POST /api/auth/register`
-- Público.
+- Public endpoint
 - Request:
 ```json
 {
   "email": "new@local.test",
-  "displayName": "Nuevo Usuario",
+  "displayName": "New User",
   "password": "password",
   "confirmPassword": "password"
 }
@@ -39,93 +39,90 @@
 ```
 
 ### `GET /api/auth/me`
-- Requiere token válido.
-- Devuelve perfil del usuario autenticado (id/email/displayName/rol).
+- Requires a valid token
+- Returns profile of the authenticated user
 
 ## 3) Tickets (`/api/tickets`)
 
-### Estados soportados
+### Supported statuses
 `OPEN | IN_PROGRESS | ON_HOLD | RESOLVED`
 
-### Prioridades soportadas
+### Supported priorities
 `LOW | MEDIUM | HIGH`
 
 ### `POST /api/tickets`
 - Roles: `USER | AGENT | ADMIN`
-- Crea ticket.
-- Request incluye `title`, `description`, `categoryId`, `priority`.
+- Creates a ticket
 
 ### `GET /api/tickets/me`
 - Roles: `USER | AGENT | ADMIN`
-- Listado paginado de tickets del usuario autenticado.
+- Paginated list of tickets created by the authenticated user
 - Query params:
-  - `status` (opcional)
-  - `q` (opcional)
+  - `status` (optional)
+  - `q` (optional)
   - `page` (default `0`)
   - `size` (default `20`, max `100`)
 
 ### `GET /api/tickets`
 - Roles: `AGENT | ADMIN`
-- Listado paginado de cola operativa.
+- Paginated list of operational queue
 - Query params:
   - `scope`: `UNASSIGNED | MINE | OTHERS | ALL` (default `MINE`)
-  - `status` (opcional)
-  - `q` (opcional)
+  - `status` (optional)
+  - `q` (optional)
   - `page`, `size`
 
 ### `GET /api/tickets/{id}`
 - Roles: `USER | AGENT | ADMIN`
-- Detalle de ticket.
-- Regla de acceso:
-  - `USER`: solo sus propios tickets.
-  - `AGENT/ADMIN`: acceso completo.
+- Ticket detail
+- Access rules:
+  - `USER`: only own tickets
+  - `AGENT/ADMIN`: full access
 
 ### `PATCH /api/tickets/{id}/status`
 - Roles: `AGENT | ADMIN`
-- Cambia estado de ticket (transiciones validadas por dominio).
+- Changes ticket status
 
 ### `PATCH /api/tickets/{id}/assignment/me`
 - Roles: `AGENT | ADMIN`
-- Asigna el ticket al usuario autenticado.
+- Assigns ticket to authenticated user
 
 ### `POST /api/tickets/{id}/comments`
-- Requiere autenticación.
-- Añade comentario al ticket.
+- Requires authentication
+- Adds a comment to the ticket
 
-## 4) Categorías
+## 4) Categories
 
 ### `GET /api/categories`
-- Requiere autenticación.
-- Devuelve categorías activas para creación de tickets.
+- Requires authentication
+- Returns active categories
 
-## 5) Administración (`/api/admin`)
+## 5) Administration (`/api/admin`)
 
-> Todas las rutas `/api/admin/**` requieren rol `ADMIN`.
+All `/api/admin/**` routes require role `ADMIN`.
 
 ### `GET /api/admin/categories`
-Lista categorías.
+List categories.
 
 ### `POST /api/admin/categories`
-Crea categoría.
+Create category.
 
 ### `PATCH /api/admin/categories/{categoryId}`
-Actualiza nombre y estado (`isActive`).
+Update category name and active flag.
 
 ### `GET /api/admin/users`
-Lista usuarios.
+List users.
 
 ### `PATCH /api/admin/users/{userId}/active`
-Activa/desactiva usuario.
+Activate/deactivate user.
 
-## 6) Salud
+## 6) Health
 
 ### `GET /api/health`
-- Público.
-- Respuesta esperada: `ok`.
+- Public endpoint
+- Expected response: `ok`
 
-## 7) Formato de paginación
-
-Para endpoints paginados de tickets se usa:
+## 7) Pagination format
 
 ```json
 {
@@ -136,7 +133,6 @@ Para endpoints paginados de tickets se usa:
 }
 ```
 
-## 8) Notas de evolución
+## 8) Evolution note
 
-- Si se añaden endpoints nuevos de tickets, deben actualizarse aquí como fuente única de estado API.
-- En el siguiente paso del proyecto, esta documentación convivirá con OpenAPI/Swagger para exploración interactiva.
+If new endpoints are added, update this file to keep a single API reference aligned with implementation.
