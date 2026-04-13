@@ -132,6 +132,12 @@ npm run test:e2e
 - Matriu de traçabilitat: `docs/testing/traceability-matrix.md`
 - Estratègia CI/CD: `docs/devops/cicd-strategy.md`
 
+### OpenAPI / Swagger (local)
+
+Amb el backend en marxa (`http://localhost:8080`):
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
 ---
 
 ## ⚖️ Llicència

@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // health/actuator (ajusta a tu gusto)
                         .requestMatchers("/actuator/health", "/api/health").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         // auth: login/register abiertos
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
@@ -50,7 +51,7 @@ public class SecurityConfig {
                         // resto API: requiere estar autenticado
                         .requestMatchers("/api/**").authenticated()
 
-                        // lo demás (swagger estático, etc.)
+                        // lo demás
                         .anyRequest().permitAll()
                 )
 
