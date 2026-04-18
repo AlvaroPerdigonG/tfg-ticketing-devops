@@ -27,3 +27,6 @@ app:
   security:
     jwt:
       private-key-location: ${APP_SECURITY_JWT_PRIVATE_KEY_LOCATION}
+
+server:
+  forward-headers-strategy: framework
