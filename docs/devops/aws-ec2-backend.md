@@ -1,53 +1,53 @@
-# Backend en AWS EC2 con Docker Compose + PostgreSQL + Caddy
+# Backend on AWS EC2 with Docker Compose + PostgreSQL + Caddy
 
-Este documento describe cómo ejecutar el backend en una instancia EC2 (Ubuntu) con HTTPS automático usando Caddy.
+This document describes how to run the backend on an EC2 instance (Ubuntu) with automatic HTTPS using Caddy.
 
-## 1) Arquitectura
+## 1) Architecture
 
-Servicios en `ticketing-backend/docker-compose.prod.yml`:
+Services in `ticketing-backend/docker-compose.prod.yml`:
 
-- **backend**: aplicación Spring Boot (Java 17), construida con el `Dockerfile` del backend.
-- **postgres**: base de datos PostgreSQL (contenedor oficial) con volumen persistente.
-- **caddy**: reverse proxy (contenedor oficial) que publica 80/443 y gestiona certificados TLS automáticamente.
+- **backend**: Spring Boot application (Java 17), built from the backend `Dockerfile`.
+- **postgres**: PostgreSQL database (official container) with persistent volume.
+- **caddy**: reverse proxy (official container) exposing 80/443 and managing TLS certificates automatically.
 
-Flujo de red:
+Network flow:
 
-1. Cliente llama a `https://api.example.com`.
-2. **Caddy** recibe la petición en 443.
-3. Caddy hace `reverse_proxy` al servicio **backend** en `backend:8080`.
-4. **backend** conecta con **postgres** por red interna Docker.
+1. Client calls `https://api.example.com`.
+2. **Caddy** receives the request on 443.
+3. Caddy performs `reverse_proxy` to the **backend** service at `backend:8080`.
+4. **backend** connects to **postgres** through the internal Docker network.
 
-> `backend` y `postgres` no se exponen directamente a Internet.
+> `backend` and `postgres` are not exposed directly to the Internet.
 
-## 2) Explicación de cada servicio
+## 2) Service explanation
 
 ### backend
-- Usa el `Dockerfile` existente (`build: .`).
-- Escucha internamente en `8080` (`expose`, sin `ports`).
-- Usa variables de entorno para datasource y perfil activo.
-- Incluye soporte de headers de proxy (`X-Forwarded-*`) con:
-  - `server.forward-headers-strategy: framework` en `application-cloud.yml`.
+- Uses the existing `Dockerfile` (`build: .`).
+- Listens internally on `8080` (`expose`, without `ports`).
+- Uses environment variables for datasource and active profile.
+- Includes proxy header (`X-Forwarded-*`) support with:
+  - `server.forward-headers-strategy: framework` in `application-cloud.yml`.
 
 ### postgres
-- Imagen oficial `postgres:16`.
+- Official `postgres:16` image.
 - Variables:
   - `POSTGRES_DB`
   - `POSTGRES_USER`
   - `POSTGRES_PASSWORD`
-- Volumen persistente:
+- Persistent volume:
   - `ticketing_pgdata:/var/lib/postgresql/data`
 
 ### caddy
-- Imagen oficial `caddy:2`.
-- Puertos publicados:
+- Official `caddy:2` image.
+- Published ports:
   - `80:80`
   - `443:443`
-- Monta `ticketing-backend/Caddyfile`.
-- Certificados automáticos (Let's Encrypt) para el dominio configurado en `DOMAIN`.
+- Mounts `ticketing-backend/Caddyfile`.
+- Automatic certificates (Let's Encrypt) for the domain configured in `DOMAIN`.
 
-## 3) Variables de entorno necesarias
+## 3) Required environment variables
 
-Base mínima (ver `ticketing-backend/.env.example`):
+Minimum base (see `ticketing-backend/.env.example`):
 
 - `DB_NAME`
 - `DB_USER`
@@ -55,69 +55,69 @@ Base mínima (ver `ticketing-backend/.env.example`):
 - `SPRING_PROFILES_ACTIVE`
 - `DOMAIN`
 
-También necesarias para seguridad/JWT en perfil cloud:
+Also required for security/JWT in cloud profile:
 
 - `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY_LOCATION`
 - `APP_SECURITY_JWT_PRIVATE_KEY_LOCATION`
 
-Opcional recomendado:
+Recommended optional:
 
-- `APP_SECURITY_CORS_ALLOWED_ORIGINS` (lista CSV con el frontend desplegado en Cloudflare Pages).
+- `APP_SECURITY_CORS_ALLOWED_ORIGINS` (CSV list with the frontend deployed on Cloudflare Pages).
 
-## 4) Puesta en marcha en EC2
+## 4) Startup on EC2
 
-### 4.1 Preparar `.env`
+### 4.1 Prepare `.env`
 
 ```bash
-cd /ruta/al/repo/ticketing-backend
+cd /path/to/repo/ticketing-backend
 cp .env.example .env
-# editar .env con valores reales (sin commitearlos)
+# edit .env with real values (do not commit them)
 ```
 
-### 4.2 Levantar servicios
+### 4.2 Start services
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 ```
 
-### 4.3 Ver estado
+### 4.3 Check status
 
 ```bash
 docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs -f backend
 ```
 
-## 5) Prueba de salud
+## 5) Health check test
 
-Con dominio y DNS ya apuntando a la EC2:
+With domain and DNS already pointing to EC2:
 
 ```bash
 curl https://api.example.com/actuator/health
 ```
 
-También puedes probar localmente en la instancia:
+You can also test locally on the instance:
 
 ```bash
 curl http://localhost/actuator/health
 ```
 
-## 6) Cómo funciona el HTTPS automático con Caddy
+## 6) How automatic HTTPS works with Caddy
 
-- Caddy detecta el host del `Caddyfile` (valor de `{$DOMAIN}`).
-- Solicita/renueva certificados automáticamente.
-- Guarda estado y certificados en volúmenes Docker (`caddy_data`, `caddy_config`).
-- Redirige y sirve tráfico HTTPS sin configuración manual de certbot/nginx.
+- Caddy detects the host in `Caddyfile` (value of `{$DOMAIN}`).
+- It requests/renews certificates automatically.
+- It stores state and certificates in Docker volumes (`caddy_data`, `caddy_config`).
+- It redirects and serves HTTPS traffic without manual certbot/nginx setup.
 
-Requisitos para que funcione:
+Requirements for this to work:
 
-- DNS del dominio apuntando a la IP pública de EC2.
-- Puertos 80 y 443 abiertos en Security Group/NACL/firewall.
+- Domain DNS pointing to the EC2 public IP.
+- Ports 80 and 443 open in Security Group/NACL/firewall.
 
-## 7) Qué falta para automatizar (siguiente lote)
+## 7) What is missing for automation (next batch)
 
-Este lote deja el entorno listo para operación manual. En el siguiente lote quedaría:
+This batch leaves the environment ready for manual operation. In the next batch, what remains is:
 
-- Workflow CI/CD para build + push de imagen backend.
-- Workflow CD para despliegue automático en EC2.
-- Gestión automatizada de secretos y rotación.
-- Estrategia de rollback y health checks post-deploy.
+- CI/CD workflow for backend image build + push.
+- CD workflow for automatic deployment on EC2.
+- Automated secrets management and rotation.
+- Rollback strategy and post-deploy health checks.
