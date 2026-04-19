@@ -23,6 +23,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build backend JAR with Maven
+        working-directory: ticketing-backend
+        run: |
+          set -euo pipefail
+          ./mvnw -B -DskipTests clean package
+
       - name: Prepare backend deployment bundle
         env:
           DOMAIN: ${{ secrets.DOMAIN }}
@@ -38,13 +51,16 @@ jobs:
           rm -rf deploy
           mkdir -p deploy/app/secrets
 
+          APP_JAR="$(ls -1 ticketing-backend/target/*.jar | grep -v 'original' | head -n 1)"
+          if [ -z "${APP_JAR}" ]; then
+            echo "No backend jar found in ticketing-backend/target" >&2
+            exit 1
+          fi
+
+          cp "${APP_JAR}" deploy/app/app.jar
           cp ticketing-backend/docker-compose.prod.yml deploy/app/docker-compose.prod.yml
           cp ticketing-backend/Dockerfile deploy/app/Dockerfile
           cp ticketing-backend/Caddyfile deploy/app/Caddyfile
-          cp ticketing-backend/pom.xml deploy/app/pom.xml
-          cp ticketing-backend/mvnw deploy/app/mvnw
-          cp -R ticketing-backend/.mvn deploy/app/.mvn
-          cp -R ticketing-backend/src deploy/app/src
 
           {
             printf '%s\n' "SPRING_PROFILES_ACTIVE=cloud"
@@ -62,8 +78,7 @@ jobs:
 
           chmod 644 deploy/app/secrets/jwt-public.pem deploy/app/secrets/jwt-private.pem
           chmod 755 deploy/app/secrets
-          chmod 644 deploy/app/.env
-          chmod +x deploy/app/mvnw
+          chmod 644 deploy/app/.env deploy/app/app.jar
 
           tar -czf deploy/backend-production-bundle.tgz -C deploy app
 
@@ -91,6 +106,9 @@ jobs:
           SSH_PORT="${EC2_SSH_PORT:-22}"
 
           scp -P "${SSH_PORT}" \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=10 \
+            -o TCPKeepAlive=yes \
             deploy/backend-production-bundle.tgz \
             "${EC2_USER}@${EC2_HOST}:/tmp/backend-production-bundle.tgz"
 
@@ -105,7 +123,11 @@ jobs:
 
           SSH_PORT="${EC2_SSH_PORT:-22}"
 
-          ssh -p "${SSH_PORT}" "${EC2_USER}@${EC2_HOST}" \
+          ssh -p "${SSH_PORT}" \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=10 \
+            -o TCPKeepAlive=yes \
+            "${EC2_USER}@${EC2_HOST}" \
             "EC2_APP_DIR='${EC2_APP_DIR}' bash -s" <<'REMOTE_EOF'
           set -euo pipefail
 
@@ -121,7 +143,7 @@ jobs:
 
           chmod 755 "${EC2_APP_DIR}/app/secrets"
           chmod 644 "${EC2_APP_DIR}/app/secrets/jwt-public.pem" "${EC2_APP_DIR}/app/secrets/jwt-private.pem"
-          chmod 644 "${EC2_APP_DIR}/app/.env"
+          chmod 644 "${EC2_APP_DIR}/app/.env" "${EC2_APP_DIR}/app/app.jar"
 
           cd "${EC2_APP_DIR}/app"
 

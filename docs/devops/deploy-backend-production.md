@@ -5,6 +5,16 @@ Automate backend production deployment to AWS EC2 from GitHub Actions using SSH 
 
 This workflow intentionally covers **backend only** (no frontend automation in this batch).
 
+## Deployment strategy
+
+Current strategy uses a **build artifact model**:
+
+- GitHub Actions compiles the Spring Boot backend with Maven.
+- The deployment bundle sent to EC2 includes a prebuilt `app.jar`.
+- EC2 keeps using Docker Compose, but performs only a lightweight Docker image build (`COPY app.jar`) and container restart.
+
+This avoids Maven compilation on small EC2 instances (for example `t3.micro`), reducing CPU/RAM pressure and making SSH-based deploys more stable.
+
 ## Workflow
 File: `.github/workflows/deploy-backend-production.yml`
 
@@ -38,15 +48,14 @@ File: `.github/workflows/deploy-backend-production.yml`
 
 ### 1) On GitHub runner
 1. Checkout repository.
-2. Prepare a deployment bundle with minimal backend files:
+2. Setup Java 17 (`actions/setup-java@v4`) with Maven cache.
+3. Build backend jar in `ticketing-backend` with Maven Wrapper (`./mvnw -B -DskipTests clean package`).
+4. Prepare a deployment bundle with runtime files only:
+   - `app.jar` (copied from `ticketing-backend/target/*.jar`)
    - `docker-compose.prod.yml`
-   - `Dockerfile`
+   - `Dockerfile` (runtime-only)
    - `Caddyfile`
-   - Maven wrapper + `.mvn`
-   - `pom.xml`
-   - `src/`
-3. Generate `.env` from `production` secrets.
-4. Generate JWT key files:
+   - `.env`
    - `secrets/jwt-public.pem`
    - `secrets/jwt-private.pem`
 5. Upload `backend-production-bundle.tgz` to EC2 via SCP.
@@ -54,7 +63,7 @@ File: `.github/workflows/deploy-backend-production.yml`
 ### 2) On EC2 via SSH
 1. Create app directory if missing (`EC2_APP_DIR`).
 2. Extract uploaded bundle.
-3. Apply minimal file permissions for secrets.
+3. Apply minimal file permissions for secrets, `.env` and `app.jar`.
 4. Detect compose command:
    - try `docker compose`
    - fallback to `docker-compose`
@@ -65,6 +74,14 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 ```
 
 (or same with `docker-compose` fallback).
+
+## Keepalive configuration for SSH/SCP
+
+To improve stability during transfer and remote execution, both `scp` and `ssh` use:
+
+- `-o ServerAliveInterval=30`
+- `-o ServerAliveCountMax=10`
+- `-o TCPKeepAlive=yes`
 
 ## `.env` and JWT key handling
 
@@ -100,7 +117,7 @@ using `curl` + retries and requires JSON response with status `UP`.
 ## Current limitations (intentional)
 
 - No automated rollback yet.
-- No container registry yet (build occurs on EC2 via compose).
+- No container registry yet (no `docker pull` flow in this batch).
 - No frontend deployment automation in this workflow.
 - No Terraform/IaC in this batch.
 
