@@ -36,6 +36,8 @@ services:
       APP_SECURITY_JWT_PRIVATE_KEY_LOCATION: ${APP_SECURITY_JWT_PRIVATE_KEY_LOCATION}
     expose:
       - "8080"
+    volumes:
+      - ./secrets:/run/secrets:ro
     networks:
       - backend_net
 

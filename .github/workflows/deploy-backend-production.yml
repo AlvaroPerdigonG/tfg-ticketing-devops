@@ -1,0 +1,166 @@
+name: Deploy Backend Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-backend-production:
+    name: deploy-backend-production
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare backend deployment bundle
+        env:
+          DOMAIN: ${{ secrets.DOMAIN }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          APP_SECURITY_CORS_ALLOWED_ORIGINS: ${{ secrets.APP_SECURITY_CORS_ALLOWED_ORIGINS }}
+          JWT_PUBLIC_KEY_PEM: ${{ secrets.JWT_PUBLIC_KEY_PEM }}
+          JWT_PRIVATE_KEY_PEM: ${{ secrets.JWT_PRIVATE_KEY_PEM }}
+        run: |
+          set -euo pipefail
+
+          rm -rf deploy
+          mkdir -p deploy/app/secrets
+
+          cp ticketing-backend/docker-compose.prod.yml deploy/app/docker-compose.prod.yml
+          cp ticketing-backend/Dockerfile deploy/app/Dockerfile
+          cp ticketing-backend/Caddyfile deploy/app/Caddyfile
+          cp ticketing-backend/pom.xml deploy/app/pom.xml
+          cp ticketing-backend/mvnw deploy/app/mvnw
+          cp -R ticketing-backend/.mvn deploy/app/.mvn
+          cp -R ticketing-backend/src deploy/app/src
+
+          {
+            printf '%s\n' "SPRING_PROFILES_ACTIVE=cloud"
+            printf '%s\n' "DOMAIN=${DOMAIN}"
+            printf '%s\n' "DB_NAME=${DB_NAME}"
+            printf '%s\n' "DB_USER=${DB_USER}"
+            printf '%s\n' "DB_PASSWORD=${DB_PASSWORD}"
+            printf '%s\n' "APP_SECURITY_CORS_ALLOWED_ORIGINS=${APP_SECURITY_CORS_ALLOWED_ORIGINS}"
+            printf '%s\n' "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY_LOCATION=file:/run/secrets/jwt-public.pem"
+            printf '%s\n' "APP_SECURITY_JWT_PRIVATE_KEY_LOCATION=file:/run/secrets/jwt-private.pem"
+          } > deploy/app/.env
+
+          printf '%s' "${JWT_PUBLIC_KEY_PEM}" > deploy/app/secrets/jwt-public.pem
+          printf '%s' "${JWT_PRIVATE_KEY_PEM}" > deploy/app/secrets/jwt-private.pem
+
+          chmod 644 deploy/app/secrets/jwt-public.pem deploy/app/secrets/jwt-private.pem
+          chmod 755 deploy/app/secrets
+          chmod 644 deploy/app/.env
+          chmod +x deploy/app/mvnw
+
+          tar -czf deploy/backend-production-bundle.tgz -C deploy app
+
+      - name: Configure SSH
+        env:
+          EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          EC2_SSH_KNOWN_HOSTS: ${{ secrets.EC2_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${EC2_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${EC2_SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload bundle to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_PORT: ${{ secrets.EC2_SSH_PORT }}
+        run: |
+          set -euo pipefail
+
+          SSH_PORT="${EC2_SSH_PORT:-22}"
+
+          scp -P "${SSH_PORT}" \
+            deploy/backend-production-bundle.tgz \
+            "${EC2_USER}@${EC2_HOST}:/tmp/backend-production-bundle.tgz"
+
+      - name: Deploy on EC2 with docker compose fallback
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_PORT: ${{ secrets.EC2_SSH_PORT }}
+          EC2_APP_DIR: ${{ secrets.EC2_APP_DIR }}
+        run: |
+          set -euo pipefail
+
+          SSH_PORT="${EC2_SSH_PORT:-22}"
+
+          ssh -p "${SSH_PORT}" "${EC2_USER}@${EC2_HOST}" \
+            "EC2_APP_DIR='${EC2_APP_DIR}' bash -s" <<'REMOTE_EOF'
+          set -euo pipefail
+
+          if [ -z "${EC2_APP_DIR:-}" ]; then
+            echo "EC2_APP_DIR is required" >&2
+            exit 1
+          fi
+
+          mkdir -p "${EC2_APP_DIR}"
+          rm -rf "${EC2_APP_DIR}/app"
+          tar -xzf /tmp/backend-production-bundle.tgz -C "${EC2_APP_DIR}"
+          rm -f /tmp/backend-production-bundle.tgz
+
+          chmod 755 "${EC2_APP_DIR}/app/secrets"
+          chmod 644 "${EC2_APP_DIR}/app/secrets/jwt-public.pem" "${EC2_APP_DIR}/app/secrets/jwt-private.pem"
+          chmod 644 "${EC2_APP_DIR}/app/.env"
+
+          cd "${EC2_APP_DIR}/app"
+
+          if docker compose version >/dev/null 2>&1; then
+            COMPOSE_CMD='docker compose'
+          elif command -v docker-compose >/dev/null 2>&1; then
+            COMPOSE_CMD='docker-compose'
+          else
+            echo "Neither 'docker compose' nor 'docker-compose' is available" >&2
+            exit 1
+          fi
+
+          ${COMPOSE_CMD} -f docker-compose.prod.yml --env-file .env up -d --build
+          REMOTE_EOF
+
+  smoke-backend-production:
+    name: smoke-backend-production
+    runs-on: ubuntu-latest
+    environment: production
+    needs: deploy-backend-production
+
+    steps:
+      - name: Smoke check backend health endpoint
+        env:
+          BACKEND_BASE_URL: ${{ secrets.BACKEND_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          HEALTH_URL="${BACKEND_BASE_URL%/}/actuator/health"
+
+          for attempt in $(seq 1 18); do
+            if curl --fail --silent --show-error "${HEALTH_URL}" | grep -q '"status"\s*:\s*"UP"'; then
+              echo "Smoke check passed on attempt ${attempt}"
+              exit 0
+            fi
+
+            echo "Attempt ${attempt}/18: backend not ready yet"
+            sleep 10
+          done
+
+          echo "Smoke check failed after 18 attempts" >&2
+          exit 1
