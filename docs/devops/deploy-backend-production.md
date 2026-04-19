@@ -1,7 +1,7 @@
 # Deploy backend production (EC2) with GitHub Actions
 
 ## Objective
-Automate backend production deployment to AWS EC2 from GitHub Actions using SSH and Docker Compose, with a post-deploy smoke check over `https://.../actuator/health`.
+Automate backend production deployment to AWS EC2 from GitHub Actions using SSH and Docker Compose v2, with a post-deploy smoke check over `https://.../actuator/health`.
 
 This workflow intentionally covers **backend only** (no frontend automation in this batch).
 
@@ -14,6 +14,14 @@ Current strategy uses a **build artifact model**:
 - EC2 keeps using Docker Compose, but performs only a lightweight Docker image build (`COPY app.jar`) and container restart.
 
 This avoids Maven compilation on small EC2 instances (for example `t3.micro`), reducing CPU/RAM pressure and making SSH-based deploys more stable.
+
+## Docker Compose requirement on EC2
+
+Production deployment now requires **Docker Compose v2** via `docker compose` plugin.
+
+- `docker compose` is mandatory.
+- Legacy `docker-compose` v1 is no longer supported.
+- The workflow runs `docker compose ... down --remove-orphans || true` before recreating the stack with `up -d --build`.
 
 ## Workflow
 File: `.github/workflows/deploy-backend-production.yml`
@@ -64,16 +72,16 @@ File: `.github/workflows/deploy-backend-production.yml`
 1. Create app directory if missing (`EC2_APP_DIR`).
 2. Extract uploaded bundle.
 3. Apply minimal file permissions for secrets, `.env` and `app.jar`.
-4. Detect compose command:
-   - try `docker compose`
-   - fallback to `docker-compose`
-5. Run deployment:
+4. Run remote preflight checks:
+   - `docker version`
+   - `docker compose version` (required)
+5. If `docker compose version` is not available, deployment aborts with a clear error instructing to install Docker Compose v2 plugin on EC2.
+6. Run deployment lifecycle:
 
 ```bash
+docker compose -f docker-compose.prod.yml --env-file .env down --remove-orphans || true
 docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 ```
-
-(or same with `docker-compose` fallback).
 
 ## Keepalive configuration for SSH/SCP
 
