@@ -60,7 +60,8 @@ jobs:
           printf '%s' "${JWT_PUBLIC_KEY_PEM}" > deploy/app/secrets/jwt-public.pem
           printf '%s' "${JWT_PRIVATE_KEY_PEM}" > deploy/app/secrets/jwt-private.pem
 
-          chmod 600 deploy/app/secrets/jwt-public.pem deploy/app/secrets/jwt-private.pem
+          chmod 644 deploy/app/secrets/jwt-public.pem deploy/app/secrets/jwt-private.pem
+          chmod 755 deploy/app/secrets
           chmod 644 deploy/app/.env
           chmod +x deploy/app/mvnw
 
@@ -118,8 +119,8 @@ jobs:
           tar -xzf /tmp/backend-production-bundle.tgz -C "${EC2_APP_DIR}"
           rm -f /tmp/backend-production-bundle.tgz
 
-          chmod 700 "${EC2_APP_DIR}/app/secrets"
-          chmod 600 "${EC2_APP_DIR}/app/secrets/jwt-public.pem" "${EC2_APP_DIR}/app/secrets/jwt-private.pem"
+          chmod 755 "${EC2_APP_DIR}/app/secrets"
+          chmod 644 "${EC2_APP_DIR}/app/secrets/jwt-public.pem" "${EC2_APP_DIR}/app/secrets/jwt-private.pem"
           chmod 644 "${EC2_APP_DIR}/app/.env"
 
           cd "${EC2_APP_DIR}/app"
