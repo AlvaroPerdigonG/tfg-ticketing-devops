@@ -192,7 +192,22 @@ jobs:
 
       - name: Compile backend classes for Sonar Java analysis
         working-directory: ticketing-backend
-        run: ./mvnw -B -ntp -DskipTests compile
+        run: |
+          set -euo pipefail
+
+          for attempt in 1 2 3; do
+            if ./mvnw -B -ntp -DskipTests compile; then
+              exit 0
+            fi
+
+            if [ "${attempt}" -eq 3 ]; then
+              echo "Maven Wrapper compile failed after 3 attempts" >&2
+              exit 1
+            fi
+
+            echo "Attempt ${attempt} failed (possible transient Maven download/network issue). Retrying in 15s..."
+            sleep 15
+          done
 
       - name: SonarQube Cloud scan
         uses: SonarSource/sonarqube-scan-action@v6
