@@ -190,7 +190,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-test-coverage-reports
-          path: .
+          path: ticketing-backend/target
 
       - name: Download frontend coverage report
         uses: actions/download-artifact@v4
@@ -224,6 +224,20 @@ jobs:
             echo "Attempt ${attempt} failed (possible transient Maven download/network issue). Retrying in 15s..."
             sleep 15
           done
+
+
+      - name: Debug backend JaCoCo report path
+        run: |
+          set -euo pipefail
+
+          if [ -f ticketing-backend/target/site/jacoco-merged/jacoco.xml ]; then
+            echo "✅ Found backend JaCoCo XML report at expected path"
+          else
+            echo "❌ Missing backend JaCoCo XML report at ticketing-backend/target/site/jacoco-merged/jacoco.xml" >&2
+            exit 1
+          fi
+
+          find ticketing-backend -maxdepth 6 -type f | sort
 
       - name: SonarQube Cloud scan (wait for Quality Gate)
         uses: SonarSource/sonarqube-scan-action@v6
