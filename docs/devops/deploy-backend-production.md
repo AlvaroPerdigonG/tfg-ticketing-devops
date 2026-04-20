@@ -28,12 +28,19 @@ File: `.github/workflows/deploy-backend-production.yml`
 
 - Name: `Deploy Backend Production`
 - Triggers:
-  - `push` on `main`
+  - `workflow_run` for workflow `CI` (only after completion)
   - `workflow_dispatch`
 - Concurrency: single in-flight deployment (`deploy-backend-production` group)
 - Jobs (both with `environment: production`):
   1. `deploy-backend-production`
   2. `smoke-backend-production` (`needs: deploy-backend-production`)
+
+Automatic deployment is now subordinated to CI quality gates:
+
+- Deploy runs automatically only when `CI` concludes with `success`.
+- It only auto-deploys runs where `CI` itself was triggered by `push` to `main`.
+- For `workflow_run`, checkout uses `github.event.workflow_run.head_sha` so production deploys the exact commit validated by CI.
+- `workflow_dispatch` is preserved for manual deployments.
 
 ## Required `production` environment secrets
 
