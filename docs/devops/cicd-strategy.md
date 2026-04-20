@@ -66,7 +66,7 @@ Minimum pipeline gates:
 
 ## 8. Tool responsibilities
 - **GitHub Actions**: CI/CD orchestration
-- **SonarCloud**: maintainability and quality insights
+- **SonarCloud**: maintainability and quality insights (backend JaCoCo XML + frontend Vitest LCOV, waiting for Quality Gate result in CI)
 - **Dependabot**: dependency update hygiene
 - **Security workflow (dependency review / CodeQL when enabled)**: early security signal
 - **GitHub Environments**: staging/production secret and policy isolation
