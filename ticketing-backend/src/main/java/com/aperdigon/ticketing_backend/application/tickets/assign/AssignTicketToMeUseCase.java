@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class AssignTicketToMeUseCase {
+public final class AssignTicketToMeUseCase {
 
     private final TicketRepository ticketRepository;
     private final TicketEventRepository ticketEventRepository;

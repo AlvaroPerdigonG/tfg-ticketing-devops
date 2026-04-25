@@ -31,6 +31,7 @@ Aplicar de forma coherente una arquitectura por capas (*API → Application → 
 
 ## Convenciones de naming
 - Casos de uso: `*UseCase`
+- Implementación de casos de uso: `final class`
 - Entrada de casos de uso:
   - `*Command` para escritura
   - `*Query` para lectura
@@ -58,3 +59,6 @@ Aplicar de forma coherente una arquitectura por capas (*API → Application → 
 ## Política de eventos (timeline)
 - El modelo final de eventos de ticket incluye: `TICKET_CREATED`, `STATUS_CHANGED` y `ASSIGNED_TO_ME`.
 - Los comentarios se representan en timeline como mensajes del agregado `Ticket` (no como `TicketEventType` separado).
+
+## ADR relacionado
+- Ver `docs/architecture/adr/0001-backend-layering-and-auth-boundaries.md`.

@@ -7,7 +7,7 @@ import com.aperdigon.ticketing_backend.domain.user.User;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UpdateUserActiveUseCase {
+public final class UpdateUserActiveUseCase {
 
     private final UserRepository userRepository;
 

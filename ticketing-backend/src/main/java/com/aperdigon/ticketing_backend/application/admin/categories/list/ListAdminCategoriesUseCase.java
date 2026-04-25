@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ListAdminCategoriesUseCase {
+public final class ListAdminCategoriesUseCase {
 
     private final CategoryRepository categoryRepository;
 

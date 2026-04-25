@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Service
-public class RegisterUseCase {
+public final class RegisterUseCase {
 
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$");
 

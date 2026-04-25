@@ -7,7 +7,7 @@ import com.aperdigon.ticketing_backend.domain.shared.validation.Guard;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UpdateCategoryUseCase {
+public final class UpdateCategoryUseCase {
 
     private final CategoryRepository categoryRepository;
 

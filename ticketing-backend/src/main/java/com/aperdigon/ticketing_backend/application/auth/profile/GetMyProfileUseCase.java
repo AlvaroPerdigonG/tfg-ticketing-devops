@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class GetMyProfileUseCase {
+public final class GetMyProfileUseCase {
 
     private final UserRepository userRepository;
 

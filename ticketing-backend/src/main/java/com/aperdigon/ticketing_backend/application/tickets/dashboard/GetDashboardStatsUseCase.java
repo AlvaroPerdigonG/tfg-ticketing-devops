@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 @Service
-public class GetDashboardStatsUseCase {
+public final class GetDashboardStatsUseCase {
 
     private static final Set<UserRole> DASHBOARD_ASSIGNEE_ROLES = Set.of(UserRole.AGENT, UserRole.ADMIN);
 

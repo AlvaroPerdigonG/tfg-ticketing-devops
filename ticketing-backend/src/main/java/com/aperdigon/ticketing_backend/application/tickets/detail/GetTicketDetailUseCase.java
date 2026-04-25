@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class GetTicketDetailUseCase {
+public final class GetTicketDetailUseCase {
 
     private final GetTicketUseCase getTicketUseCase;
     private final TicketEventRepository ticketEventRepository;
