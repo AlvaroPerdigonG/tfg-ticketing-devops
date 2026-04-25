@@ -17,11 +17,9 @@ import com.aperdigon.ticketing_backend.application.tickets.add_comment.AddTicket
 import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeCommand;
 import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.dashboard.GetDashboardStatsUseCase;
-import com.aperdigon.ticketing_backend.application.ports.TicketEventRepository;
-import com.aperdigon.ticketing_backend.application.ports.UserRepository;
+import com.aperdigon.ticketing_backend.application.tickets.detail.GetTicketDetailUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.create.CreateTicketCommand;
 import com.aperdigon.ticketing_backend.application.tickets.create.CreateTicketUseCase;
-import com.aperdigon.ticketing_backend.application.tickets.get.GetTicketUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.list.ListMyTicketsQuery;
 import com.aperdigon.ticketing_backend.application.tickets.list.ListMyTicketsUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.list.ListTicketsQuery;
@@ -30,7 +28,6 @@ import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
-import com.aperdigon.ticketing_backend.domain.user.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
@@ -40,10 +37,6 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -56,11 +49,9 @@ public class TicketController {
     private final AssignTicketToMeUseCase assignTicketToMeUseCase;
     private final ListMyTicketsUseCase listMyTicketsUseCase;
     private final ListTicketsUseCase listTicketsUseCase;
-    private final GetTicketUseCase getTicketUseCase;
+    private final GetTicketDetailUseCase getTicketDetailUseCase;
     private final AddTicketCommentUseCase addTicketCommentUseCase;
     private final GetDashboardStatsUseCase getDashboardStatsUseCase;
-    private final TicketEventRepository ticketEventRepository;
-    private final UserRepository userRepository;
     private final CurrentUserProvider currentUserProvider;
 
     public TicketController(
@@ -69,11 +60,9 @@ public class TicketController {
             AssignTicketToMeUseCase assignTicketToMeUseCase,
             ListMyTicketsUseCase listMyTicketsUseCase,
             ListTicketsUseCase listTicketsUseCase,
-            GetTicketUseCase getTicketUseCase,
+            GetTicketDetailUseCase getTicketDetailUseCase,
             AddTicketCommentUseCase addTicketCommentUseCase,
             GetDashboardStatsUseCase getDashboardStatsUseCase,
-            TicketEventRepository ticketEventRepository,
-            UserRepository userRepository,
             CurrentUserProvider currentUserProvider
     ) {
         this.createTicketUseCase = createTicketUseCase;
@@ -81,11 +70,9 @@ public class TicketController {
         this.assignTicketToMeUseCase = assignTicketToMeUseCase;
         this.listMyTicketsUseCase = listMyTicketsUseCase;
         this.listTicketsUseCase = listTicketsUseCase;
-        this.getTicketUseCase = getTicketUseCase;
+        this.getTicketDetailUseCase = getTicketDetailUseCase;
         this.addTicketCommentUseCase = addTicketCommentUseCase;
         this.getDashboardStatsUseCase = getDashboardStatsUseCase;
-        this.ticketEventRepository = ticketEventRepository;
-        this.userRepository = userRepository;
         this.currentUserProvider = currentUserProvider;
     }
 
@@ -150,30 +137,8 @@ public class TicketController {
     @Operation(summary = "Get full ticket detail by id")
     public TicketDetailResponse getById(@PathVariable UUID id) {
         var actor = currentUserProvider.getCurrentUser();
-        var ticket = getTicketUseCase.execute(new TicketId(id), actor);
-        var events = ticketEventRepository.findByTicketId(new TicketId(id));
-
-        Set<UUID> userIds = new HashSet<>();
-        userIds.add(ticket.createdBy().value());
-        if (ticket.assignedTo() != null) {
-            userIds.add(ticket.assignedTo().value());
-        }
-        for (var comment : ticket.comments()) {
-            userIds.add(comment.authorId().value());
-        }
-        for (var event : events) {
-            if (event.actorUserId() != null) {
-                userIds.add(event.actorUserId().value());
-            }
-        }
-
-        Map<UUID, String> userNamesById = new HashMap<>();
-        for (var userId : userIds) {
-            userRepository.findById(new UserId(userId))
-                    .ifPresent(user -> userNamesById.put(userId, user.displayName()));
-        }
-
-        return TicketDetailResponse.from(ticket, events, userId -> userNamesById.getOrDefault(userId, userId.toString()));
+        var result = getTicketDetailUseCase.execute(new TicketId(id), actor);
+        return TicketDetailResponse.from(result.ticket(), result.events(), result::resolveUserDisplayName);
     }
 
     @PostMapping("/{id}/comments")
