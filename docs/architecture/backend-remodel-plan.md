@@ -43,6 +43,14 @@ Aplicar de forma coherente una arquitectura por capas (*API → Application → 
 - `SecurityConfig`: autorización por endpoint (coarse-grained).
 - Use cases: autorización de negocio contextual (fine-grained).
 
+## Patrón único de actor actual (Current User)
+- Los controllers no deben parsear JWT directamente.
+- La identidad del actor se obtiene siempre a través de `CurrentUserProvider`.
+- Los endpoints que necesiten perfil de usuario (`/api/auth/me`) deben delegar en un use case de `application`, que usa el actor actual y puertos de dominio para devolver la información de perfil.
+- Separación defendible en TFG:
+  - `SecurityConfig` decide **si** se puede entrar al endpoint.
+  - El use case decide **qué** puede hacer el actor dentro de la operación.
+
 ## Criterio de refactor
 - Priorizar coherencia y mantenibilidad sin romper contratos HTTP.
 - Refactor por bloques pequeños (1 bloque = 1 commit).
