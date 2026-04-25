@@ -1,4 +1,4 @@
-import { Alert, Card, Empty, Progress, Skeleton, Space, Typography } from "antd";
+import { Alert, Card, Empty, Skeleton, Space, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ticketsApi } from "../../api/ticketsApi";
@@ -50,13 +50,26 @@ function AgentBarChart({
                 <div key={item.assigneeUserId}>
                   <Space style={{ width: "100%", justifyContent: "space-between" }}>
                     <Typography.Text>{item.assigneeDisplayName}</Typography.Text>
-                    <Typography.Text strong>{item.count}</Typography.Text>
+                    <Typography.Text style={{ fontWeight: 700 }}>{item.count}</Typography.Text>
                   </Space>
-                  <Progress
-                    percent={Number(percentage.toFixed(2))}
-                    showInfo={false}
-                    strokeColor="#389e0d"
-                  />
+                  <div
+                    aria-label={`chart-bar-${item.assigneeUserId}`}
+                    style={{
+                      width: "100%",
+                      background: "#f3f4f6",
+                      borderRadius: 999,
+                      height: 10,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${Number(percentage.toFixed(2))}%`,
+                        background: "#389e0d",
+                        height: "100%",
+                      }}
+                    />
+                  </div>
                 </div>
               );
             })}
