@@ -1,16 +1,18 @@
 package com.aperdigon.ticketing_backend.api.admin;
 
-import com.aperdigon.ticketing_backend.application.ports.CategoryRepository;
-import com.aperdigon.ticketing_backend.application.ports.UserRepository;
-import com.aperdigon.ticketing_backend.application.shared.exception.NotFoundException;
-import com.aperdigon.ticketing_backend.domain.category.Category;
+import com.aperdigon.ticketing_backend.application.admin.categories.create.CreateCategoryCommand;
+import com.aperdigon.ticketing_backend.application.admin.categories.create.CreateCategoryUseCase;
+import com.aperdigon.ticketing_backend.application.admin.categories.list.ListAdminCategoriesUseCase;
+import com.aperdigon.ticketing_backend.application.admin.categories.update.UpdateCategoryCommand;
+import com.aperdigon.ticketing_backend.application.admin.categories.update.UpdateCategoryUseCase;
+import com.aperdigon.ticketing_backend.application.admin.users.list.ListAdminUsersUseCase;
+import com.aperdigon.ticketing_backend.application.admin.users.update_active.UpdateUserActiveCommand;
+import com.aperdigon.ticketing_backend.application.admin.users.update_active.UpdateUserActiveUseCase;
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
-import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,18 +25,30 @@ import java.util.UUID;
 @Tag(name = "Admin", description = "Administrative endpoints")
 public class AdminController {
 
-    private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final ListAdminCategoriesUseCase listAdminCategoriesUseCase;
+    private final CreateCategoryUseCase createCategoryUseCase;
+    private final UpdateCategoryUseCase updateCategoryUseCase;
+    private final ListAdminUsersUseCase listAdminUsersUseCase;
+    private final UpdateUserActiveUseCase updateUserActiveUseCase;
 
-    public AdminController(CategoryRepository categoryRepository, UserRepository userRepository) {
-        this.categoryRepository = categoryRepository;
-        this.userRepository = userRepository;
+    public AdminController(
+            ListAdminCategoriesUseCase listAdminCategoriesUseCase,
+            CreateCategoryUseCase createCategoryUseCase,
+            UpdateCategoryUseCase updateCategoryUseCase,
+            ListAdminUsersUseCase listAdminUsersUseCase,
+            UpdateUserActiveUseCase updateUserActiveUseCase
+    ) {
+        this.listAdminCategoriesUseCase = listAdminCategoriesUseCase;
+        this.createCategoryUseCase = createCategoryUseCase;
+        this.updateCategoryUseCase = updateCategoryUseCase;
+        this.listAdminUsersUseCase = listAdminUsersUseCase;
+        this.updateUserActiveUseCase = updateUserActiveUseCase;
     }
 
     @GetMapping("/categories")
     @Operation(summary = "List all categories (admin)")
     public List<AdminCategoryResponse> listCategories() {
-        return categoryRepository.findAll().stream()
+        return listAdminCategoriesUseCase.execute().stream()
                 .map(AdminCategoryResponse::from)
                 .toList();
     }
@@ -42,13 +56,7 @@ public class AdminController {
     @PostMapping("/categories")
     @Operation(summary = "Create category (admin)")
     public ResponseEntity<AdminCategoryResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
-        var trimmedName = request.name().trim();
-        if (categoryRepository.findByName(trimmedName).isPresent()) {
-            throw new InvalidArgumentException("Category already exists");
-        }
-
-        var category = new Category(new CategoryId(UUID.randomUUID()), trimmedName, true);
-        var saved = categoryRepository.save(category);
+        var saved = createCategoryUseCase.execute(new CreateCategoryCommand(request.name()));
 
         return ResponseEntity.created(URI.create("/api/admin/categories/" + saved.id().value()))
                 .body(AdminCategoryResponse.from(saved));
@@ -60,18 +68,18 @@ public class AdminController {
             @PathVariable UUID categoryId,
             @Valid @RequestBody UpdateCategoryRequest request
     ) {
-        var existing = categoryRepository.findById(new CategoryId(categoryId))
-                .orElseThrow(() -> new NotFoundException("Category not found"));
-
-        var updated = new Category(existing.id(), request.name().trim(), request.isActive());
-        var saved = categoryRepository.save(updated);
+        var saved = updateCategoryUseCase.execute(new UpdateCategoryCommand(
+                new CategoryId(categoryId),
+                request.name(),
+                request.isActive()
+        ));
         return AdminCategoryResponse.from(saved);
     }
 
     @GetMapping("/users")
     @Operation(summary = "List all users (admin)")
     public List<AdminUserResponse> listUsers() {
-        return userRepository.findAll().stream()
+        return listAdminUsersUseCase.execute().stream()
                 .map(AdminUserResponse::from)
                 .toList();
     }
@@ -82,19 +90,10 @@ public class AdminController {
             @PathVariable UUID userId,
             @Valid @RequestBody UpdateUserActiveRequest request
     ) {
-        var existing = userRepository.findById(new UserId(userId))
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        var updated = new User(
-                existing.id(),
-                existing.email(),
-                existing.displayName(),
-                existing.passwordHash(),
-                existing.role(),
+        var saved = updateUserActiveUseCase.execute(new UpdateUserActiveCommand(
+                new UserId(userId),
                 request.isActive()
-        );
-
-        var saved = userRepository.save(updated);
+        ));
         return AdminUserResponse.from(saved);
     }
 }
