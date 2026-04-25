@@ -15,16 +15,18 @@ const baseItems: AppMenuItem[] = [
   { key: "/profile", icon: <HiBars3 fontSize={18} />, label: "Perfil" },
 ];
 
-function getMenuItems(isAdmin: boolean): AppMenuItem[] {
-  if (isAdmin) {
-    return [
-      { key: "/dashboard", icon: <MdDashboard fontSize={18} />, label: "Dashboard" },
-      ...baseItems,
-      { key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" },
-    ];
+function getMenuItems(canSeeDashboard: boolean, isAdmin: boolean): AppMenuItem[] {
+  const items: AppMenuItem[] = [...baseItems];
+
+  if (canSeeDashboard) {
+    items.unshift({ key: "/dashboard", icon: <MdDashboard fontSize={18} />, label: "Dashboard" });
   }
 
-  return baseItems;
+  if (isAdmin) {
+    items.push({ key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" });
+  }
+
+  return items;
 }
 
 function getSelectedKey(pathname: string, items: AppMenuItem[]) {
@@ -41,7 +43,9 @@ export function AppShell() {
   const navigate = useNavigate();
   const { hasRole, logout } = useAuth();
 
-  const menuItems = getMenuItems(hasRole("ADMIN"));
+  const isAdmin = hasRole("ADMIN");
+  const canSeeDashboard = hasRole("AGENT") || isAdmin;
+  const menuItems = getMenuItems(canSeeDashboard, isAdmin);
 
   const onLogout = () => {
     logout();

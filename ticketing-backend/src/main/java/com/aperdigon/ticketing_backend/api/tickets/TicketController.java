@@ -7,6 +7,7 @@ import com.aperdigon.ticketing_backend.api.tickets.comments.AddTicketCommentRequ
 import com.aperdigon.ticketing_backend.api.tickets.comments.AddTicketCommentResponse;
 import com.aperdigon.ticketing_backend.api.tickets.create.CreateTicketRequest;
 import com.aperdigon.ticketing_backend.api.tickets.create.CreateTicketResponse;
+import com.aperdigon.ticketing_backend.api.tickets.dashboard.DashboardStatsResponse;
 import com.aperdigon.ticketing_backend.api.tickets.detail.TicketDetailResponse;
 import com.aperdigon.ticketing_backend.api.tickets.list.TicketSummaryResponse;
 import com.aperdigon.ticketing_backend.application.tickets.change_status.ChangeTicketStatusCommand;
@@ -15,6 +16,7 @@ import com.aperdigon.ticketing_backend.application.tickets.add_comment.AddTicket
 import com.aperdigon.ticketing_backend.application.tickets.add_comment.AddTicketCommentUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeCommand;
 import com.aperdigon.ticketing_backend.application.tickets.assign.AssignTicketToMeUseCase;
+import com.aperdigon.ticketing_backend.application.tickets.dashboard.GetDashboardStatsUseCase;
 import com.aperdigon.ticketing_backend.application.ports.TicketEventRepository;
 import com.aperdigon.ticketing_backend.application.ports.UserRepository;
 import com.aperdigon.ticketing_backend.application.tickets.create.CreateTicketCommand;
@@ -56,6 +58,7 @@ public class TicketController {
     private final ListTicketsUseCase listTicketsUseCase;
     private final GetTicketUseCase getTicketUseCase;
     private final AddTicketCommentUseCase addTicketCommentUseCase;
+    private final GetDashboardStatsUseCase getDashboardStatsUseCase;
     private final TicketEventRepository ticketEventRepository;
     private final UserRepository userRepository;
     private final CurrentUserProvider currentUserProvider;
@@ -68,6 +71,7 @@ public class TicketController {
             ListTicketsUseCase listTicketsUseCase,
             GetTicketUseCase getTicketUseCase,
             AddTicketCommentUseCase addTicketCommentUseCase,
+            GetDashboardStatsUseCase getDashboardStatsUseCase,
             TicketEventRepository ticketEventRepository,
             UserRepository userRepository,
             CurrentUserProvider currentUserProvider
@@ -79,6 +83,7 @@ public class TicketController {
         this.listTicketsUseCase = listTicketsUseCase;
         this.getTicketUseCase = getTicketUseCase;
         this.addTicketCommentUseCase = addTicketCommentUseCase;
+        this.getDashboardStatsUseCase = getDashboardStatsUseCase;
         this.ticketEventRepository = ticketEventRepository;
         this.userRepository = userRepository;
         this.currentUserProvider = currentUserProvider;
@@ -131,6 +136,14 @@ public class TicketController {
 
         var result = listTicketsUseCase.execute(new ListTicketsQuery(actor, scope, status, q, pageable));
         return PageResponse.from(result.map(TicketSummaryResponse::from));
+    }
+
+    @GetMapping("/dashboard/stats")
+    @Operation(summary = "Get dashboard stats for agents/admins")
+    public DashboardStatsResponse dashboardStats() {
+        var actor = currentUserProvider.getCurrentUser();
+        var result = getDashboardStatsUseCase.execute(actor);
+        return DashboardStatsResponse.from(result);
     }
 
     @GetMapping("/{id}")

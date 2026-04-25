@@ -1,11 +1,13 @@
 package com.aperdigon.ticketing_backend.test_support;
 
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
+import com.aperdigon.ticketing_backend.application.tickets.dashboard.AgentTicketCount;
 import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
+import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class InMemoryTicketRepository implements TicketRepository {
@@ -51,6 +55,56 @@ public final class InMemoryTicketRepository implements TicketRepository {
                 .toList();
 
         return toPage(filtered, pageable);
+    }
+
+    @Override
+    public long countUnassigned() {
+        return store.values().stream()
+                .filter(ticket -> ticket.assignedTo() == null)
+                .count();
+    }
+
+    @Override
+    public long countAssignedTo(UserId assigneeId) {
+        return store.values().stream()
+                .filter(ticket -> assigneeId.equals(ticket.assignedTo()))
+                .count();
+    }
+
+    @Override
+    public long countByStatus(TicketStatus status) {
+        return store.values().stream()
+                .filter(ticket -> ticket.status() == status)
+                .count();
+    }
+
+    @Override
+    public List<AgentTicketCount> countAssignedByAssigneeRoles(Set<UserRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return List.of();
+        }
+        return store.values().stream()
+                .filter(ticket -> ticket.assignedTo() != null)
+                .collect(Collectors.groupingBy(Ticket::assignedTo, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> new AgentTicketCount(entry.getKey(), entry.getKey().value().toString(), entry.getValue()))
+                .sorted(Comparator.comparingLong(AgentTicketCount::count).reversed())
+                .toList();
+    }
+
+    @Override
+    public List<AgentTicketCount> countByStatusGroupedByAssigneeRoles(TicketStatus status, Set<UserRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return List.of();
+        }
+        return store.values().stream()
+                .filter(ticket -> ticket.assignedTo() != null)
+                .filter(ticket -> ticket.status() == status)
+                .collect(Collectors.groupingBy(Ticket::assignedTo, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> new AgentTicketCount(entry.getKey(), entry.getKey().value().toString(), entry.getValue()))
+                .sorted(Comparator.comparingLong(AgentTicketCount::count).reversed())
+                .toList();
     }
 
     private Stream<Ticket> sortedTickets() {

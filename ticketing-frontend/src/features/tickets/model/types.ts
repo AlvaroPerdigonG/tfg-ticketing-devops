@@ -71,6 +71,25 @@ export type CreateTicketResponse = {
   ticketId: string;
 };
 
+export type DashboardAgentCount = {
+  assigneeUserId: string;
+  assigneeDisplayName: string;
+  count: number;
+};
+
+export type DashboardStats = {
+  cards: {
+    unassigned: number;
+    assignedToMe: number;
+    inProgress: number;
+    onHold: number;
+  };
+  charts: {
+    resolvedByAgent: DashboardAgentCount[];
+    assignedByAgent: DashboardAgentCount[];
+  };
+};
+
 export type PaginatedResponse<T> = {
   items: T[];
   page: number;
