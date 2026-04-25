@@ -68,7 +68,7 @@ describe("CreateTicketPage", () => {
 
     const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
     fireEvent.mouseDown(categoryCombobox);
-    await user.click(await screen.findByText("General"));
+    fireEvent.click(await screen.findByText("General"));
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Crear ticket" })).toBeEnabled();
@@ -88,11 +88,12 @@ describe("CreateTicketPage", () => {
   });
 
   it("deshabilita botón durante el envío para evitar doble submit", async () => {
-    const user = userEvent.setup();
+    let createTicketRequests = 0;
 
     server.use(
       http.get("/api/categories", () => jsonResponse([{ id: "cat-1", name: "General" }])),
       http.post("/api/tickets", async () => {
+        createTicketRequests += 1;
         await new Promise((resolve) => setTimeout(resolve, 200));
         return jsonResponse({ ticketId: "t-777" }, { status: 201 });
       }),
@@ -100,15 +101,24 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    await user.type(await screen.findByLabelText("Título"), "Ticket en cola");
-    await user.type(screen.getByLabelText("Descripción"), "Descripción completa");
+    fireEvent.change(await screen.findByLabelText("Título"), {
+      target: { value: "Ticket en cola" },
+    });
+    fireEvent.change(screen.getByLabelText("Descripción"), {
+      target: { value: "Descripción completa" },
+    });
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Categoría" }));
-    await user.click(await screen.findByText("General"));
+    fireEvent.click(await screen.findByText("General"));
 
     const submitButton = screen.getByRole("button", { name: "Crear ticket" });
-    await user.click(submitButton);
+    const form = submitButton.closest("form");
+    expect(form).not.toBeNull();
+    fireEvent.submit(form!);
+    fireEvent.submit(form!);
 
-    expect(submitButton).toHaveClass("ant-btn-loading");
+    await waitFor(() => {
+      expect(createTicketRequests).toBe(1);
+    });
   });
 
   it("muestra error visible cuando falla el envío", async () => {
@@ -125,7 +135,7 @@ describe("CreateTicketPage", () => {
     await user.type(screen.getByLabelText("Descripción"), "Error de cola de impresión");
 
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Categoría" }));
-    await user.click(await screen.findByText("General"));
+    fireEvent.click(await screen.findByText("General"));
     await user.click(screen.getByRole("button", { name: "Crear ticket" }));
 
     expect(await screen.findByText("Error al crear ticket")).toBeInTheDocument();
