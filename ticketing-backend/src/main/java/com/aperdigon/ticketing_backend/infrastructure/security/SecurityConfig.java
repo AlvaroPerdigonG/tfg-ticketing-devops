@@ -38,6 +38,7 @@ public class SecurityConfig {
                         //UC1: crear ticket todos
                         .requestMatchers(HttpMethod.POST, "/api/tickets").hasAnyRole("USER","AGENT","ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/tickets/me").hasAnyRole("USER","AGENT","ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/dashboard/**").hasAnyRole("AGENT", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/tickets").hasAnyRole("AGENT", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/tickets/*").hasAnyRole("USER", "AGENT", "ADMIN")
 

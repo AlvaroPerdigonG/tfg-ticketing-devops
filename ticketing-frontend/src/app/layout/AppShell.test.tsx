@@ -73,6 +73,14 @@ describe("AppShell", () => {
     expect(screen.getByText("Administración")).toBeInTheDocument();
   });
 
+  it("shows dashboard menu for AGENT but not admin menu", () => {
+    hasRoleMock.mockImplementation((role) => role === "AGENT");
+    renderWithRouter();
+
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(screen.queryByText("Administración")).not.toBeInTheDocument();
+  });
+
   it("logs out and redirects to login from header button", async () => {
     hasRoleMock.mockReturnValue(false);
     const user = userEvent.setup();

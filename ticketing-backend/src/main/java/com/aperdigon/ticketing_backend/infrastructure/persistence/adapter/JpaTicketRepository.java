@@ -1,11 +1,13 @@
 package com.aperdigon.ticketing_backend.infrastructure.persistence.adapter;
 
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
+import com.aperdigon.ticketing_backend.application.tickets.dashboard.AgentTicketCount;
 import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
+import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.CommentJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.TicketJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.mapper.TicketMapper;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class JpaTicketRepository implements TicketRepository {
@@ -145,5 +148,39 @@ public class JpaTicketRepository implements TicketRepository {
         };
 
         return ticketSpringRepo.findAll(spec, pageable).map(TicketMapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countUnassigned() {
+        return ticketSpringRepo.countByAssignedToIsNull();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countAssignedTo(UserId assigneeId) {
+        return ticketSpringRepo.countByAssignedTo_Id(assigneeId.value());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countByStatus(TicketStatus status) {
+        return ticketSpringRepo.countByStatus(status);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AgentTicketCount> countAssignedByAssigneeRoles(Set<UserRole> roles) {
+        return ticketSpringRepo.countAssignedByAssigneeRoles(roles).stream()
+                .map(row -> new AgentTicketCount(new UserId(row.getAssigneeId()), row.getAssigneeDisplayName(), row.getTicketCount()))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AgentTicketCount> countByStatusGroupedByAssigneeRoles(TicketStatus status, Set<UserRole> roles) {
+        return ticketSpringRepo.countByStatusGroupedByAssigneeRoles(status, roles).stream()
+                .map(row -> new AgentTicketCount(new UserId(row.getAssigneeId()), row.getAssigneeDisplayName(), row.getTicketCount()))
+                .toList();
     }
 }

@@ -3,6 +3,7 @@ import type {
   CreateTicketInput,
   AddTicketCommentResponse,
   CreateTicketResponse,
+  DashboardStats,
   PaginatedResponse,
   TicketCategory,
   TicketDetail,
@@ -57,4 +58,6 @@ export const ticketsApi = {
 
   addComment: (ticketId: string, content: string) =>
     authClient.post<AddTicketCommentResponse>(`/api/tickets/${ticketId}/comments`, { content }),
+
+  getDashboardStats: () => authClient.get<DashboardStats>("/api/tickets/dashboard/stats"),
 };
