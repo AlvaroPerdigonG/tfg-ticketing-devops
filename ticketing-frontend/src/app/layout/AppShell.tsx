@@ -31,7 +31,7 @@ function getMenuItems(canSeeDashboard: boolean, isAdmin: boolean): AppMenuItem[]
 
 function getSelectedKey(pathname: string, items: AppMenuItem[]) {
   const matched = items
-    .map((item) => item.key?.toString() ?? "")
+    .map((item) => item?.key?.toString() ?? "")
     .sort((a, b) => b.length - a.length)
     .find((key) => key && pathname.startsWith(key));
 

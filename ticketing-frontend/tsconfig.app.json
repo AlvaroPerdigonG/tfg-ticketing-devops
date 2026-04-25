@@ -19,11 +19,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "antd": ["src/vendor/antd/index.tsx"],
-      "antd/*": ["src/vendor/antd/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["src"]
 }
