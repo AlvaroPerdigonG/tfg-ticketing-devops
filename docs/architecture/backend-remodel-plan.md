@@ -54,3 +54,7 @@ Aplicar de forma coherente una arquitectura por capas (*API → Application → 
 ## Criterio de refactor
 - Priorizar coherencia y mantenibilidad sin romper contratos HTTP.
 - Refactor por bloques pequeños (1 bloque = 1 commit).
+
+## Política de eventos (timeline)
+- El modelo final de eventos de ticket incluye: `TICKET_CREATED`, `STATUS_CHANGED` y `ASSIGNED_TO_ME`.
+- Los comentarios se representan en timeline como mensajes del agregado `Ticket` (no como `TicketEventType` separado).

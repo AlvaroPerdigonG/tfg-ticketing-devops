@@ -191,5 +191,13 @@ public final class Ticket {
     public TicketPriority priority() { return priority; }
     public Instant createdAt() { return createdAt; }
     public Instant updatedAt() { return updatedAt; }
+    public List<TicketStatus> availableTransitions() {
+        return switch (this.status) {
+            case OPEN -> List.of(TicketStatus.IN_PROGRESS);
+            case IN_PROGRESS -> List.of(TicketStatus.ON_HOLD, TicketStatus.RESOLVED);
+            case ON_HOLD -> List.of(TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED);
+            case RESOLVED -> List.of();
+        };
+    }
     public List<Comment> comments() { return Collections.unmodifiableList(comments); }
 }
