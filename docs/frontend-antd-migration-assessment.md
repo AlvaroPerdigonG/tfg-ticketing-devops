@@ -113,3 +113,17 @@ No se espera un “rompimiento masivo” si la app ya corre con Ant real, pero s
 ## Recomendación final
 
 Hacer el cambio es **aconsejable**: reduce deuda técnica, elimina una fuente de confusión (TS vs runtime) y deja el stack coherente con dependencias reales. Riesgo general **bajo-medio**, centrado principalmente en tests y algunos ajustes de UI menores.
+
+## Aclaración importante: ¿“se interpreta distinto al escribir que al ejecutar”?
+
+Sí, en este proyecto puede pasar algo muy parecido a eso:
+
+- **Mientras escribes (TypeScript/IDE)**, el import `from "antd"` se resuelve usando `paths` hacia `src/vendor/antd`.
+- **Cuando ejecutas con Vite (dev/build/test)**, el import `from "antd"` se resuelve desde `node_modules/antd` porque Vite no tiene ese alias al shim.
+
+Técnicamente no son “dos JavaScript distintos en el navegador”, sino **dos resoluciones de módulo en fases distintas del toolchain**:
+
+1. **Fase de type-check/editor** → manda `tsconfig` (`paths`).
+2. **Fase de bundling/runtime** → manda Vite/Rollup (sin alias de `antd`, por lo que usa paquete real).
+
+Consecuencia práctica: puedes tener una situación engañosa donde el editor/TS “cree” unas props o comportamientos (shim), pero en ejecución manda otra implementación (Ant real). Esa desalineación es precisamente la deuda técnica que conviene eliminar.
