@@ -80,7 +80,9 @@ public final class InMemoryTicketRepository implements TicketRepository {
 
     @Override
     public List<AgentTicketCount> countAssignedByAssigneeRoles(Set<UserRole> roles) {
-        void roles;
+        if (roles == null || roles.isEmpty()) {
+            return List.of();
+        }
         return store.values().stream()
                 .filter(ticket -> ticket.assignedTo() != null)
                 .collect(Collectors.groupingBy(Ticket::assignedTo, Collectors.counting()))
@@ -92,7 +94,9 @@ public final class InMemoryTicketRepository implements TicketRepository {
 
     @Override
     public List<AgentTicketCount> countByStatusGroupedByAssigneeRoles(TicketStatus status, Set<UserRole> roles) {
-        void roles;
+        if (roles == null || roles.isEmpty()) {
+            return List.of();
+        }
         return store.values().stream()
                 .filter(ticket -> ticket.assignedTo() != null)
                 .filter(ticket -> ticket.status() == status)
