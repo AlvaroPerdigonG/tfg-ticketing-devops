@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 
 @Service
-public class AddTicketCommentUseCase {
+public final class AddTicketCommentUseCase {
 
     private final TicketRepository ticketRepository;
     private final Clock clock;

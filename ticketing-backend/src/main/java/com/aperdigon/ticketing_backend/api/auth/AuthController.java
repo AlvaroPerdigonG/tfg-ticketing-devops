@@ -1,21 +1,20 @@
 package com.aperdigon.ticketing_backend.api.auth;
 
+import com.aperdigon.ticketing_backend.api.shared.currentuser.CurrentUserProvider;
 import com.aperdigon.ticketing_backend.application.auth.login.LoginCommand;
 import com.aperdigon.ticketing_backend.application.auth.login.LoginUseCase;
+import com.aperdigon.ticketing_backend.application.auth.profile.GetMyProfileUseCase;
 import com.aperdigon.ticketing_backend.application.auth.register.RegisterCommand;
 import com.aperdigon.ticketing_backend.application.auth.register.RegisterUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,10 +23,19 @@ public class AuthController {
 
     private final LoginUseCase loginUseCase;
     private final RegisterUseCase registerUseCase;
+    private final GetMyProfileUseCase getMyProfileUseCase;
+    private final CurrentUserProvider currentUserProvider;
 
-    public AuthController(LoginUseCase loginUseCase, RegisterUseCase registerUseCase) {
+    public AuthController(
+            LoginUseCase loginUseCase,
+            RegisterUseCase registerUseCase,
+            GetMyProfileUseCase getMyProfileUseCase,
+            CurrentUserProvider currentUserProvider
+    ) {
         this.loginUseCase = loginUseCase;
         this.registerUseCase = registerUseCase;
+        this.getMyProfileUseCase = getMyProfileUseCase;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @PostMapping("/login")
@@ -52,17 +60,14 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Get profile of the authenticated user")
-    public ResponseEntity<AuthProfileResponse> me(JwtAuthenticationToken authentication) {
-        var jwt = authentication.getToken();
-        var roles = jwt.getClaimAsStringList("roles");
-        var role = roles == null || roles.isEmpty() ? "UNKNOWN" : roles.get(0);
-
+    public ResponseEntity<AuthProfileResponse> me() {
+        var result = getMyProfileUseCase.execute(currentUserProvider.getCurrentUser());
         return ResponseEntity.ok(new AuthProfileResponse(
-                jwt.getSubject(),
-                jwt.getClaimAsString("email"),
-                jwt.getClaimAsString("displayName"),
-                role,
-                roles == null ? List.of() : roles
+                result.userId().toString(),
+                result.email(),
+                result.displayName(),
+                result.role().name(),
+                result.roles()
         ));
     }
 }

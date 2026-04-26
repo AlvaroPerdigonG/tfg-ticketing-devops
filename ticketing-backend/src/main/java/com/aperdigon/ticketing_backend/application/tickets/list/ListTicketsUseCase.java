@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ListTicketsUseCase {
+public final class ListTicketsUseCase {
 
     private final TicketRepository ticketRepository;
 

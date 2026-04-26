@@ -58,9 +58,6 @@ public record TicketDetailResponse(
         }
 
         for (var event : events) {
-            if (event.type() == TicketEventType.COMMENT_ADDED) {
-                continue;
-            }
             entries.add(new TimelineEntryResponse(
                     event.id(),
                     "EVENT",
@@ -93,17 +90,8 @@ public record TicketDetailResponse(
                 ticket.assignedTo() == null ? null : userDisplayNameResolver.apply(ticket.assignedTo().value()),
                 ticket.categoryId().value(),
                 entries,
-                availableTransitions(ticket.status())
+                ticket.availableTransitions()
         );
-    }
-
-    private static List<TicketStatus> availableTransitions(TicketStatus status) {
-        return switch (status) {
-            case OPEN -> List.of(TicketStatus.IN_PROGRESS);
-            case IN_PROGRESS -> List.of(TicketStatus.ON_HOLD, TicketStatus.RESOLVED);
-            case ON_HOLD -> List.of(TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED);
-            case RESOLVED -> List.of();
-        };
     }
 
     public record TimelineEntryResponse(

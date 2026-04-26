@@ -10,7 +10,7 @@ import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GetTicketUseCase {
+public final class GetTicketUseCase {
 
     private final TicketRepository ticketRepository;
 
