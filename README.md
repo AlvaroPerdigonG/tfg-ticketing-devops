@@ -1,3 +1,7 @@
+[![CI](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AlvaroPerdigonG_tfg-ticketing-devops&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AlvaroPerdigonG_tfg-ticketing-devops)
+[![Deploy Backend Production](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/deploy-backend-production.yml/badge.svg)](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/deploy-backend-production.yml)
+
 # TFG – Plataforma de Ticketing amb Arquitectura DevOps
 
 Aquest repositori conté el codi font del Treball de Final de Grau titulat:
