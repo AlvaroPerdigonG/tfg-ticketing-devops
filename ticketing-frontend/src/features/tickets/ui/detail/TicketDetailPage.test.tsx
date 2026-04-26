@@ -180,15 +180,13 @@ describe("TicketDetailPage", () => {
 
   it("si el ticket está resuelto deshabilita envío de comentarios", async () => {
     server.use(
-      http.get(
-        "/api/tickets/ticket-1",
-        () =>
-          jsonResponse(
-            buildTicket({
-              status: "RESOLVED",
-              availableTransitions: [],
-            }),
-          ),
+      http.get("/api/tickets/ticket-1", () =>
+        jsonResponse(
+          buildTicket({
+            status: "RESOLVED",
+            availableTransitions: [],
+          }),
+        ),
       ),
     );
 
