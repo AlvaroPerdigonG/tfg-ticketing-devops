@@ -135,6 +135,6 @@ public final class AddTicketCommentUseCaseTest {
         var ticketRepository = new InMemoryTicketRepository();
         var useCase = new AddTicketCommentUseCase(ticketRepository, Clock.systemUTC());
 
-        assertThrows(IllegalArgumentException.class, () -> useCase.execute(null));
+        assertThrows(com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException.class, () -> useCase.execute(null));
     }
 }

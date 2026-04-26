@@ -81,7 +81,7 @@ public final class GetDashboardStatsUseCaseTest {
     void null_actor_is_rejected() {
         var useCase = new GetDashboardStatsUseCase(new StubTicketRepository());
 
-        assertThrows(IllegalArgumentException.class, () -> useCase.execute(null));
+        assertThrows(com.aperdigon.ticketing_backend.domain.shared.exception.InvalidArgumentException.class, () -> useCase.execute(null));
     }
 
     private static final class StubTicketRepository implements TicketRepository {
