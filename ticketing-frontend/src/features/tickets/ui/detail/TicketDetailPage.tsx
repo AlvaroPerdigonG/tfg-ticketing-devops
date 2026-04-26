@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../../auth/hooks/useAuth";
 import { ticketsApi } from "../../api/ticketsApi";
 import { ticketPriorityLabel, ticketStatusLabel } from "../../model/presentation";
-import type { TicketDetail, TicketStatus, TimelineEntry } from "../../model/types";
+import type { TicketCategory, TicketDetail, TicketStatus, TimelineEntry } from "../../model/types";
 import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 
 type LoadState = "loading" | "ready" | "error";
@@ -28,6 +28,7 @@ export function TicketDetailPage() {
   const [busyAction, setBusyAction] = useState<"assign" | "status" | null>(null);
   const [commentText, setCommentText] = useState("");
   const [busyComment, setBusyComment] = useState(false);
+  const [categories, setCategories] = useState<TicketCategory[]>([]);
 
   const availableStatusTransitions = useMemo(
     () => ticket?.availableTransitions ?? ([] as TicketStatus[]),
@@ -62,6 +63,12 @@ export function TicketDetailPage() {
     }));
   }, [ticket]);
 
+  const categoryDisplayName = useMemo(() => {
+    if (!ticket) return "";
+    const category = categories.find((item) => item.id === ticket.categoryId);
+    return category?.name ?? ticket.categoryId;
+  }, [categories, ticket]);
+
   useEffect(() => {
     if (!id) {
       setLoadState("error");
@@ -76,9 +83,13 @@ export function TicketDetailPage() {
       setErrorMessage(null);
 
       try {
-        const response = await ticketsApi.getTicketById(id);
+        const [ticketResponse, categoriesResponse] = await Promise.all([
+          ticketsApi.getTicketById(id),
+          ticketsApi.getCategories().catch(() => []),
+        ]);
         if (!mounted) return;
-        setTicket(response);
+        setTicket(ticketResponse);
+        setCategories(categoriesResponse);
         setLoadState("ready");
       } catch (error) {
         if (!mounted) return;
@@ -171,7 +182,13 @@ export function TicketDetailPage() {
         />
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr 1.5fr", gap: 16 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: canManage ? "2fr 3fr 1.5fr" : "2fr 4fr",
+          gap: 16,
+        }}
+      >
         <div>
           <Card>
             <Space direction="vertical" size={12} style={{ width: "100%" }}>
@@ -186,7 +203,7 @@ export function TicketDetailPage() {
                 Metadata
               </Typography.Title>
               <Typography.Text>ID: {ticket.id}</Typography.Text>
-              <Typography.Text>Categoría: {ticket.categoryId}</Typography.Text>
+              <Typography.Text>Categoría: {categoryDisplayName}</Typography.Text>
               <Typography.Text>Creado por: {ticket.createdByDisplayName}</Typography.Text>
               <Typography.Text>
                 Asignado a: {ticket.assignedToDisplayName ?? "Sin asignar"}
@@ -240,21 +257,12 @@ export function TicketDetailPage() {
           </Card>
         </div>
 
-        <div>
-          <Card>
-            <Typography.Title level={5} style={{ margin: "0 0 12px" }}>
-              Acciones
-            </Typography.Title>
-            {!canManage && (
-              <Alert
-                showIcon
-                type="info"
-                message="Vista de solo lectura"
-                description="Tu rol solo puede ver el detalle y la conversación del ticket."
-              />
-            )}
-
-            {canManage && (
+        {canManage && (
+          <div>
+            <Card>
+              <Typography.Title level={5} style={{ margin: "0 0 12px" }}>
+                Acciones
+              </Typography.Title>
               <Space direction="vertical" style={{ width: "100%" }} size={12}>
                 {!ticket.assignedToUserId && (
                   <Button loading={busyAction === "assign"} onClick={handleAssignToMe}>
@@ -281,9 +289,9 @@ export function TicketDetailPage() {
                   </Button>
                 ))}
               </Space>
-            )}
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
       </div>
     </Space>
   );

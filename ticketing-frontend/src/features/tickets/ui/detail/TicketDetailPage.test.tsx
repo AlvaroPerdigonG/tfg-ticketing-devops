@@ -64,6 +64,14 @@ describe("TicketDetailPage", () => {
     navigateMock.mockReset();
     paramsMock.mockReturnValue({ id: "ticket-1" });
     hasAnyRoleMock.mockReturnValue(true);
+    server.use(
+      http.get("/api/categories", () =>
+        jsonResponse([
+          { id: "cat-1", name: "Hardware" },
+          { id: "cat-2", name: "Software" },
+        ]),
+      ),
+    );
   });
 
   it("carga el ticket y muestra título, estado y timeline", async () => {
@@ -74,6 +82,7 @@ describe("TicketDetailPage", () => {
     expect(await screen.findByTestId("ticket-detail-title")).toHaveTextContent("Printer issue");
     expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("Abierto");
     expect(screen.getByText("Paper jam on tray 2")).toBeInTheDocument();
+    expect(screen.getByText("Categoría: Hardware")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Asignarme ticket" })).toBeInTheDocument();
   });
 
@@ -167,13 +176,14 @@ describe("TicketDetailPage", () => {
     });
   });
 
-  it("en rol USER muestra vista solo lectura y oculta acciones de gestión", async () => {
+  it("en rol USER oculta la caja de acciones de gestión", async () => {
     hasAnyRoleMock.mockReturnValue(false);
     server.use(http.get("/api/tickets/ticket-1", () => jsonResponse(buildTicket())));
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Vista de solo lectura")).toBeInTheDocument();
+    expect(await screen.findByText("Conversación")).toBeInTheDocument();
+    expect(screen.queryByText("Acciones")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Asignarme ticket" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("ticket-status-transition-IN_PROGRESS")).not.toBeInTheDocument();
   });
