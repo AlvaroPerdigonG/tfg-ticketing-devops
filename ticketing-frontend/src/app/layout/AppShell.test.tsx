@@ -40,11 +40,11 @@ describe("AppShell", () => {
     logoutMock.mockReset();
   });
 
-  it("renders sidebar, header and page content", () => {
+  it("renders sidebar, header and page content", async () => {
     hasRoleMock.mockReturnValue(false);
     renderWithRouter();
 
-    expect(screen.getByText("TFG Ticketing")).toBeInTheDocument();
+    expect(await screen.findByText("TFG Ticketing")).toBeInTheDocument();
     expect(screen.getByText("Ticketing Platform")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Dashboard page" })).toBeInTheDocument();
   });
@@ -54,30 +54,31 @@ describe("AppShell", () => {
     const user = userEvent.setup();
     renderWithRouter();
 
-    await user.click(screen.getByText("Tickets"));
+    await user.click(await screen.findByText("Tickets"));
 
     expect(screen.getByRole("heading", { name: "Tickets page" })).toBeInTheDocument();
   });
 
-  it("hides admin menu for USER", () => {
+  it("hides admin menu for USER", async () => {
     hasRoleMock.mockReturnValue(false);
     renderWithRouter();
 
+    await screen.findByRole("heading", { name: "Dashboard page" });
     expect(screen.queryByText("Administración")).not.toBeInTheDocument();
   });
 
-  it("shows admin menu for ADMIN", () => {
+  it("shows admin menu for ADMIN", async () => {
     hasRoleMock.mockReturnValue(true);
     renderWithRouter();
 
-    expect(screen.getByText("Administración")).toBeInTheDocument();
+    expect(await screen.findByText("Administración")).toBeInTheDocument();
   });
 
-  it("shows dashboard menu for AGENT but not admin menu", () => {
+  it("shows dashboard menu for AGENT but not admin menu", async () => {
     hasRoleMock.mockImplementation((role) => role === "AGENT");
     renderWithRouter();
 
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(await screen.findByText("Dashboard")).toBeInTheDocument();
     expect(screen.queryByText("Administración")).not.toBeInTheDocument();
   });
 
@@ -86,9 +87,9 @@ describe("AppShell", () => {
     const user = userEvent.setup();
     renderWithRouter();
 
-    await user.click(screen.getByRole("button", { name: "Logout" }));
+    await user.click(await screen.findByRole("button", { name: "Logout" }));
 
     expect(logoutMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("heading", { name: "Login page" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Login page" })).toBeInTheDocument();
   });
 });
