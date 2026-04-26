@@ -23,12 +23,12 @@ vi.mock("../api/adminApi", () => ({
 }));
 
 describe("AdminPage", () => {
-  const messageSuccessSpy = vi.spyOn(message, "success").mockImplementation(() => {
-    return () => undefined;
-  });
-  const messageErrorSpy = vi.spyOn(message, "error").mockImplementation(() => {
-    return () => undefined;
-  });
+  const messageSuccessSpy = vi
+    .spyOn(message, "success")
+    .mockImplementation(() => ({}) as ReturnType<typeof message.success>);
+  const messageErrorSpy = vi
+    .spyOn(message, "error")
+    .mockImplementation(() => ({}) as ReturnType<typeof message.error>);
 
   beforeEach(() => {
     getCategoriesMock.mockReset();

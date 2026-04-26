@@ -17,7 +17,7 @@ vi.mock("src/features/auth/hooks/useAuth", () => ({
   }),
 }));
 
-const paramsMock = vi.fn(() => ({ id: "ticket-1" }));
+const paramsMock = vi.fn<() => { id?: string }>(() => ({ id: "ticket-1" }));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
