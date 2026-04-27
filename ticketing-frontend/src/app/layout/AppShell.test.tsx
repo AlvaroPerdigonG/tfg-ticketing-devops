@@ -7,9 +7,15 @@ import { renderWithProviders } from "src/test/utils/renderWithProviders";
 
 const hasRoleMock = vi.fn<(role: "USER" | "AGENT" | "ADMIN") => boolean>();
 const logoutMock = vi.fn();
+const authStateMock = {
+  user: {
+    displayName: "Ada Lovelace",
+  },
+};
 
 vi.mock("../../features/auth/hooks/useAuth", () => ({
   useAuth: () => ({
+    state: authStateMock,
     hasRole: hasRoleMock,
     logout: logoutMock,
   }),
@@ -45,6 +51,7 @@ describe("AppShell", () => {
     renderWithRouter();
 
     expect(await screen.findByText("TFG Ticketing")).toBeInTheDocument();
+    expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("Ticketing Platform")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Dashboard page" })).toBeInTheDocument();
   });

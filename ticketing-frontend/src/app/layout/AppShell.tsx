@@ -41,7 +41,7 @@ function getSelectedKey(pathname: string, items: AppMenuItem[]) {
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasRole, logout } = useAuth();
+  const { state, hasRole, logout } = useAuth();
 
   const isAdmin = hasRole("ADMIN");
   const canSeeDashboard = hasRole("AGENT") || isAdmin;
@@ -59,7 +59,7 @@ export function AppShell() {
           <Typography.Title level={4} style={{ margin: 0 }}>
             TFG Ticketing
           </Typography.Title>
-          <Typography.Text type="secondary">Frontend MVP</Typography.Text>
+          <Typography.Text type="secondary">{state.user?.displayName ?? "Usuario"}</Typography.Text>
         </div>
         <Menu
           mode="inline"

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { Alert, Button, Card, Space, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Alert, Card, Space, Typography } from "antd";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { authApi } from "../../features/auth/api/authApi";
 import type { ProfileResponse } from "../../features/auth/model/types";
@@ -15,8 +14,7 @@ const rowStyle: CSSProperties = {
 };
 
 export function ProfilePage() {
-  const navigate = useNavigate();
-  const { state, logout } = useAuth();
+  const { state } = useAuth();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,11 +30,6 @@ export function ProfilePage() {
         setError(err.message || "No se pudo cargar el perfil");
       });
   }, [state.token]);
-
-  const onLogout = () => {
-    logout();
-    navigate("/login", { replace: true });
-  };
 
   const data =
     profile ??
@@ -56,9 +49,6 @@ export function ProfilePage() {
         <Typography.Title level={3} style={{ marginBottom: 0 }}>
           Perfil
         </Typography.Title>
-        <Typography.Text type="secondary">
-          Información de sesión actual basada en JWT.
-        </Typography.Text>
       </div>
 
       {error && <Alert type="error" showIcon message={error} />}
@@ -87,10 +77,6 @@ export function ProfilePage() {
           <Typography.Text type="secondary">No hay datos de perfil disponibles.</Typography.Text>
         )}
       </Card>
-
-      <Button type="default" onClick={onLogout} style={{ width: "fit-content" }}>
-        Logout
-      </Button>
     </Space>
   );
 }
