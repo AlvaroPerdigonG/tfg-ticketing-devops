@@ -6,8 +6,7 @@ type PersistAccessTokenOptions = {
 
 export function getStoredAccessToken(): string | null {
   return (
-    localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) ??
-    sessionStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+    localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) ?? sessionStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
   );
 }
 
