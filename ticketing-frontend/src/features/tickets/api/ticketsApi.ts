@@ -1,4 +1,5 @@
 import { createApiClient } from "../../../shared/api/client";
+import { getStoredAccessToken } from "../../../shared/auth/tokenStorage";
 import type {
   CreateTicketInput,
   AddTicketCommentResponse,
@@ -12,10 +13,8 @@ import type {
   TicketSummary,
 } from "../model/types";
 
-const AUTH_TOKEN_STORAGE_KEY = "ticketing_access_token";
-
 const authClient = createApiClient({
-  getToken: () => localStorage.getItem(AUTH_TOKEN_STORAGE_KEY),
+  getToken: getStoredAccessToken,
 });
 
 function buildQuery(params: Record<string, string | number | undefined>) {

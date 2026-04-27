@@ -56,6 +56,7 @@ function deferred<T>() {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   loginMock.mockReset();
 });
 

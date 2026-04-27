@@ -2,12 +2,15 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { AuthState, Role } from "../../features/auth/model/types";
 import { authApi } from "../../features/auth/api/authApi";
 import { isExpired, toAuthUser } from "../../features/auth/model/jwt";
+import {
+  clearStoredAccessToken,
+  getStoredAccessToken,
+  persistAccessToken,
+} from "../../shared/auth/tokenStorage";
 import { AuthContext, type AuthContextValue } from "./AuthContext";
 
-const STORAGE_KEY = "ticketing_access_token";
-
 function getInitialAuthState(): AuthState {
-  const token = localStorage.getItem(STORAGE_KEY);
+  const token = getStoredAccessToken();
 
   if (!token) {
     return { token: null, user: null };
@@ -16,13 +19,13 @@ function getInitialAuthState(): AuthState {
   try {
     const user = toAuthUser(token);
     if (isExpired(user.exp)) {
-      localStorage.removeItem(STORAGE_KEY);
+      clearStoredAccessToken();
       return { token: null, user: null };
     }
 
     return { token, user };
   } catch {
-    localStorage.removeItem(STORAGE_KEY);
+    clearStoredAccessToken();
     return { token: null, user: null };
   }
 }
@@ -32,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isHydrated = true;
 
   const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    clearStoredAccessToken();
     setState({ token: null, user: null });
   }, []);
 
@@ -43,8 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Token expired");
     }
 
-    if (remember) localStorage.setItem(STORAGE_KEY, token);
-    else localStorage.removeItem(STORAGE_KEY);
+    persistAccessToken(token, { remember });
 
     setState({ token, user });
   }, []);

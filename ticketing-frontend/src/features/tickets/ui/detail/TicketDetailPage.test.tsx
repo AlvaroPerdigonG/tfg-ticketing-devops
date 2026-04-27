@@ -10,10 +10,14 @@ import { TicketDetailPage } from "./TicketDetailPage";
 
 const navigateMock = vi.fn();
 const hasAnyRoleMock = vi.fn<(roles: Array<"USER" | "AGENT" | "ADMIN">) => boolean>();
+const authStateMock = {
+  user: { id: "agent-1" },
+};
 
 vi.mock("src/features/auth/hooks/useAuth", () => ({
   useAuth: () => ({
     hasAnyRole: hasAnyRoleMock,
+    state: authStateMock,
   }),
 }));
 
@@ -63,7 +67,8 @@ describe("TicketDetailPage", () => {
   beforeEach(() => {
     navigateMock.mockReset();
     paramsMock.mockReturnValue({ id: "ticket-1" });
-    hasAnyRoleMock.mockReturnValue(true);
+    hasAnyRoleMock.mockImplementation((roles) => roles.includes("AGENT"));
+    authStateMock.user = { id: "agent-1" };
     server.use(
       http.get("/api/categories", () =>
         jsonResponse([
@@ -135,6 +140,8 @@ describe("TicketDetailPage", () => {
 
   it("envía comentario, limpia textarea y muestra contenido nuevo en timeline", async () => {
     const ticketState = buildTicket();
+    ticketState.assignedToUserId = "agent-1";
+    ticketState.assignedToDisplayName = "Agent One";
 
     server.use(
       http.get("/api/tickets/ticket-1", () => jsonResponse(ticketState)),
@@ -176,8 +183,9 @@ describe("TicketDetailPage", () => {
     });
   });
 
-  it("en rol USER oculta la caja de acciones de gestión", async () => {
-    hasAnyRoleMock.mockReturnValue(false);
+  it("en rol USER oculta la caja de acciones de gestión pero permite comentar", async () => {
+    hasAnyRoleMock.mockImplementation((roles) => roles.includes("USER"));
+    authStateMock.user = { id: "user-1" };
     server.use(http.get("/api/tickets/ticket-1", () => jsonResponse(buildTicket())));
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
@@ -186,6 +194,52 @@ describe("TicketDetailPage", () => {
     expect(screen.queryByText("Acciones")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Asignarme ticket" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("ticket-status-transition-IN_PROGRESS")).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Escribe un comentario")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeInTheDocument();
+  });
+
+  it("agente no propietario ve mensaje y no puede usar acciones ni comentar", async () => {
+    authStateMock.user = { id: "agent-2" };
+    server.use(
+      http.get("/api/tickets/ticket-1", () =>
+        jsonResponse(
+          buildTicket({
+            assignedToUserId: "agent-1",
+            assignedToDisplayName: "Agent One",
+          }),
+        ),
+      ),
+    );
+
+    renderWithProviders(<TicketDetailPage />, { router: {} });
+
+    expect(await screen.findByText("Acciones")).toBeInTheDocument();
+    expect(screen.getByText("No eres el propietario de este ticket.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Asignarme ticket" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ticket-status-transition-IN_PROGRESS")).not.toBeInTheDocument();
+    expect(screen.getByText("No tienes permisos para añadir comentarios.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Enviar comentario" })).not.toBeInTheDocument();
+  });
+
+  it("admin puede usar acciones y comentar aunque no sea propietario", async () => {
+    hasAnyRoleMock.mockImplementation((roles) => roles.includes("ADMIN"));
+    authStateMock.user = { id: "admin-1" };
+    server.use(
+      http.get("/api/tickets/ticket-1", () =>
+        jsonResponse(
+          buildTicket({
+            assignedToUserId: "agent-1",
+            assignedToDisplayName: "Agent One",
+          }),
+        ),
+      ),
+    );
+
+    renderWithProviders(<TicketDetailPage />, { router: {} });
+
+    expect(await screen.findByText("Acciones")).toBeInTheDocument();
+    expect(screen.getByTestId("ticket-status-transition-IN_PROGRESS")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Escribe un comentario")).toBeInTheDocument();
   });
 
   it("si el ticket está resuelto deshabilita envío de comentarios", async () => {
@@ -195,6 +249,8 @@ describe("TicketDetailPage", () => {
           buildTicket({
             status: "RESOLVED",
             availableTransitions: [],
+            assignedToUserId: "agent-1",
+            assignedToDisplayName: "Agent One",
           }),
         ),
       ),

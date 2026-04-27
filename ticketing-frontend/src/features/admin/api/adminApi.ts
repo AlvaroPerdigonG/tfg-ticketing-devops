@@ -1,10 +1,9 @@
 import { createApiClient } from "../../../shared/api/client";
+import { getStoredAccessToken } from "../../../shared/auth/tokenStorage";
 import type { AdminCategory, AdminUser } from "../model/types";
 
-const AUTH_TOKEN_STORAGE_KEY = "ticketing_access_token";
-
 const authClient = createApiClient({
-  getToken: () => localStorage.getItem(AUTH_TOKEN_STORAGE_KEY),
+  getToken: getStoredAccessToken,
 });
 
 export const adminApi = {
