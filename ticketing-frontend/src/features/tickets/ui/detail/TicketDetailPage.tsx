@@ -18,10 +18,13 @@ function formatDate(isoDate: string) {
 
 export function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { hasAnyRole } = useAuth();
+  const { hasAnyRole, state } = useAuth();
   const navigate = useNavigate();
 
   const canManage = hasAnyRole(["AGENT", "ADMIN"]);
+  const isAdmin = hasAnyRole(["ADMIN"]);
+  const isAgent = hasAnyRole(["AGENT"]);
+  const currentUserId = state.user?.id ?? null;
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -68,6 +71,22 @@ export function TicketDetailPage() {
     const category = categories.find((item) => item.id === ticket.categoryId);
     return category?.name ?? ticket.categoryId;
   }, [categories, ticket]);
+
+  const isAgentOwner = useMemo(() => {
+    if (!ticket || !isAgent || !currentUserId) return false;
+    return ticket.assignedToUserId === currentUserId;
+  }, [currentUserId, isAgent, ticket]);
+
+  const canUseActions = useMemo(() => {
+    if (!ticket || !canManage) return false;
+    if (isAdmin) return true;
+    return !ticket.assignedToUserId || isAgentOwner;
+  }, [canManage, isAdmin, isAgentOwner, ticket]);
+
+  const canAddComment = useMemo(() => {
+    if (!ticket) return false;
+    return isAdmin || isAgentOwner;
+  }, [isAdmin, isAgentOwner, ticket]);
 
   useEffect(() => {
     if (!id) {
@@ -238,21 +257,29 @@ export function TicketDetailPage() {
                   description="No admite nuevos comentarios."
                 />
               )}
-              <Input.TextArea
-                rows={3}
-                value={commentText}
-                maxLength={2000}
-                placeholder="Escribe un comentario"
-                onChange={(event) => setCommentText(event.target.value)}
-              />
-              <Button
-                type="primary"
-                loading={busyComment}
-                disabled={!commentText.trim() || ticket.status === "RESOLVED"}
-                onClick={handleAddComment}
-              >
-                Enviar comentario
-              </Button>
+              {canAddComment ? (
+                <>
+                  <Input.TextArea
+                    rows={3}
+                    value={commentText}
+                    maxLength={2000}
+                    placeholder="Escribe un comentario"
+                    onChange={(event) => setCommentText(event.target.value)}
+                  />
+                  <Button
+                    type="primary"
+                    loading={busyComment}
+                    disabled={!commentText.trim() || ticket.status === "RESOLVED"}
+                    onClick={handleAddComment}
+                  >
+                    Enviar comentario
+                  </Button>
+                </>
+              ) : (
+                <Typography.Text type="secondary">
+                  No tienes permisos para añadir comentarios.
+                </Typography.Text>
+              )}
             </Space>
           </Card>
         </div>
@@ -263,32 +290,38 @@ export function TicketDetailPage() {
               <Typography.Title level={5} style={{ margin: "0 0 12px" }}>
                 Acciones
               </Typography.Title>
-              <Space direction="vertical" style={{ width: "100%" }} size={12}>
-                {!ticket.assignedToUserId && (
-                  <Button loading={busyAction === "assign"} onClick={handleAssignToMe}>
-                    Asignarme ticket
-                  </Button>
-                )}
-                <Typography.Title level={5} style={{ margin: 0 }}>
-                  Cambiar estado
-                </Typography.Title>
-                {availableStatusTransitions.length === 0 && (
-                  <Typography.Text type="secondary">
-                    No hay transiciones disponibles.
-                  </Typography.Text>
-                )}
-                {availableStatusTransitions.map((nextStatus) => (
-                  <Button
-                    key={nextStatus}
-                    data-testid={`ticket-status-transition-${nextStatus}`}
-                    type="primary"
-                    loading={busyAction === "status"}
-                    onClick={() => handleStatusChange(nextStatus)}
-                  >
-                    Mover a {ticketStatusLabel[nextStatus]}
-                  </Button>
-                ))}
-              </Space>
+              {canUseActions ? (
+                <Space direction="vertical" style={{ width: "100%" }} size={12}>
+                  {!ticket.assignedToUserId && (
+                    <Button loading={busyAction === "assign"} onClick={handleAssignToMe}>
+                      Asignarme ticket
+                    </Button>
+                  )}
+                  <Typography.Title level={5} style={{ margin: 0 }}>
+                    Cambiar estado
+                  </Typography.Title>
+                  {availableStatusTransitions.length === 0 && (
+                    <Typography.Text type="secondary">
+                      No hay transiciones disponibles.
+                    </Typography.Text>
+                  )}
+                  {availableStatusTransitions.map((nextStatus) => (
+                    <Button
+                      key={nextStatus}
+                      data-testid={`ticket-status-transition-${nextStatus}`}
+                      type="primary"
+                      loading={busyAction === "status"}
+                      onClick={() => handleStatusChange(nextStatus)}
+                    >
+                      Mover a {ticketStatusLabel[nextStatus]}
+                    </Button>
+                  ))}
+                </Space>
+              ) : (
+                <Typography.Text type="secondary">
+                  No eres el propietario de este ticket.
+                </Typography.Text>
+              )}
             </Card>
           </div>
         )}
