@@ -85,8 +85,8 @@ export function TicketDetailPage() {
 
   const canAddComment = useMemo(() => {
     if (!ticket) return false;
-    return isAdmin || isAgentOwner;
-  }, [isAdmin, isAgentOwner, ticket]);
+    return isAdmin || isAgentOwner || hasAnyRole(["USER"]);
+  }, [hasAnyRole, isAdmin, isAgentOwner, ticket]);
 
   useEffect(() => {
     if (!id) {

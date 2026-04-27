@@ -183,8 +183,8 @@ describe("TicketDetailPage", () => {
     });
   });
 
-  it("en rol USER oculta la caja de acciones de gestión", async () => {
-    hasAnyRoleMock.mockReturnValue(false);
+  it("en rol USER oculta la caja de acciones de gestión pero permite comentar", async () => {
+    hasAnyRoleMock.mockImplementation((roles) => roles.includes("USER"));
     authStateMock.user = { id: "user-1" };
     server.use(http.get("/api/tickets/ticket-1", () => jsonResponse(buildTicket())));
 
@@ -194,7 +194,8 @@ describe("TicketDetailPage", () => {
     expect(screen.queryByText("Acciones")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Asignarme ticket" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("ticket-status-transition-IN_PROGRESS")).not.toBeInTheDocument();
-    expect(screen.getByText("No tienes permisos para añadir comentarios.")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Escribe un comentario")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeInTheDocument();
   });
 
   it("agente no propietario ve mensaje y no puede usar acciones ni comentar", async () => {
