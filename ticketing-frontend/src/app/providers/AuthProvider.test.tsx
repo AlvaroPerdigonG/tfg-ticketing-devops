@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
 import { useAuth } from "src/features/auth/hooks/useAuth";
 import { AuthProvider } from "./AuthProvider";
 import { renderWithProviders } from "src/test/utils/renderWithProviders";
@@ -30,18 +30,40 @@ function AuthStateProbe() {
   );
 }
 
+function AuthStateProbeSession() {
+  const { isAuthenticated, state, login } = useAuth();
+
+  return (
+    <section>
+      <p>Estado sesión: {isAuthenticated ? "autenticado" : "anonimo"}</p>
+      <p>Usuario sesión: {state.user?.email ?? "sin usuario"}</p>
+      <button type="button" onClick={() => login("agent@test.com", "Password.123", false)}>
+        Login sesión
+      </button>
+    </section>
+  );
+}
+
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+  loginMock.mockReset();
+});
+
 describe("[AUTH-01] login correcto refleja estado autenticado", () => {
   it("actualiza el estado visible de sesión cuando el backend devuelve un token válido", async () => {
     const user = userEvent.setup();
 
+    const token = buildJwt({
+      sub: "u-1",
+      email: "admin@test.com",
+      displayName: "Admin",
+      roles: ["ADMIN"],
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    });
+
     loginMock.mockResolvedValue({
-      accessToken: buildJwt({
-        sub: "u-1",
-        email: "admin@test.com",
-        displayName: "Admin",
-        roles: ["ADMIN"],
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      }),
+      accessToken: token,
     });
 
     renderWithProviders(
@@ -56,5 +78,35 @@ describe("[AUTH-01] login correcto refleja estado autenticado", () => {
 
     expect(await screen.findByText("Estado: autenticado")).toBeInTheDocument();
     expect(screen.getByText("Usuario: admin@test.com")).toBeInTheDocument();
+    expect(localStorage.getItem("ticketing_access_token")).toBe(token);
+    expect(sessionStorage.getItem("ticketing_access_token")).toBeNull();
+  });
+
+  it("con remember=false guarda token en sessionStorage y no en localStorage", async () => {
+    const user = userEvent.setup();
+
+    const token = buildJwt({
+      sub: "u-2",
+      email: "agent@test.com",
+      displayName: "Agent",
+      roles: ["AGENT"],
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    });
+
+    loginMock.mockResolvedValue({
+      accessToken: token,
+    });
+
+    renderWithProviders(
+      <AuthProvider>
+        <AuthStateProbeSession />
+      </AuthProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Login sesión" }));
+
+    expect(await screen.findByText("Estado sesión: autenticado")).toBeInTheDocument();
+    expect(localStorage.getItem("ticketing_access_token")).toBeNull();
+    expect(sessionStorage.getItem("ticketing_access_token")).toBe(token);
   });
 });
