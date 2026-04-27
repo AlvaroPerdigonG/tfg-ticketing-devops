@@ -27,7 +27,7 @@ export function ProfilePage() {
         setProfile(data);
       })
       .catch((err: Error) => {
-        setError(err.message || "No se pudo cargar el perfil");
+        setError(err.message || "Could not load profile");
       });
   }, [state.token]);
 
@@ -47,7 +47,7 @@ export function ProfilePage() {
     <Space direction="vertical" size={16} style={{ width: "100%", maxWidth: 820 }}>
       <div>
         <Typography.Title level={3} style={{ marginBottom: 0 }}>
-          Perfil
+          Profile
         </Typography.Title>
       </div>
 
@@ -69,12 +69,12 @@ export function ProfilePage() {
               <span>{data.displayName}</span>
             </div>
             <div style={{ ...rowStyle, borderBottom: "none" }}>
-              <strong>Rol</strong>
+              <strong>Role</strong>
               <span>{data.role}</span>
             </div>
           </div>
         ) : (
-          <Typography.Text type="secondary">No hay datos de perfil disponibles.</Typography.Text>
+          <Typography.Text type="secondary">No profile data available.</Typography.Text>
         )}
       </Card>
     </Space>

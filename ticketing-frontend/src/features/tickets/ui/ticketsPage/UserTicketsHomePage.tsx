@@ -10,7 +10,7 @@ import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 type LoadState = "loading" | "ready" | "error";
 
 function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(isoDate));
@@ -40,9 +40,7 @@ export function UserTicketsHomePage() {
         if (!isMounted) return;
 
         setLoadState("error");
-        setErrorMessage(
-          error instanceof Error ? error.message : "No se pudieron cargar tus tickets.",
-        );
+        setErrorMessage(error instanceof Error ? error.message : "Could not load your tickets.");
       }
     };
 
@@ -63,12 +61,12 @@ export function UserTicketsHomePage() {
         ellipsis: true,
       },
       {
-        title: "Título",
+        title: "Title",
         dataIndex: "title",
         key: "title",
       },
       {
-        title: "Estado",
+        title: "Status",
         dataIndex: "status",
         key: "status",
         width: 140,
@@ -78,7 +76,7 @@ export function UserTicketsHomePage() {
         },
       },
       {
-        title: "Prioridad",
+        title: "Priority",
         dataIndex: "priority",
         key: "priority",
         width: 120,
@@ -87,20 +85,20 @@ export function UserTicketsHomePage() {
         ),
       },
       {
-        title: "Fecha creación",
+        title: "Created date",
         dataIndex: "createdAt",
         key: "createdAt",
         width: 220,
         render: (createdAtValue: unknown) => formatDate(String(createdAtValue)),
       },
       {
-        title: "Acciones",
+        title: "Actions",
         dataIndex: "id",
         key: "actions",
         width: 120,
         render: (_id: unknown, row: TicketSummary) => (
           <Button size="small" onClick={() => navigate(`/tickets/${row.id}`)}>
-            Ver
+            View
           </Button>
         ),
       },
@@ -112,7 +110,7 @@ export function UserTicketsHomePage() {
     <Space direction="vertical" size={20} style={{ width: "100%" }}>
       <Space style={{ width: "100%", justifyContent: "space-between" }}>
         <Typography.Title level={3} style={{ margin: 0 }}>
-          <span data-testid="user-tickets-title">Mis tickets</span>
+          <span data-testid="user-tickets-title">My tickets</span>
         </Typography.Title>
         <Button
           data-testid="user-create-ticket-cta"
@@ -120,7 +118,7 @@ export function UserTicketsHomePage() {
           size="large"
           onClick={() => navigate("/tickets/new")}
         >
-          Crear ticket
+          Create ticket
         </Button>
       </Space>
 
@@ -130,13 +128,13 @@ export function UserTicketsHomePage() {
         <Alert
           type="error"
           showIcon
-          message="No hemos podido cargar tus tickets"
+          message="Could not load your tickets"
           description={errorMessage}
         />
       )}
 
       {loadState === "ready" && tickets.length === 0 && (
-        <Empty description="Aún no tienes tickets creados" />
+        <Empty description="You do not have any tickets yet" />
       )}
 
       {loadState === "ready" && tickets.length > 0 && (

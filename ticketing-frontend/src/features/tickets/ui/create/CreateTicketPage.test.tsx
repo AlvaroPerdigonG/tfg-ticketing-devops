@@ -27,7 +27,7 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    const submitButton = await screen.findByRole("button", { name: "Crear ticket" });
+    const submitButton = await screen.findByRole("button", { name: "Create ticket" });
     expect(submitButton).toBeDisabled();
   });
 
@@ -41,7 +41,7 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    const submitButton = screen.getByRole("button", { name: "Crear ticket" });
+    const submitButton = screen.getByRole("button", { name: "Create ticket" });
     expect(submitButton).toBeDisabled();
   });
 
@@ -59,22 +59,22 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    fireEvent.change(await screen.findByLabelText("Título"), {
+    fireEvent.change(await screen.findByLabelText("Title"), {
       target: { value: "  Impresora bloqueada  " },
     });
-    fireEvent.change(screen.getByLabelText("Descripción"), {
+    fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "  Error E23 al imprimir PDF  " },
     });
 
-    const categoryCombobox = screen.getByRole("combobox", { name: "Categoría" });
+    const categoryCombobox = screen.getByRole("combobox", { name: "Category" });
     fireEvent.mouseDown(categoryCombobox);
     fireEvent.click(await screen.findByText("General"));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Crear ticket" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Create ticket" })).toBeEnabled();
     });
 
-    await user.click(screen.getByRole("button", { name: "Crear ticket" }));
+    await user.click(screen.getByRole("button", { name: "Create ticket" }));
 
     await waitFor(() => {
       expect(payload).toEqual({
@@ -101,16 +101,16 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    fireEvent.change(await screen.findByLabelText("Título"), {
+    fireEvent.change(await screen.findByLabelText("Title"), {
       target: { value: "Ticket en cola" },
     });
-    fireEvent.change(screen.getByLabelText("Descripción"), {
-      target: { value: "Descripción completa" },
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "Description completa" },
     });
-    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Categoría" }));
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Category" }));
     fireEvent.click(await screen.findByText("General"));
 
-    const submitButton = screen.getByRole("button", { name: "Crear ticket" });
+    const submitButton = screen.getByRole("button", { name: "Create ticket" });
     const form = submitButton.closest("form");
     expect(form).not.toBeNull();
     fireEvent.submit(form!);
@@ -131,13 +131,13 @@ describe("CreateTicketPage", () => {
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
-    await user.type(await screen.findByLabelText("Título"), "No imprime");
-    await user.type(screen.getByLabelText("Descripción"), "Error de cola de impresión");
+    await user.type(await screen.findByLabelText("Title"), "No imprime");
+    await user.type(screen.getByLabelText("Description"), "Error de cola de impresión");
 
-    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Categoría" }));
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Category" }));
     fireEvent.click(await screen.findByText("General"));
-    await user.click(screen.getByRole("button", { name: "Crear ticket" }));
+    await user.click(screen.getByRole("button", { name: "Create ticket" }));
 
-    expect(await screen.findByText("Error al crear ticket")).toBeInTheDocument();
+    expect(await screen.findByText("Error creating ticket")).toBeInTheDocument();
   });
 });

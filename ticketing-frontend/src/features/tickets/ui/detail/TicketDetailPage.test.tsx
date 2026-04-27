@@ -85,10 +85,10 @@ describe("TicketDetailPage", () => {
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
     expect(await screen.findByTestId("ticket-detail-title")).toHaveTextContent("Printer issue");
-    expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("Abierto");
+    expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("Open");
     expect(screen.getByText("Paper jam on tray 2")).toBeInTheDocument();
-    expect(screen.getByText("Categoría: Hardware")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Asignarme ticket" })).toBeInTheDocument();
+    expect(screen.getByText("Category: Hardware")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Assign ticket to me" })).toBeInTheDocument();
   });
 
   it("permite asignarse ticket y recarga detalle", async () => {
@@ -107,10 +107,10 @@ describe("TicketDetailPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    await user.click(await screen.findByRole("button", { name: "Asignarme ticket" }));
+    await user.click(await screen.findByRole("button", { name: "Assign ticket to me" }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Asignado a: Agent One/i)).toBeInTheDocument();
+      expect(screen.getByText(/Assigned to: Agent One/i)).toBeInTheDocument();
     });
   });
 
@@ -134,7 +134,7 @@ describe("TicketDetailPage", () => {
     await user.click(await screen.findByTestId("ticket-status-transition-IN_PROGRESS"));
 
     await waitFor(() => {
-      expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("En progreso");
+      expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("In progress");
     });
   });
 
@@ -173,9 +173,9 @@ describe("TicketDetailPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    const textarea = await screen.findByPlaceholderText("Escribe un comentario");
+    const textarea = await screen.findByPlaceholderText("Write a comment");
     await user.type(textarea, "  Revisado, aplico solución.  ");
-    await user.click(screen.getByRole("button", { name: "Enviar comentario" }));
+    await user.click(screen.getByRole("button", { name: "Send comment" }));
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("")).toBeInTheDocument();
@@ -190,12 +190,12 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Conversación")).toBeInTheDocument();
-    expect(screen.queryByText("Acciones")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Asignarme ticket" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Conversation")).toBeInTheDocument();
+    expect(screen.queryByText("Actions")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Assign ticket to me" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("ticket-status-transition-IN_PROGRESS")).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Escribe un comentario")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Write a comment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Send comment" })).toBeInTheDocument();
   });
 
   it("agente no propietario ve mensaje y no puede usar acciones ni comentar", async () => {
@@ -213,12 +213,12 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Acciones")).toBeInTheDocument();
-    expect(screen.getByText("No eres el propietario de este ticket.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Asignarme ticket" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Actions")).toBeInTheDocument();
+    expect(screen.getByText("You are not the owner of this ticket.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Assign ticket to me" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("ticket-status-transition-IN_PROGRESS")).not.toBeInTheDocument();
-    expect(screen.getByText("No tienes permisos para añadir comentarios.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Enviar comentario" })).not.toBeInTheDocument();
+    expect(screen.getByText("You do not have permission to add comments.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Send comment" })).not.toBeInTheDocument();
   });
 
   it("admin puede usar acciones y comentar aunque no sea propietario", async () => {
@@ -237,9 +237,9 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Acciones")).toBeInTheDocument();
+    expect(await screen.findByText("Actions")).toBeInTheDocument();
     expect(screen.getByTestId("ticket-status-transition-IN_PROGRESS")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Escribe un comentario")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Write a comment")).toBeInTheDocument();
   });
 
   it("si el ticket está resuelto deshabilita envío de comentarios", async () => {
@@ -258,8 +258,8 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Ticket resuelto")).toBeInTheDocument();
-    const submitCommentButton = screen.getByRole("button", { name: "Enviar comentario" });
+    expect(await screen.findByText("Ticket resolved")).toBeInTheDocument();
+    const submitCommentButton = screen.getByRole("button", { name: "Send comment" });
     expect(submitCommentButton).toBeDisabled();
   });
 
@@ -269,10 +269,10 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Error cargando el ticket")).toBeInTheDocument();
-    expect(screen.getByText("Id de ticket inválido")).toBeInTheDocument();
+    expect(await screen.findByText("Error loading ticket")).toBeInTheDocument();
+    expect(screen.getByText("Invalid ticket id")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Volver a tickets" }));
+    await user.click(screen.getByRole("button", { name: "Back to tickets" }));
     expect(navigateMock).toHaveBeenCalledWith("/tickets");
   });
 });

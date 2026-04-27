@@ -29,11 +29,11 @@ type LoadState = "loading" | "ready" | "error";
 type QueueFilter = "all" | TicketStatus;
 
 const statusFilterOptions: Array<{ label: string; value: QueueFilter }> = [
-  { label: "Todos los estados", value: "all" },
-  { label: "Abierto", value: "OPEN" },
-  { label: "En progreso", value: "IN_PROGRESS" },
-  { label: "En espera", value: "ON_HOLD" },
-  { label: "Resuelto", value: "RESOLVED" },
+  { label: "All statuses", value: "all" },
+  { label: "Open", value: "OPEN" },
+  { label: "In progress", value: "IN_PROGRESS" },
+  { label: "On hold", value: "ON_HOLD" },
+  { label: "Resolved", value: "RESOLVED" },
 ];
 
 function toQueueView(value: string | null): QueueView {
@@ -53,7 +53,7 @@ function toStatusFilter(value: string | null): QueueFilter {
 }
 
 function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "short",
     timeStyle: "short",
   }).format(new Date(isoDate));
@@ -114,7 +114,7 @@ export function AgentAdminTicketsPage() {
 
         setLoadState("error");
         setErrorMessage(
-          error instanceof Error ? error.message : "No se pudo cargar la cola de tickets.",
+          error instanceof Error ? error.message : "Could not load the ticket queue.",
         );
       }
     };
@@ -129,9 +129,9 @@ export function AgentAdminTicketsPage() {
   const columns: TableProps<TicketSummary>["columns"] = useMemo(
     () => [
       { title: "ID", dataIndex: "id", key: "id", width: 180 },
-      { title: "Título", dataIndex: "title", key: "title" },
+      { title: "Title", dataIndex: "title", key: "title" },
       {
-        title: "Estado",
+        title: "Status",
         dataIndex: "status",
         key: "status",
         width: 140,
@@ -140,7 +140,7 @@ export function AgentAdminTicketsPage() {
         ),
       },
       {
-        title: "Prioridad",
+        title: "Priority",
         dataIndex: "priority",
         key: "priority",
         width: 120,
@@ -149,27 +149,27 @@ export function AgentAdminTicketsPage() {
         ),
       },
       {
-        title: "Asignado",
+        title: "Assigned",
         dataIndex: "assignedToUserId",
         key: "assignedToUserId",
         width: 180,
-        render: (assigneeValue: unknown) => (assigneeValue ? String(assigneeValue) : "Sin asignar"),
+        render: (assigneeValue: unknown) => (assigneeValue ? String(assigneeValue) : "Unassigned"),
       },
       {
-        title: "Actualizado",
+        title: "Updated",
         dataIndex: "updatedAt",
         key: "updatedAt",
         width: 180,
         render: (updatedAtValue: unknown) => formatDate(String(updatedAtValue)),
       },
       {
-        title: "Acciones",
+        title: "Actions",
         dataIndex: "id",
         key: "actions",
         width: 120,
         render: (_id: unknown, row: TicketSummary) => (
           <Button size="small" onClick={() => navigate(`/tickets/${row.id}`)}>
-            Ver
+            View
           </Button>
         ),
       },
@@ -179,10 +179,10 @@ export function AgentAdminTicketsPage() {
 
   const viewLabel =
     view === "unassigned"
-      ? "Cola sin asignar"
+      ? "Unassigned queue"
       : view === "mine"
-        ? "Tickets asignados a mí"
-        : "Todos los tickets";
+        ? "Tickets assigned to me"
+        : "All tickets";
 
   const unassignedCount = tickets.filter((ticket) => ticket.assignedToUserId === null).length;
   const inProgressCount = tickets.filter((ticket) => ticket.status === "IN_PROGRESS").length;
@@ -201,30 +201,30 @@ export function AgentAdminTicketsPage() {
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>
-        <span data-testid="agent-tickets-title">Gestión de tickets</span>
+        <span data-testid="agent-tickets-title">Ticket management</span>
       </Typography.Title>
 
       <Space style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
         <Card>
-          <Typography.Text type="secondary">Sin asignar (vista)</Typography.Text>
+          <Typography.Text type="secondary">Unassigned (view)</Typography.Text>
           <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
             {unassignedCount}
           </Typography.Title>
         </Card>
         <Card>
-          <Typography.Text type="secondary">Total (vista)</Typography.Text>
+          <Typography.Text type="secondary">Total (view)</Typography.Text>
           <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
             {total}
           </Typography.Title>
         </Card>
         <Card>
-          <Typography.Text type="secondary">En progreso (vista)</Typography.Text>
+          <Typography.Text type="secondary">In progress (view)</Typography.Text>
           <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
             {inProgressCount}
           </Typography.Title>
         </Card>
         <Card>
-          <Typography.Text type="secondary">Scope actual</Typography.Text>
+          <Typography.Text type="secondary">Current scope</Typography.Text>
           <Typography.Title level={3} style={{ margin: "8px 0 0" }}>
             {queueScopeFromView(view)}
           </Typography.Title>
@@ -236,20 +236,20 @@ export function AgentAdminTicketsPage() {
           type={view === "unassigned" ? "primary" : "default"}
           onClick={() => setView("unassigned")}
         >
-          Sin asignar
+          Unassigned
         </Button>
         <Button type={view === "mine" ? "primary" : "default"} onClick={() => setView("mine")}>
-          Asignados a mí
+          Assigned to me
         </Button>
         <Button type={view === "all" ? "primary" : "default"} onClick={() => setView("all")}>
-          Todos
+          All
         </Button>
       </Space>
 
       <Card>
         <Space>
           <Select
-            aria-label="Estado"
+            aria-label="Status"
             value={statusFilter}
             onChange={(value) => setStatusFilter(value as QueueFilter)}
             options={statusFilterOptions}
@@ -258,10 +258,10 @@ export function AgentAdminTicketsPage() {
           <Input
             value={inputQuery}
             onChange={(event) => setInputQuery(event.target.value)}
-            placeholder="Buscar por título o ID"
+            placeholder="Search by title or ID"
           />
-          <Button onClick={onApplySearch}>Buscar</Button>
-          <Button onClick={onClearFilters}>Limpiar filtros</Button>
+          <Button onClick={onApplySearch}>Search</Button>
+          <Button onClick={onClearFilters}>Clear filters</Button>
         </Space>
       </Card>
 
@@ -277,13 +277,13 @@ export function AgentAdminTicketsPage() {
             <Alert
               type="error"
               showIcon
-              message="No se ha podido cargar la cola de tickets"
+              message="Could not load the ticket queue"
               description={errorMessage}
             />
           )}
 
           {loadState === "ready" && tickets.length === 0 && (
-            <Empty description="No hay tickets para mostrar con los filtros actuales" />
+            <Empty description="No tickets to display with the current filters" />
           )}
 
           {loadState === "ready" && tickets.length > 0 && (

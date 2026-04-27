@@ -105,7 +105,7 @@ export function AgentAdminDashboardPage() {
 
         setLoadState("error");
         setErrorMessage(
-          error instanceof Error ? error.message : "No se pudo cargar el dashboard de tickets.",
+          error instanceof Error ? error.message : "Could not load ticket dashboard.",
         );
       }
     };
@@ -123,26 +123,26 @@ export function AgentAdminDashboardPage() {
     return [
       {
         key: "unassigned",
-        label: "Tickets sin asignar",
+        label: "Unassigned tickets",
         value: stats.cards.unassigned,
         view: "unassigned",
       },
       {
         key: "mine",
-        label: "Tickets asignados a mí",
+        label: "Tickets assigned to me",
         value: stats.cards.assignedToMe,
         view: "mine",
       },
       {
         key: "inProgress",
-        label: "WIP (en progreso)",
+        label: "WIP (in progress)",
         value: stats.cards.inProgress,
         view: "all",
         status: "IN_PROGRESS",
       },
       {
         key: "onHold",
-        label: "Esperando respuesta",
+        label: "Waiting for response",
         value: stats.cards.onHold,
         view: "all",
         status: "ON_HOLD",
@@ -153,10 +153,10 @@ export function AgentAdminDashboardPage() {
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>
-        Dashboard de soporte
+        Support dashboard
       </Typography.Title>
       <Typography.Text type="secondary">
-        Resumen operativo y estadístico para agentes y administradores.
+        Operational and statistical summary for agents and administrators.
       </Typography.Text>
 
       {loadState === "loading" && <Skeleton active paragraph={{ rows: 8 }} />}
@@ -165,7 +165,7 @@ export function AgentAdminDashboardPage() {
         <Alert
           type="error"
           showIcon
-          message="No se ha podido cargar el dashboard"
+          message="Could not load the dashboard"
           description={errorMessage}
         />
       )}
@@ -210,14 +210,14 @@ export function AgentAdminDashboardPage() {
             }}
           >
             <AgentBarChart
-              title="Tickets cerrados por agente/admin"
+              title="Tickets resolved by agent/admin"
               data={stats.charts.resolvedByAgent}
-              emptyMessage="No hay tickets cerrados asignados"
+              emptyMessage="No resolved assigned tickets"
             />
             <AgentBarChart
-              title="Tickets asignados por agente/admin"
+              title="Tickets assigned by agent/admin"
               data={stats.charts.assignedByAgent}
-              emptyMessage="No hay tickets asignados"
+              emptyMessage="No assigned tickets"
             />
           </div>
         </>

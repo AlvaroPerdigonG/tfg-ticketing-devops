@@ -44,8 +44,8 @@ describe("AgentAdminDashboardPage", () => {
 
     renderPage();
 
-    expect(await screen.findByText("Tickets sin asignar")).toBeInTheDocument();
-    expect(screen.getByText("Tickets cerrados por agente/admin")).toBeInTheDocument();
+    expect(await screen.findByText("Unassigned tickets")).toBeInTheDocument();
+    expect(screen.getByText("Tickets resolved by agent/admin")).toBeInTheDocument();
     expect(screen.getAllByText("Agent Uno")).toHaveLength(2);
     expect(screen.getAllByText("Admin Uno")).toHaveLength(2);
   });
@@ -56,9 +56,9 @@ describe("AgentAdminDashboardPage", () => {
     const { router } = renderPage();
     const user = userEvent.setup();
 
-    await screen.findByText("WIP (en progreso)");
+    await screen.findByText("WIP (in progress)");
 
-    await user.click(screen.getByRole("button", { name: /WIP \(en progreso\)/i }));
+    await user.click(screen.getByRole("button", { name: /WIP \(in progress\)/i }));
 
     expect(router.state.location.pathname).toBe("/tickets");
     expect(router.state.location.search).toContain("view=all");

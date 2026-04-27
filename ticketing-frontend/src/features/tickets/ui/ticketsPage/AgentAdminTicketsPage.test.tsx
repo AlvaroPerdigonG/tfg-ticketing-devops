@@ -55,7 +55,7 @@ describe("AgentAdminTicketsPage", () => {
       expect(capturedSearch).toContain("q=printer");
     });
 
-    expect(screen.getByRole("heading", { name: "Tickets asignados a mí" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tickets assigned to me" })).toBeInTheDocument();
   });
 
   it("muestra loading y empty state", async () => {
@@ -72,7 +72,7 @@ describe("AgentAdminTicketsPage", () => {
 
     expect(container.querySelector(".ant-skeleton")).toBeInTheDocument();
     expect(
-      await screen.findByText("No hay tickets para mostrar con los filtros actuales"),
+      await screen.findByText("No tickets to display with the current filters"),
     ).toBeInTheDocument();
   });
 
@@ -81,9 +81,7 @@ describe("AgentAdminTicketsPage", () => {
 
     renderWithProviders(<AgentAdminTicketsPage />, { router: { initialEntries: ["/tickets"] } });
 
-    expect(
-      await screen.findByText("No se ha podido cargar la cola de tickets"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Could not load the ticket queue")).toBeInTheDocument();
   });
 
   it("[TICKET-AGENT-01] muestra acciones de UI para gestión de estado si existen", async () => {
@@ -102,7 +100,7 @@ describe("AgentAdminTicketsPage", () => {
 
     await screen.findByRole("cell", { name: "TCK-200" });
 
-    // En esta pantalla actualmente solo existe acción "Ver".
-    expect(screen.getByRole("button", { name: "Ver" })).toBeInTheDocument();
+    // En esta pantalla actualmente solo existe acción "View".
+    expect(screen.getByRole("button", { name: "View" })).toBeInTheDocument();
   });
 });

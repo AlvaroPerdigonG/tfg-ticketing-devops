@@ -12,11 +12,11 @@ vi.mock("../../features/auth/hooks/useAuth", () => ({
 }));
 
 vi.mock("src/features/tickets/ui/ticketsPage/UserTicketsHomePage", () => ({
-  UserTicketsHomePage: () => <h1>Mis tickets</h1>,
+  UserTicketsHomePage: () => <h1>My tickets</h1>,
 }));
 
 vi.mock("src/features/tickets/ui/ticketsPage/AgentAdminTicketsPage", () => ({
-  AgentAdminTicketsPage: () => <h1>Gestión de tickets</h1>,
+  AgentAdminTicketsPage: () => <h1>Ticket management</h1>,
 }));
 
 describe("TicketsPage", () => {
@@ -29,7 +29,7 @@ describe("TicketsPage", () => {
 
     renderWithProviders(<TicketsPage />, { router: {} });
 
-    expect(screen.getByRole("heading", { name: "Mis tickets" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "My tickets" })).toBeInTheDocument();
   });
 
   it("renderiza vista de gestión cuando tiene rol AGENT/ADMIN", () => {
@@ -37,6 +37,6 @@ describe("TicketsPage", () => {
 
     renderWithProviders(<TicketsPage />, { router: {} });
 
-    expect(screen.getByRole("heading", { name: "Gestión de tickets" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ticket management" })).toBeInTheDocument();
   });
 });
