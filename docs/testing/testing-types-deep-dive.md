@@ -226,12 +226,25 @@ E2E tests validate a small set of critical end-user journeys in a real browser e
 
 ### Current repository scope
 
-As documented in `ticketing-frontend/e2e/README.md`, the suite currently focuses on:
+As documented in `ticketing-frontend/e2e/PLAYWRIGHT-E2E-EXECUTION.md`, the suite currently focuses on:
 
 - `AUTH-01`, `AUTH-02` (`auth.spec.ts`)
 - `TICKET-USER-01` (`tickets-user.spec.ts`)
 - `TICKET-AGENT-01` (`tickets-agent.spec.ts`)
 - `ADMIN-04` (`admin.spec.ts`)
+
+### 6.1 Manual execution requirement in this repository
+
+In the current CI design, Playwright E2E tests are not part of `.github/workflows/ci.yml` and therefore do **not** run automatically on push or pull request.
+
+Operational implication:
+
+- E2E execution is a **manual quality activity** performed by developers/maintainers.
+- Manual runs should be scheduled for high-risk changes (routing/auth flows, cross-role navigation, release candidates).
+
+How to execute E2E manually is documented in:
+
+- `ticketing-frontend/e2e/PLAYWRIGHT-E2E-EXECUTION.md`
 
 ### Execution characteristics
 
