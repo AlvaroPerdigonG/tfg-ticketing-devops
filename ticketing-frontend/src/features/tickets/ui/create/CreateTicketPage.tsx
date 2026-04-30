@@ -5,9 +5,9 @@ import { ticketsApi } from "../../api/ticketsApi";
 import type { TicketCategory, TicketPriority } from "../../model/types";
 
 const priorityOptions: Array<{ value: TicketPriority; label: string }> = [
-  { value: "LOW", label: "Baja" },
-  { value: "MEDIUM", label: "Media" },
-  { value: "HIGH", label: "Alta" },
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
 ];
 
 export function CreateTicketPage() {
@@ -39,9 +39,7 @@ export function CreateTicketPage() {
         setCategories(loadedCategories);
       } catch (error) {
         if (!isMounted) return;
-        setErrorMessage(
-          error instanceof Error ? error.message : "No se pudieron cargar las categorías.",
-        );
+        setErrorMessage(error instanceof Error ? error.message : "Could not load categories.");
       } finally {
         if (isMounted) {
           setIsLoadingCategories(false);
@@ -73,7 +71,7 @@ export function CreateTicketPage() {
       });
       navigate(`/tickets/${response.ticketId}`);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "No se pudo crear el ticket.");
+      setErrorMessage(error instanceof Error ? error.message : "Could not create the ticket.");
     } finally {
       setIsSubmitting(false);
     }
@@ -83,44 +81,44 @@ export function CreateTicketPage() {
     <Card>
       <Space direction="vertical" size={20} style={{ width: "100%" }}>
         <Typography.Title level={3} style={{ margin: 0 }}>
-          Crear ticket
+          Create ticket
         </Typography.Title>
 
         {errorMessage && (
-          <Alert showIcon type="error" message="Error al crear ticket" description={errorMessage} />
+          <Alert showIcon type="error" message="Error creating ticket" description={errorMessage} />
         )}
 
         <Form layout="vertical" onFinish={handleSubmit}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Form.Item label="Título" style={{ marginBottom: 0 }}>
+            <Form.Item label="Title" style={{ marginBottom: 0 }}>
               <Input
-                aria-label="Título"
+                aria-label="Title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Describe brevemente tu incidencia"
+                placeholder="Briefly describe your issue"
                 maxLength={200}
               />
             </Form.Item>
 
-            <Form.Item label="Descripción" style={{ marginBottom: 0 }}>
+            <Form.Item label="Description" style={{ marginBottom: 0 }}>
               <Input.TextArea
-                aria-label="Descripción"
+                aria-label="Description"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="Explica qué ocurre, cuándo empezó y qué has probado"
+                placeholder="Explain what is happening, when it started, and what you have tried"
                 maxLength={1000}
                 rows={6}
               />
             </Form.Item>
 
-            <Form.Item label="Categoría" style={{ marginBottom: 0 }}>
+            <Form.Item label="Category" style={{ marginBottom: 0 }}>
               <Select
                 data-testid="create-ticket-category"
-                aria-label="Categoría"
+                aria-label="Category"
                 value={categoryId || undefined}
                 onChange={(value) => setCategoryId(value)}
                 disabled={isLoadingCategories}
-                placeholder="Selecciona una categoría"
+                placeholder="Select a category"
                 options={categories.map((category) => ({
                   label: category.name,
                   value: category.id,
@@ -128,9 +126,9 @@ export function CreateTicketPage() {
               />
             </Form.Item>
 
-            <Form.Item label="Prioridad" style={{ marginBottom: 0 }}>
+            <Form.Item label="Priority" style={{ marginBottom: 0 }}>
               <Select
-                aria-label="Prioridad"
+                aria-label="Priority"
                 value={priority}
                 onChange={(value) => setPriority(value as TicketPriority)}
                 options={priorityOptions}
@@ -145,7 +143,7 @@ export function CreateTicketPage() {
               disabled={isSubmitDisabled || isLoadingCategories}
               style={{ backgroundColor: "#389e0d" }}
             >
-              Crear ticket
+              Create ticket
             </Button>
           </Space>
         </Form>

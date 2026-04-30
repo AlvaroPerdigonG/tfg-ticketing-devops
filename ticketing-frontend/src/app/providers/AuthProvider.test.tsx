@@ -21,8 +21,8 @@ function AuthStateProbe() {
 
   return (
     <section>
-      <p>Estado: {isAuthenticated ? "autenticado" : "anonimo"}</p>
-      <p>Usuario: {state.user?.email ?? "sin usuario"}</p>
+      <p>Estado: {isAuthenticated ? "authenticated" : "anonymous"}</p>
+      <p>Usuario: {state.user?.email ?? "no user"}</p>
       <button type="button" onClick={() => login("admin@test.com", "Password.123", true)}>
         Login
       </button>
@@ -35,10 +35,10 @@ function AuthStateProbeSession() {
 
   return (
     <section>
-      <p>Estado sesión: {isAuthenticated ? "autenticado" : "anonimo"}</p>
-      <p>Usuario sesión: {state.user?.email ?? "sin usuario"}</p>
+      <p>Estado sesión: {isAuthenticated ? "authenticated" : "anonymous"}</p>
+      <p>Usuario sesión: {state.user?.email ?? "no user"}</p>
       <button type="button" onClick={() => login("agent@test.com", "Password.123", false)}>
-        Login sesión
+        Session login
       </button>
     </section>
   );
@@ -50,7 +50,7 @@ beforeEach(() => {
   loginMock.mockReset();
 });
 
-describe("[AUTH-01] login correcto refleja estado autenticado", () => {
+describe("[AUTH-01] login correcto refleja estado authenticated", () => {
   it("actualiza el estado visible de sesión cuando el backend devuelve un token válido", async () => {
     const user = userEvent.setup();
 
@@ -72,11 +72,11 @@ describe("[AUTH-01] login correcto refleja estado autenticado", () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByText("Estado: anonimo")).toBeInTheDocument();
+    expect(screen.getByText("Estado: anonymous")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Login" }));
 
-    expect(await screen.findByText("Estado: autenticado")).toBeInTheDocument();
+    expect(await screen.findByText("Estado: authenticated")).toBeInTheDocument();
     expect(screen.getByText("Usuario: admin@test.com")).toBeInTheDocument();
     expect(localStorage.getItem("ticketing_access_token")).toBe(token);
     expect(sessionStorage.getItem("ticketing_access_token")).toBeNull();
@@ -103,9 +103,9 @@ describe("[AUTH-01] login correcto refleja estado autenticado", () => {
       </AuthProvider>,
     );
 
-    await user.click(screen.getByRole("button", { name: "Login sesión" }));
+    await user.click(screen.getByRole("button", { name: "Session login" }));
 
-    expect(await screen.findByText("Estado sesión: autenticado")).toBeInTheDocument();
+    expect(await screen.findByText("Estado sesión: authenticated")).toBeInTheDocument();
     expect(localStorage.getItem("ticketing_access_token")).toBeNull();
     expect(sessionStorage.getItem("ticketing_access_token")).toBe(token);
   });

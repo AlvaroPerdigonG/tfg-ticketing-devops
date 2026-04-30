@@ -10,9 +10,9 @@ async function createTicketAsUser(page: Page) {
   await page.getByTestId("user-create-ticket-cta").click();
   await expect(page).toHaveURL(/\/tickets\/new$/);
 
-  await page.getByLabel("Título").fill(title);
+  await page.getByLabel("Title").fill(title);
   await page
-    .getByLabel("Descripción")
+    .getByLabel("Description")
     .fill("Ticket creado para validar cambio de estado por agente.");
   await selectFirstTicketCategory(page);
   await page.getByTestId("create-ticket-submit").click();
@@ -29,17 +29,17 @@ test("TICKET-AGENT-01 agent/admin cambia estado correctamente", async ({ page })
   await loginAs(page, "agent");
   await page.goto("/tickets");
   await expect(page).toHaveURL(/\/tickets(?:\?.*)?$/);
-  await page.getByRole("button", { name: "Todos" }).click();
+  await page.getByRole("button", { name: "All" }).click();
 
-  await page.getByPlaceholder("Buscar por título o ID").fill(ticketTitle);
-  await page.getByRole("button", { name: "Buscar" }).click();
-  await page.getByRole("button", { name: "Ver" }).first().click();
+  await page.getByPlaceholder("Search by title or ID").fill(ticketTitle);
+  await page.getByRole("button", { name: "Search" }).click();
+  await page.getByRole("button", { name: "View" }).first().click();
 
   await expect(page.getByTestId("ticket-detail-title")).toContainText(ticketTitle);
-  await expect(page.getByTestId("ticket-detail-status")).toContainText("Abierto");
+  await expect(page.getByTestId("ticket-detail-status")).toContainText("Open");
 
   await page.getByTestId("ticket-status-transition-IN_PROGRESS").click();
-  await expect(page.getByTestId("ticket-detail-status")).toContainText("En progreso");
+  await expect(page.getByTestId("ticket-detail-status")).toContainText("In progress");
 });
 
 test("TICKET-AGENT-04 agent se asigna ticket y comenta en el detalle", async ({ page }) => {
@@ -49,20 +49,20 @@ test("TICKET-AGENT-04 agent se asigna ticket y comenta en el detalle", async ({ 
   await loginAs(page, "agent");
   await page.goto("/tickets");
   await expect(page).toHaveURL(/\/tickets(?:\?.*)?$/);
-  await page.getByRole("button", { name: "Todos" }).click();
+  await page.getByRole("button", { name: "All" }).click();
 
-  await page.getByPlaceholder("Buscar por título o ID").fill(ticketTitle);
-  await page.getByRole("button", { name: "Buscar" }).click();
-  await page.getByRole("button", { name: "Ver" }).first().click();
+  await page.getByPlaceholder("Search by title or ID").fill(ticketTitle);
+  await page.getByRole("button", { name: "Search" }).click();
+  await page.getByRole("button", { name: "View" }).first().click();
 
   await expect(page.getByTestId("ticket-detail-title")).toContainText(ticketTitle);
 
-  await page.getByRole("button", { name: "Asignarme ticket" }).click();
-  await expect(page.getByRole("button", { name: "Asignarme ticket" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Assign ticket to me" }).click();
+  await expect(page.getByRole("button", { name: "Assign ticket to me" })).toHaveCount(0);
 
   const commentText = `Comentario E2E agente ${Date.now()}`;
-  await page.getByPlaceholder("Escribe un comentario").fill(commentText);
-  await page.getByRole("button", { name: "Enviar comentario" }).click();
+  await page.getByPlaceholder("Write a comment").fill(commentText);
+  await page.getByRole("button", { name: "Send comment" }).click();
 
   await expect(page.getByText(commentText)).toBeVisible();
 });

@@ -11,7 +11,7 @@ export function PlaceholderPage({ title }: PlaceholderPageProps) {
         {title}
       </Typography.Title>
       <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
-        Página placeholder para el MVP.
+        Placeholder page for the MVP.
       </Typography.Paragraph>
     </Card>
   );

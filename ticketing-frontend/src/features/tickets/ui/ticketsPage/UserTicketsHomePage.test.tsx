@@ -17,7 +17,7 @@ const baseTicket = {
 } as const;
 
 describe("UserTicketsHomePage", () => {
-  it("[TICKET-USER-03] muestra solo los tickets del usuario autenticado", async () => {
+  it("[TICKET-USER-03] muestra solo los tickets del usuario authenticated", async () => {
     server.use(
       http.get("/api/tickets/me", () =>
         jsonResponse({
@@ -33,7 +33,7 @@ describe("UserTicketsHomePage", () => {
 
     expect(await screen.findByRole("cell", { name: "TCK-001" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "No funciona la VPN" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Ver" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View" })).toBeInTheDocument();
   });
 
   it("muestra loading state mientras la petición está en curso", async () => {
@@ -47,7 +47,7 @@ describe("UserTicketsHomePage", () => {
     const { container } = renderWithProviders(<UserTicketsHomePage />, { router: {} });
 
     expect(container.querySelector(".ant-skeleton")).toBeInTheDocument();
-    expect(await screen.findByText("Aún no tienes tickets creados")).toBeInTheDocument();
+    expect(await screen.findByText("You do not have any tickets yet")).toBeInTheDocument();
   });
 
   it("muestra empty state cuando el usuario no tiene tickets", async () => {
@@ -57,7 +57,7 @@ describe("UserTicketsHomePage", () => {
 
     renderWithProviders(<UserTicketsHomePage />, { router: {} });
 
-    expect(await screen.findByText("Aún no tienes tickets creados")).toBeInTheDocument();
+    expect(await screen.findByText("You do not have any tickets yet")).toBeInTheDocument();
   });
 
   it("muestra error state cuando falla la carga", async () => {
@@ -67,7 +67,7 @@ describe("UserTicketsHomePage", () => {
 
     renderWithProviders(<UserTicketsHomePage />, { router: {} });
 
-    expect(await screen.findByText("No hemos podido cargar tus tickets")).toBeInTheDocument();
+    expect(await screen.findByText("Could not load your tickets")).toBeInTheDocument();
   });
 
   it("[TICKET-USER-05] no muestra acciones de cambio de estado", async () => {

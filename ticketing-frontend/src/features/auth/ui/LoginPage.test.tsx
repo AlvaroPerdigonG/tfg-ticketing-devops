@@ -35,11 +35,11 @@ function renderLogin(initialState?: { from?: string }) {
   );
 }
 
-function getSubmitButton(name: RegExp | string = /^Iniciar sesión$/i) {
+function getSubmitButton(name: RegExp | string = /^Sign in$/i) {
   const buttons = screen.getAllByRole("button", { name });
   const submit = buttons.find((button) => button.getAttribute("type") === "submit");
 
-  if (!submit) throw new Error("No se encontró el botón submit del formulario de login");
+  if (!submit) throw new Error("Could not find the login submit button");
   return submit;
 }
 
@@ -77,7 +77,7 @@ describe("[AUTH-01] Login correcto", () => {
     renderLogin({ from: "/tickets" });
 
     await user.type(screen.getByLabelText("Email"), "user@test.com");
-    await user.type(screen.getByLabelText("Contraseña"), "Password.123");
+    await user.type(screen.getByLabelText("Password"), "Password.123");
     await user.click(getSubmitButton());
 
     expect(loginMock).toHaveBeenCalledWith({ email: "user@test.com", password: "Password.123" });
@@ -93,10 +93,10 @@ describe("[AUTH-01] Login correcto", () => {
     renderLogin();
 
     await user.type(screen.getByLabelText("Email"), "user@test.com");
-    await user.type(screen.getByLabelText("Contraseña"), "Password.123");
+    await user.type(screen.getByLabelText("Password"), "Password.123");
     await user.click(getSubmitButton());
 
-    const submit = await screen.findByRole("button", { name: "Procesando..." });
+    const submit = await screen.findByRole("button", { name: "Processing..." });
     expect(submit).toBeDisabled();
 
     request.resolve({
@@ -128,15 +128,15 @@ describe("[AUTH-02] Login inválido", () => {
   it("muestra feedback de error y mantiene al usuario en login", async () => {
     const user = userEvent.setup();
 
-    loginMock.mockRejectedValueOnce(new ApiError("Credenciales inválidas", 401));
+    loginMock.mockRejectedValueOnce(new ApiError("Invalid credentials", 401));
 
     renderLogin({ from: "/tickets" });
 
     await user.type(screen.getByLabelText("Email"), "user@test.com");
-    await user.type(screen.getByLabelText("Contraseña"), "wrong-pass");
+    await user.type(screen.getByLabelText("Password"), "wrong-pass");
     await user.click(getSubmitButton());
 
-    expect(await screen.findByText("401 — Credenciales inválidas")).toBeInTheDocument();
+    expect(await screen.findByText("401 — Invalid credentials")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Tickets" })).not.toBeInTheDocument();
     expect(getSubmitButton()).toBeEnabled();
   });

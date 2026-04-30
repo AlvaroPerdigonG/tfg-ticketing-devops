@@ -10,7 +10,7 @@ import { TicketStatusBadge } from "../shared/TicketStatusBadge";
 type LoadState = "loading" | "ready" | "error";
 
 function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(isoDate));
@@ -57,7 +57,7 @@ export function TicketDetailPage() {
               {entry.eventType === "STATUS_CHANGED" &&
                 `Cambio de estado: ${entry.payload.from} → ${entry.payload.to}`}
               {entry.eventType === "ASSIGNED_TO_ME" &&
-                `Asignado a ${entry.actorDisplayName ?? "agente"}`}
+                `Assigned to ${entry.actorDisplayName ?? "agent"}`}
               {entry.eventType === "TICKET_CREATED" && "Ticket creado"}
             </Typography.Text>
           )}
@@ -91,7 +91,7 @@ export function TicketDetailPage() {
   useEffect(() => {
     if (!id) {
       setLoadState("error");
-      setErrorMessage("Id de ticket inválido");
+      setErrorMessage("Invalid ticket id");
       return;
     }
 
@@ -113,7 +113,7 @@ export function TicketDetailPage() {
       } catch (error) {
         if (!mounted) return;
         setLoadState("error");
-        setErrorMessage(error instanceof Error ? error.message : "No se pudo cargar el ticket.");
+        setErrorMessage(error instanceof Error ? error.message : "Could not load the ticket.");
       }
     };
 
@@ -137,7 +137,7 @@ export function TicketDetailPage() {
       await ticketsApi.assignToMe(id);
       await reload();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "No se pudo asignar el ticket.");
+      setErrorMessage(error instanceof Error ? error.message : "Could not assign the ticket.");
     } finally {
       setBusyAction(null);
     }
@@ -151,7 +151,7 @@ export function TicketDetailPage() {
       await ticketsApi.changeStatus(id, status);
       await reload();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "No se pudo cambiar el estado.");
+      setErrorMessage(error instanceof Error ? error.message : "Could not change status.");
     } finally {
       setBusyAction(null);
     }
@@ -166,7 +166,7 @@ export function TicketDetailPage() {
       setCommentText("");
       await reload();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "No se pudo añadir el comentario.");
+      setErrorMessage(error instanceof Error ? error.message : "Could not add comment.");
     } finally {
       setBusyComment(false);
     }
@@ -179,13 +179,8 @@ export function TicketDetailPage() {
   if (loadState === "error" || !ticket) {
     return (
       <Space direction="vertical" style={{ width: "100%" }} size={16}>
-        <Alert
-          type="error"
-          showIcon
-          message="Error cargando el ticket"
-          description={errorMessage}
-        />
-        <Button onClick={() => navigate("/tickets")}>Volver a tickets</Button>
+        <Alert type="error" showIcon message="Error loading ticket" description={errorMessage} />
+        <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>
       </Space>
     );
   }
@@ -196,7 +191,7 @@ export function TicketDetailPage() {
         <Alert
           type="error"
           showIcon
-          message="No se pudo completar la acción"
+          message="Could not complete action"
           description={errorMessage}
         />
       )}
@@ -222,13 +217,13 @@ export function TicketDetailPage() {
                 Metadata
               </Typography.Title>
               <Typography.Text>ID: {ticket.id}</Typography.Text>
-              <Typography.Text>Categoría: {categoryDisplayName}</Typography.Text>
-              <Typography.Text>Creado por: {ticket.createdByDisplayName}</Typography.Text>
+              <Typography.Text>Category: {categoryDisplayName}</Typography.Text>
+              <Typography.Text>Created by: {ticket.createdByDisplayName}</Typography.Text>
               <Typography.Text>
-                Asignado a: {ticket.assignedToDisplayName ?? "Sin asignar"}
+                Assigned to: {ticket.assignedToDisplayName ?? "Unassigned"}
               </Typography.Text>
-              <Typography.Text>Creado: {formatDate(ticket.createdAt)}</Typography.Text>
-              <Typography.Text>Actualizado: {formatDate(ticket.updatedAt)}</Typography.Text>
+              <Typography.Text>Created: {formatDate(ticket.createdAt)}</Typography.Text>
+              <Typography.Text>Updated: {formatDate(ticket.updatedAt)}</Typography.Text>
             </Space>
           </Card>
         </div>
@@ -237,10 +232,10 @@ export function TicketDetailPage() {
           <Card>
             <Space direction="vertical" size={12} style={{ width: "100%" }}>
               <Typography.Title level={5} style={{ margin: 0 }}>
-                Conversación
+                Conversation
               </Typography.Title>
               {timelineItems.length === 0 ? (
-                <Empty description="Sin actividad todavía" />
+                <Empty description="No activity yet" />
               ) : (
                 <div style={{ maxHeight: 420, overflowY: "auto", paddingRight: 8 }}>
                   <Space direction="vertical" size={12} style={{ width: "100%" }}>
@@ -253,8 +248,8 @@ export function TicketDetailPage() {
               {ticket.status === "RESOLVED" && (
                 <Alert
                   type="info"
-                  message="Ticket resuelto"
-                  description="No admite nuevos comentarios."
+                  message="Ticket resolved"
+                  description="No new comments allowed."
                 />
               )}
               {canAddComment ? (
@@ -263,7 +258,7 @@ export function TicketDetailPage() {
                     rows={3}
                     value={commentText}
                     maxLength={2000}
-                    placeholder="Escribe un comentario"
+                    placeholder="Write a comment"
                     onChange={(event) => setCommentText(event.target.value)}
                   />
                   <Button
@@ -272,12 +267,12 @@ export function TicketDetailPage() {
                     disabled={!commentText.trim() || ticket.status === "RESOLVED"}
                     onClick={handleAddComment}
                   >
-                    Enviar comentario
+                    Send comment
                   </Button>
                 </>
               ) : (
                 <Typography.Text type="secondary">
-                  No tienes permisos para añadir comentarios.
+                  You do not have permission to add comments.
                 </Typography.Text>
               )}
             </Space>
@@ -288,22 +283,20 @@ export function TicketDetailPage() {
           <div>
             <Card>
               <Typography.Title level={5} style={{ margin: "0 0 12px" }}>
-                Acciones
+                Actions
               </Typography.Title>
               {canUseActions ? (
                 <Space direction="vertical" style={{ width: "100%" }} size={12}>
                   {!ticket.assignedToUserId && (
                     <Button loading={busyAction === "assign"} onClick={handleAssignToMe}>
-                      Asignarme ticket
+                      Assign ticket to me
                     </Button>
                   )}
                   <Typography.Title level={5} style={{ margin: 0 }}>
-                    Cambiar estado
+                    Change status
                   </Typography.Title>
                   {availableStatusTransitions.length === 0 && (
-                    <Typography.Text type="secondary">
-                      No hay transiciones disponibles.
-                    </Typography.Text>
+                    <Typography.Text type="secondary">No transitions available.</Typography.Text>
                   )}
                   {availableStatusTransitions.map((nextStatus) => (
                     <Button
@@ -313,13 +306,13 @@ export function TicketDetailPage() {
                       loading={busyAction === "status"}
                       onClick={() => handleStatusChange(nextStatus)}
                     >
-                      Mover a {ticketStatusLabel[nextStatus]}
+                      Move to {ticketStatusLabel[nextStatus]}
                     </Button>
                   ))}
                 </Space>
               ) : (
                 <Typography.Text type="secondary">
-                  No eres el propietario de este ticket.
+                  You are not the owner of this ticket.
                 </Typography.Text>
               )}
             </Card>

@@ -54,9 +54,9 @@ describe("AdminPage", () => {
   it("renderiza tabs y datos cargados en categorías", async () => {
     renderWithProviders(<AdminPage />);
 
-    expect(screen.getByRole("heading", { name: "Administración" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Administration" })).toBeInTheDocument();
     expect(await screen.findByText("Software")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Usuarios" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Users" })).toBeInTheDocument();
   });
 
   it("crea una categoría nueva y limpia el input", async () => {
@@ -65,16 +65,16 @@ describe("AdminPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
-    const input = await screen.findByPlaceholderText("Nueva categoría");
+    const input = await screen.findByPlaceholderText("New category");
     await user.type(input, "Hardware");
-    await user.click(screen.getByRole("button", { name: "Crear" }));
+    await user.click(screen.getByRole("button", { name: "Create" }));
 
     await waitFor(() => {
       expect(createCategoryMock).toHaveBeenCalledWith("Hardware");
       expect(screen.getByText("Hardware")).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("Nueva categoría")).toHaveValue("");
+      expect(screen.getByPlaceholderText("New category")).toHaveValue("");
     });
-    expect(messageSuccessSpy).toHaveBeenCalledWith("Categoría creada");
+    expect(messageSuccessSpy).toHaveBeenCalledWith("Category created");
   });
 
   it("edita categoría existente (nombre + activa/inactiva)", async () => {
@@ -83,16 +83,16 @@ describe("AdminPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
-    await user.click(await screen.findByRole("button", { name: "Editar" }));
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
 
-    const nameInput = await screen.findByPlaceholderText("Nombre");
+    const nameInput = await screen.findByPlaceholderText("Name");
     await user.clear(nameInput);
     await user.type(nameInput, "Software Legacy");
 
     const modalSwitch = screen.getAllByRole("switch")[0];
     await user.click(modalSwitch);
 
-    await user.click(screen.getByRole("button", { name: "Guardar" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(updateCategoryMock).toHaveBeenCalledWith("cat-1", {
@@ -100,9 +100,9 @@ describe("AdminPage", () => {
         isActive: false,
       });
       expect(screen.getByText("Software Legacy")).toBeInTheDocument();
-      expect(screen.getByText("Inactiva")).toBeInTheDocument();
+      expect(screen.getByText("Inactive")).toBeInTheDocument();
     });
-    expect(messageSuccessSpy).toHaveBeenCalledWith("Categoría actualizada");
+    expect(messageSuccessSpy).toHaveBeenCalledWith("Category updated");
   });
 
   it("deactiva usuario desde tab de usuarios", async () => {
@@ -117,14 +117,14 @@ describe("AdminPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
-    await user.click(screen.getByRole("tab", { name: "Usuarios" }));
+    await user.click(screen.getByRole("tab", { name: "Users" }));
     const userSwitch = await screen.findByRole("switch");
     await user.click(userSwitch);
 
     await waitFor(() => {
       expect(updateUserActiveMock).toHaveBeenCalledWith("u1", false);
     });
-    expect(messageSuccessSpy).toHaveBeenCalledWith("Estado de usuario actualizado");
+    expect(messageSuccessSpy).toHaveBeenCalledWith("User status updated");
   });
 
   it("muestra error cuando falla la carga inicial", async () => {
@@ -134,8 +134,22 @@ describe("AdminPage", () => {
     renderWithProviders(<AdminPage />);
 
     await waitFor(() => {
-      expect(messageErrorSpy).toHaveBeenCalledWith("No se pudieron cargar las categorías");
-      expect(messageErrorSpy).toHaveBeenCalledWith("No se pudieron cargar los usuarios");
+      expect(messageErrorSpy).toHaveBeenCalledWith("Could not load categories");
+      expect(messageErrorSpy).toHaveBeenCalledWith("Could not load users");
     });
+  });
+
+  it("muestra error si se intenta guardar categoría con nombre vacío", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AdminPage />);
+
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
+    const nameInput = await screen.findByPlaceholderText("Name");
+    await user.clear(nameInput);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(messageErrorSpy).toHaveBeenCalledWith("Name is required");
+    expect(updateCategoryMock).not.toHaveBeenCalled();
   });
 });

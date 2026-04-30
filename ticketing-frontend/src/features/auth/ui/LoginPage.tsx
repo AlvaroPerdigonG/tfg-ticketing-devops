@@ -22,7 +22,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   const submitText = useMemo(
-    () => (loading ? "Procesando..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"),
+    () => (loading ? "Processing..." : mode === "login" ? "Sign in" : "Create account"),
     [loading, mode],
   );
 
@@ -42,7 +42,7 @@ export function LoginPage() {
       nav(from, { replace: true });
     } catch (err) {
       if (err instanceof ApiError) setError(`${err.status} — ${err.message}`);
-      else setError("No se pudo completar la autenticación");
+      else setError("Could not complete authentication");
     } finally {
       setLoading(false);
     }
@@ -53,10 +53,10 @@ export function LoginPage() {
       <section className="auth-card">
         <div className="auth-brand">
           <h1>Ticketing Platform</h1>
-          <p>Accede o crea tu cuenta para gestionar incidencias de forma eficiente.</p>
+          <p>Sign in or create your account to manage support tickets efficiently.</p>
         </div>
 
-        <div className="auth-tabs" role="tablist" aria-label="Autenticación">
+        <div className="auth-tabs" role="tablist" aria-label="Authentication">
           <button
             type="button"
             className={`auth-tab ${mode === "login" ? "active" : ""}`}
@@ -65,7 +65,7 @@ export function LoginPage() {
               setError(null);
             }}
           >
-            Iniciar sesión
+            Sign in
           </button>
           <button
             type="button"
@@ -75,7 +75,7 @@ export function LoginPage() {
               setError(null);
             }}
           >
-            Registrarse
+            Sign up
           </button>
         </div>
 
@@ -94,7 +94,7 @@ export function LoginPage() {
 
           {mode === "register" && (
             <label>
-              Nombre a mostrar
+              Display name
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -105,7 +105,7 @@ export function LoginPage() {
           )}
 
           <label>
-            Contraseña
+            Password
             <input
               data-testid="auth-password"
               value={password}
@@ -119,7 +119,7 @@ export function LoginPage() {
           {mode === "register" && (
             <>
               <label>
-                Confirmar contraseña
+                Confirm password
                 <input
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -129,8 +129,8 @@ export function LoginPage() {
                 />
               </label>
               <p className="auth-password-hint">
-                La contraseña debe tener mínimo 8 caracteres e incluir mayúsculas, minúsculas,
-                número y símbolo.
+                Password must be at least 8 characters and include uppercase, lowercase, a number,
+                and a symbol.
               </p>
             </>
           )}
@@ -141,7 +141,7 @@ export function LoginPage() {
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
             />
-            Recordar sesión
+            Remember session
           </label>
 
           {error && (

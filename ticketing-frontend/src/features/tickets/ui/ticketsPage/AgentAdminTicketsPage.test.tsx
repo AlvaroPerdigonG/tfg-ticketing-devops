@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import { jsonResponse } from "src/test/msw/handlers";
 import { http } from "src/test/msw/http";
@@ -55,7 +56,7 @@ describe("AgentAdminTicketsPage", () => {
       expect(capturedSearch).toContain("q=printer");
     });
 
-    expect(screen.getByRole("heading", { name: "Tickets asignados a mí" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tickets assigned to me" })).toBeInTheDocument();
   });
 
   it("muestra loading y empty state", async () => {
@@ -72,7 +73,7 @@ describe("AgentAdminTicketsPage", () => {
 
     expect(container.querySelector(".ant-skeleton")).toBeInTheDocument();
     expect(
-      await screen.findByText("No hay tickets para mostrar con los filtros actuales"),
+      await screen.findByText("No tickets to display with the current filters"),
     ).toBeInTheDocument();
   });
 
@@ -81,9 +82,7 @@ describe("AgentAdminTicketsPage", () => {
 
     renderWithProviders(<AgentAdminTicketsPage />, { router: { initialEntries: ["/tickets"] } });
 
-    expect(
-      await screen.findByText("No se ha podido cargar la cola de tickets"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Could not load the ticket queue")).toBeInTheDocument();
   });
 
   it("[TICKET-AGENT-01] muestra acciones de UI para gestión de estado si existen", async () => {
@@ -102,7 +101,62 @@ describe("AgentAdminTicketsPage", () => {
 
     await screen.findByRole("cell", { name: "TCK-200" });
 
-    // En esta pantalla actualmente solo existe acción "Ver".
-    expect(screen.getByRole("button", { name: "Ver" })).toBeInTheDocument();
+    // En esta pantalla actualmente solo existe acción "View".
+    expect(screen.getByRole("button", { name: "View" })).toBeInTheDocument();
+  });
+
+  it("fallback a vista unassigned y estado all cuando query params son inválidos", async () => {
+    let capturedSearch = "";
+
+    server.use(
+      http.get("/api/tickets", (request) => {
+        capturedSearch = request.url.search;
+        return jsonResponse({ items: [], page: 0, size: 20, total: 0 });
+      }),
+    );
+
+    renderWithProviders(<AgentAdminTicketsPage />, {
+      router: { initialEntries: ["/tickets?view=legacy&status=UNKNOWN"] },
+    });
+
+    await waitFor(() => {
+      expect(capturedSearch).toContain("scope=UNASSIGNED");
+      expect(capturedSearch).not.toContain("status=");
+    });
+
+    expect(screen.getByRole("heading", { name: "Unassigned queue" })).toBeInTheDocument();
+  });
+
+  it("permite aplicar búsqueda y limpiar filtros", async () => {
+    let capturedSearch = "";
+    const user = userEvent.setup();
+
+    server.use(
+      http.get("/api/tickets", (request) => {
+        capturedSearch = request.url.search;
+        return jsonResponse({ items: [], page: 0, size: 20, total: 0 });
+      }),
+    );
+
+    renderWithProviders(<AgentAdminTicketsPage />, {
+      router: { initialEntries: ["/tickets?view=mine&status=IN_PROGRESS&q=printer"] },
+    });
+
+    await screen.findByRole("heading", { name: "Tickets assigned to me" });
+
+    await user.clear(screen.getByPlaceholderText("Search by title or ID"));
+    await user.type(screen.getByPlaceholderText("Search by title or ID"), "network");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(capturedSearch).toContain("q=network");
+    });
+
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Unassigned queue" })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Search by title or ID")).toHaveValue("");
+    });
   });
 });

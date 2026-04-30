@@ -11,8 +11,8 @@ const { Header, Sider, Content } = Layout;
 
 const baseItems: AppMenuItem[] = [
   { key: "/tickets", icon: <HiTicket fontSize={18} />, label: "Tickets" },
-  { key: "/tickets/new", icon: <MdOutlineAdd fontSize={18} />, label: "Nuevo ticket" },
-  { key: "/profile", icon: <HiBars3 fontSize={18} />, label: "Perfil" },
+  { key: "/tickets/new", icon: <MdOutlineAdd fontSize={18} />, label: "New ticket" },
+  { key: "/profile", icon: <HiBars3 fontSize={18} />, label: "Profile" },
 ];
 
 function getMenuItems(canSeeDashboard: boolean, isAdmin: boolean): AppMenuItem[] {
@@ -23,7 +23,7 @@ function getMenuItems(canSeeDashboard: boolean, isAdmin: boolean): AppMenuItem[]
   }
 
   if (isAdmin) {
-    items.push({ key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administración" });
+    items.push({ key: "/admin", icon: <HiUsers fontSize={18} />, label: "Administration" });
   }
 
   return items;
@@ -59,7 +59,7 @@ export function AppShell() {
           <Typography.Title level={4} style={{ margin: 0 }}>
             TFG Ticketing
           </Typography.Title>
-          <Typography.Text type="secondary">{state.user?.displayName ?? "Usuario"}</Typography.Text>
+          <Typography.Text type="secondary">{state.user?.displayName ?? "User"}</Typography.Text>
         </div>
         <Menu
           mode="inline"

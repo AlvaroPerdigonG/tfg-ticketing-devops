@@ -27,7 +27,7 @@ export function AdminPage() {
       const data = await adminApi.getCategories();
       setCategories(data);
     } catch {
-      message.error("No se pudieron cargar las categorías");
+      message.error("Could not load categories");
     } finally {
       setLoadingCategories(false);
     }
@@ -39,7 +39,7 @@ export function AdminPage() {
       const data = await adminApi.getUsers();
       setUsers(data);
     } catch {
-      message.error("No se pudieron cargar los usuarios");
+      message.error("Could not load users");
     } finally {
       setLoadingUsers(false);
     }
@@ -51,15 +51,15 @@ export function AdminPage() {
 
   const categoryColumns = useMemo<SimpleColumn<AdminCategory>[]>(
     () => [
-      { title: "Nombre", dataIndex: "name", key: "name" },
+      { title: "Name", dataIndex: "name", key: "name" },
       {
-        title: "Estado",
+        title: "Status",
         key: "isActive",
         render: (_: unknown, record: AdminCategory) =>
-          record.isActive ? <Tag color="success">Activa</Tag> : <Tag>Inactiva</Tag>,
+          record.isActive ? <Tag color="success">Active</Tag> : <Tag>Inactive</Tag>,
       },
       {
-        title: "Acciones",
+        title: "Actions",
         key: "actions",
         render: (_: unknown, record: AdminCategory) => (
           <Button
@@ -69,7 +69,7 @@ export function AdminPage() {
               setEditingActive(record.isActive);
             }}
           >
-            Editar
+            Edit
           </Button>
         ),
       },
@@ -79,16 +79,16 @@ export function AdminPage() {
 
   const userColumns = useMemo<SimpleColumn<AdminUser>[]>(
     () => [
-      { title: "Nombre", dataIndex: "displayName", key: "displayName" },
+      { title: "Name", dataIndex: "displayName", key: "displayName" },
       { title: "Email", dataIndex: "email", key: "email" },
       {
-        title: "Rol",
+        title: "Role",
         dataIndex: "role",
         key: "role",
         render: (role: unknown) => <Tag>{String(role)}</Tag>,
       },
       {
-        title: "Activo",
+        title: "Active",
         key: "isActive",
         render: (_: unknown, record: AdminUser) => (
           <Switch
@@ -97,9 +97,9 @@ export function AdminPage() {
               try {
                 const updated = await adminApi.updateUserActive(record.id, checked);
                 setUsers((prev) => prev.map((user) => (user.id === updated.id ? updated : user)));
-                message.success("Estado de usuario actualizado");
+                message.success("User status updated");
               } catch {
-                message.error("No se pudo actualizar el estado del usuario");
+                message.error("Could not update user status");
               }
             }}
           />
@@ -112,24 +112,24 @@ export function AdminPage() {
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>
-        <span data-testid="admin-title">Administración</span>
+        <span data-testid="admin-title">Administration</span>
       </Typography.Title>
       <Typography.Text type="secondary">
-        Gestiona categorías y usuarios de la plataforma. Solo los administradores tienen acceso.
+        Manage platform categories and users. Only administrators can access this area.
       </Typography.Text>
 
       <Tabs
         items={[
           {
             key: "categories",
-            label: "Categorías",
+            label: "Categories",
             children: (
               <Space direction="vertical" size={16} style={{ width: "100%" }}>
                 <Space>
                   <Input
                     value={newCategoryName}
                     onChange={(event) => setNewCategoryName(event.target.value)}
-                    placeholder="Nueva categoría"
+                    placeholder="New category"
                   />
                   <Button
                     type="primary"
@@ -137,7 +137,7 @@ export function AdminPage() {
                     onClick={async () => {
                       const name = newCategoryName.trim();
                       if (!name) {
-                        message.error("Nombre obligatorio");
+                        message.error("Name is required");
                         return;
                       }
 
@@ -148,15 +148,15 @@ export function AdminPage() {
                           [...prev, created].sort((a, b) => a.name.localeCompare(b.name)),
                         );
                         setNewCategoryName("");
-                        message.success("Categoría creada");
+                        message.success("Category created");
                       } catch {
-                        message.error("No se pudo crear la categoría (puede que ya exista)");
+                        message.error("Could not create category (it may already exist)");
                       } finally {
                         setCreatingCategory(false);
                       }
                     }}
                   >
-                    Crear
+                    Create
                   </Button>
                 </Space>
 
@@ -172,7 +172,7 @@ export function AdminPage() {
           },
           {
             key: "users",
-            label: "Usuarios",
+            label: "Users",
             children: (
               <Table
                 rowKey="id"
@@ -187,7 +187,7 @@ export function AdminPage() {
       />
 
       <Modal
-        title="Editar categoría"
+        title="Edit category"
         open={Boolean(editingCategory)}
         onCancel={() => setEditingCategory(null)}
         onOk={async () => {
@@ -197,7 +197,7 @@ export function AdminPage() {
 
           const name = editingName.trim();
           if (!name) {
-            message.error("Nombre obligatorio");
+            message.error("Name is required");
             return;
           }
 
@@ -210,21 +210,21 @@ export function AdminPage() {
               prev.map((category) => (category.id === updated.id ? updated : category)),
             );
             setEditingCategory(null);
-            message.success("Categoría actualizada");
+            message.success("Category updated");
           } catch {
-            message.error("No se pudo actualizar la categoría");
+            message.error("Could not update category");
           }
         }}
-        okText="Guardar"
+        okText="Save"
       >
         <Space direction="vertical" style={{ width: "100%" }}>
           <Input
             value={editingName}
             onChange={(event) => setEditingName(event.target.value)}
-            placeholder="Nombre"
+            placeholder="Name"
           />
           <Space>
-            <Typography.Text>Activa</Typography.Text>
+            <Typography.Text>Active</Typography.Text>
             <Switch checked={editingActive} onChange={setEditingActive} />
           </Space>
         </Space>

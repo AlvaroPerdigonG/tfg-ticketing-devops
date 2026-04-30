@@ -71,14 +71,14 @@ describe("AppShell", () => {
     renderWithRouter();
 
     await screen.findByRole("heading", { name: "Dashboard page" });
-    expect(screen.queryByText("Administración")).not.toBeInTheDocument();
+    expect(screen.queryByText("Administration")).not.toBeInTheDocument();
   });
 
   it("shows admin menu for ADMIN", async () => {
     hasRoleMock.mockReturnValue(true);
     renderWithRouter();
 
-    expect(await screen.findByText("Administración")).toBeInTheDocument();
+    expect(await screen.findByText("Administration")).toBeInTheDocument();
   });
 
   it("shows dashboard menu for AGENT but not admin menu", async () => {
@@ -86,7 +86,7 @@ describe("AppShell", () => {
     renderWithRouter();
 
     expect(await screen.findByText("Dashboard")).toBeInTheDocument();
-    expect(screen.queryByText("Administración")).not.toBeInTheDocument();
+    expect(screen.queryByText("Administration")).not.toBeInTheDocument();
   });
 
   it("logs out and redirects to login from header button", async () => {

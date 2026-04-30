@@ -9,8 +9,8 @@ test("TICKET-USER-01 usuario crea ticket y llega al detalle", async ({ page }) =
   await expect(page).toHaveURL(/\/tickets\/new$/);
 
   const uniqueSuffix = Date.now();
-  await page.getByLabel("Título").fill(`E2E ticket ${uniqueSuffix}`);
-  await page.getByLabel("Descripción").fill("Flujo E2E mínimo para validar creación de ticket.");
+  await page.getByLabel("Title").fill(`E2E ticket ${uniqueSuffix}`);
+  await page.getByLabel("Description").fill("Flujo E2E mínimo para validar creación de ticket.");
 
   await selectFirstTicketCategory(page);
   await page.getByTestId("create-ticket-submit").click();

@@ -8,8 +8,8 @@ export function NotFoundPage() {
     <Result
       status="404"
       title="404"
-      subTitle="La página que buscas no existe."
-      extra={<Button onClick={() => navigate("/dashboard")}>Ir al dashboard</Button>}
+      subTitle="The page you are looking for does not exist."
+      extra={<Button onClick={() => navigate("/dashboard")}>Go to dashboard</Button>}
     />
   );
 }
