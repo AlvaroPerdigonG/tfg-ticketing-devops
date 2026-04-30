@@ -57,6 +57,24 @@ Representative files:
 - `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/AssignTicketToMeUseCaseTest.java`
 - `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/TicketAvailableTransitionsTest.java`
 
+### Worked example (repository-based)
+
+**Scenario anchor**: `AUTH-05` in `docs/features/authentication.feature` (duplicate-email registration rejection).
+
+**Why this is a unit test candidate**:
+
+- The core risk is decision logic (existing email must be rejected).
+- The fastest feedback is at use-case level before full HTTP/runtime concerns.
+
+**Implemented evidence in repository**:
+
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/auth/RegisterUseCaseTest.java`
+
+**How this covers the scenario**:
+
+- The test asserts that registration with a duplicate email triggers a business rejection path.
+- This directly protects the domain/application rule independent of transport/database wiring.
+
 ### What they do not validate
 
 - Spring MVC serialization/deserialization.
@@ -134,6 +152,27 @@ Representative files:
 
 This is not a controller-only test; it traverses security, application services, persistence, and serialization layers.
 
+### Worked example (reference integration architecture)
+
+**Scenario anchor**: `AUTH-01` in `docs/features/authentication.feature` (valid login returns access token).
+
+**Why this is an integration test candidate**:
+
+- The scenario is an API contract with security implications.
+- It must validate end-to-end backend runtime behavior (HTTP + auth + persistence + token issuance).
+
+**Implemented evidence in repository**:
+
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/integration/auth/AuthApiIntegrationTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/test_support/integration/AbstractIntegrationTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/test_support/integration/AbstractAuthenticatedApiIntegrationTest.java`
+
+**How this covers the scenario**:
+
+- Bootstraps full Spring context and executes `/api/auth/login` through `MockMvc`.
+- Uses real persistence setup and runtime security path.
+- Parses returned JWT and asserts claims/expiration to validate token contract semantics.
+
 ### 4.5 What backend integration tests do **not** validate
 
 - Full browser behavior.
@@ -189,6 +228,25 @@ Representative UI tests:
 - Form behavior and user interaction.
 - Navigation/route-guard outcomes.
 - Correct API request intent (through handler assertions in tests that inspect request params/body).
+
+### Worked example (UI/component level)
+
+**Scenario anchor**: `TICKET-USER-01` in `docs/features/tickets-user.feature` (user creates a ticket).
+
+**Why this is a UI/component test candidate**:
+
+- The risk here is user interaction behavior (form inputs, submission, visible states, navigation intent).
+- A full browser run is not always required to validate core page behavior deterministically.
+
+**Implemented evidence in repository**:
+
+- `ticketing-frontend/src/features/tickets/ui/create/CreateTicketPage.test.tsx`
+
+**How this covers the scenario**:
+
+- Uses MSW handlers for categories fetch and ticket creation request.
+- Simulates user input/submission and validates expected UI outcome and API interaction intent.
+- Provides fast regression protection for ticket creation UX.
 
 ### What they do not validate
 
@@ -260,6 +318,25 @@ Playwright config defines:
 - Cross-page flows with real DOM/browser behavior.
 - Integration of frontend routing + backend contracts in runtime.
 - User role journeys where end-user confidence matters most.
+
+### Worked example (end-user journey)
+
+**Scenario anchor**: `TICKET-AGENT-01` in `docs/features/tickets-agent.feature` (agent transitions ticket status).
+
+**Why this is an E2E test candidate**:
+
+- The scenario is cross-page and role-sensitive.
+- Confidence requires validating real browser behavior and integration between frontend routing and backend API responses.
+
+**Implemented evidence in repository**:
+
+- `ticketing-frontend/e2e/tickets-agent.spec.ts`
+
+**How this covers the scenario**:
+
+- Executes the flow with an agent session in Chromium.
+- Performs status transition actions from the UI and validates resulting visible state.
+- Complements backend integration tests by proving user-journey correctness in browser runtime.
 
 ### What they do not validate
 
