@@ -2,354 +2,170 @@
 
 ## Purpose
 
-This document defines the testing strategy for the TFG ticketing platform.
+This document defines the testing governance model for the TFG ticketing platform monorepo.
 
-The project aims to combine:
+The strategy is intentionally **value-oriented**:
 
-- functional correctness,
-- maintainable automated testing,
-- lightweight traceability,
-- and CI/CD-friendly execution.
+- prioritize defect prevention and behavioral confidence,
+- keep tests maintainable and CI-friendly,
+- preserve end-to-end traceability from requirement to automated evidence,
+- and avoid "coverage inflation" through low-value assertions.
 
-The reference chain for the project is:
+Reference chain used across the repository:
 
-**Requirement -> Scenario (`.feature`) -> Test -> Code**
+**Requirement -> Scenario (`.feature`) -> Automated test(s) -> Production code path**.
 
-The goal is not to treat tests as isolated technical artifacts, but as verifiable evidence that each relevant functional scenario has a clear specification and at least one automated validation path.
+For detailed operational guidance per test type, see:
+
+- `docs/testing/testing-types-deep-dive.md`
+- `docs/testing/traceability-matrix.md`
 
 ---
 
 ## Canonical functional specification
 
-The files under `docs/features/` are the **canonical functional specification** for the most relevant business scenarios of the platform.
+The files under `docs/features/` are the canonical functional specification for the most relevant product scenarios.
 
-These `.feature` files are used as:
+They provide:
 
-- a stable business-readable specification,
-- a source for scenario identifiers,
-- and a traceability anchor between requirements, executable tests, and code.
+- business-readable scenario definitions,
+- stable scenario identifiers (e.g., `AUTH-01`, `TICKET-AGENT-01`),
+- and traceability anchors for backend, frontend, and E2E tests.
 
-### Important clarification
+### Clarification: `.feature` files are not executable in this repository
 
-These `.feature` files are **not executed with Cucumber**.
+The project deliberately does **not** execute these files with Cucumber.
 
-The project deliberately avoids Cucumber and similar BDD runners. The executable tests will continue to be implemented with the project testing stack:
+Executable tests are implemented directly with the project stack:
 
-- **JUnit** for backend unit and integration tests,
-- **Vitest + React Testing Library** for frontend unit and UI/component tests,
-- **Playwright** for end-to-end scenarios.
+- **JUnit** (backend unit + backend integration),
+- **Vitest + React Testing Library** (frontend UI/component),
+- **Playwright** (frontend E2E).
 
-Therefore, the `.feature` files are specifications, not test runners.
-
----
-
-## Test pyramid of the project
-
-The testing model follows a pragmatic test pyramid adapted to a SaaS ticketing platform.
-
-### 1. Unit tests
-
-Unit tests should be the most numerous and the fastest.
-
-Their purpose is to validate isolated business rules and application services such as:
-
-- authentication use cases,
-- registration rules,
-- ticket creation rules,
-- status transition rules,
-- assignment rules,
-- authorization decisions contained in application services,
-- and domain invariants.
-
-Typical technologies:
-
-- Backend: **JUnit**
-- Frontend: **Vitest** for isolated logic where applicable
-
-### 2. Integration tests
-
-Integration tests validate the behavior of relevant subsystems working together.
-
-In this project, this mainly means:
-
-- Spring Boot controllers,
-- security filters,
-- persistence adapters,
-- database interaction,
-- serialization/deserialization,
-- and contract behavior of HTTP endpoints.
-
-Typical technologies:
-
-- Backend: **JUnit + Spring Boot Test + MockMvc + Testcontainers**
-
-These tests are especially important for the TFG because they provide evidence that the backend API, security rules, and persistence layer behave correctly under realistic conditions.
-
-### 3. UI/component tests
-
-UI/component tests validate the behavior of frontend pages and components in isolation from full browser E2E execution.
-
-They should cover:
-
-- rendering of relevant states,
-- role-based conditional UI,
-- form validation and submission behavior,
-- navigation decisions,
-- empty/loading/error states,
-- and interaction with mocked API clients.
-
-Typical technologies:
-
-- Frontend: **Vitest + React Testing Library**
-
-These tests may be co-localized next to pages and components when that improves maintainability.
-
-### 4. End-to-end tests
-
-E2E tests validate the most critical user journeys across the whole system.
-
-They should be fewer in number, but highly valuable.
-
-Typical examples for this project are:
-
-- login,
-- registration,
-- user creates ticket,
-- agent assigns ticket,
-- agent changes ticket status,
-- admin manages users or categories.
-
-Typical technologies:
-
-- **Playwright**
+This keeps tooling lean and reduces glue-code overhead while preserving BDD-style specification quality.
 
 ---
 
-## What is tested in the backend
+## Testing pyramid applied to this monorepo
 
-The backend test suite should focus on the following layers.
+### 1) Unit tests (backend-first for business rules)
 
-### Backend unit scope
+Unit tests are expected to be the fastest and most numerous.
 
-Backend unit tests should validate:
+Primary role:
 
-- use cases,
-- domain rules,
-- permission rules enforced in application services,
-- error conditions,
-- and state transitions.
+- protect domain/application logic (use-case rules, transitions, validations),
+- provide fast feedback for regressions in business decisions,
+- isolate logic defects with high diagnosis precision.
 
-Examples:
+### 2) Backend integration tests
 
-- valid and invalid login,
-- successful and unsuccessful registration,
-- ticket creation with valid and invalid input,
-- ticket assignment rules,
-- ticket status changes,
-- and access restrictions for non-authorized actors.
+Integration tests are central to this project because the backend is the system of record.
 
-### Backend integration scope
+Primary role:
 
-Backend integration tests should validate:
+- validate HTTP contracts,
+- verify runtime security behavior (authentication/authorization),
+- assert persistence behavior against PostgreSQL,
+- and confirm cross-layer API behavior under real Spring runtime.
 
-- HTTP contracts,
-- security behavior (`401`, `403`, permitted endpoints, role restrictions),
-- request validation,
-- persistence with PostgreSQL,
-- JWT-based authentication behavior,
-- and end-to-end backend flows inside the Spring application.
+### 3) Frontend UI/component tests
 
-Examples:
+UI/component tests validate user-visible behavior of pages/components using deterministic API mocking.
 
-- `/api/auth/login`,
-- `/api/auth/register`,
-- `/api/auth/me`,
-- `/api/tickets`,
-- `/api/tickets/me`,
-- `/api/tickets/{id}`,
-- `/api/tickets/{id}/status`,
-- `/api/tickets/{id}/assignment/me`,
-- `/api/admin/users`,
-- `/api/admin/categories`.
+Primary role:
 
-The backend is the system of record for business rules, so integration coverage is especially important for demonstrating robustness in the TFG.
+- assert rendering, interaction, and route-guard behavior,
+- verify loading/error/empty/data states,
+- and catch regressions early without full browser cost.
 
-### Coverage policy for CI
+### 4) End-to-end tests (Playwright)
 
-Backend coverage should be treated as a **diagnostic signal**, not as a target to game.
+E2E tests are intentionally fewer and focused on critical cross-page business journeys.
 
-Therefore:
+Primary role:
 
-- CI should publish JaCoCo XML/HTML reports for both unit and integration execution,
-- SonarCloud should consume the merged XML report,
-- and any future quality gate should use a **moderate and explainable threshold** only after a stable baseline has been observed.
-
-Coverage is useful for highlighting untested code paths, but it does **not** prove scenario quality, assertion strength, or business relevance. For this TFG, traceability plus meaningful unit/integration tests is more valuable than artificially increasing percentages with low-value tests.
+- provide system-level confidence for high-value workflows,
+- and validate real-browser behavior that lower layers cannot prove alone.
 
 ---
 
-## What is tested in the frontend
+## Backend integration reference architecture (explicit scope)
 
-The frontend test suite should focus on user-visible behavior rather than implementation details.
+Backend integration tests in this repository execute with:
 
-### Frontend unit/UI scope
+- full Spring context (`@SpringBootTest`),
+- real MVC request pipeline (`MockMvc`),
+- real PostgreSQL via Testcontainers,
+- runtime JWT authentication and role checks,
+- repository-backed persistence and HTTP response assertions.
 
-Frontend tests should validate:
+This scope is implemented in:
 
-- page rendering,
-- protected navigation,
-- role-based route decisions,
-- forms such as login, registration, and create ticket,
-- list views,
-- detail views,
-- admin screens,
-- and visible error/loading/empty states.
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/test_support/integration/AbstractIntegrationTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/test_support/integration/AbstractAuthenticatedApiIntegrationTest.java`
 
-Where possible, tests should assert:
+### What this layer validates
 
-- what the user sees,
-- what the user can do,
-- and what API interaction is triggered.
+- controller mapping and request validation,
+- security filters and authorization outcomes (`401`/`403`/allowed),
+- application-service orchestration,
+- JPA/repository persistence behavior,
+- endpoint contract responses.
 
-### Frontend E2E scope
+### What this layer does not validate
 
-Playwright should validate the most relevant cross-page workflows with real browser execution.
-
-The E2E suite should remain intentionally small and should focus on canonical business scenarios rather than exhaustive UI permutations.
-
----
-
-## Why Cucumber is not used
-
-The project uses Gherkin-style `.feature` files as documentation, but it does **not** use Cucumber.
-
-This decision is intentional.
-
-### Reasons
-
-1. **Lower tooling overhead**  
-   Cucumber introduces an additional execution layer, step-definition maintenance, and glue code that can become expensive in a small-to-medium academic project.
-
-2. **Reduced duplication**  
-   With Cucumber, there is often duplication between scenario text, step definitions, and actual test logic. This project prefers writing executable tests directly in JUnit, Vitest, and Playwright.
-
-3. **Better alignment with the existing stack**  
-   The project already uses Java/Spring Boot and React/Vitest. Directly using their native testing tools keeps the suite simpler and easier to maintain.
-
-4. **Clearer ownership of test intent**  
-   The `.feature` file defines the functional contract, while the executable test is written in the most suitable technical layer.
-
-5. **Better fit for CI/CD**  
-   Native test tools are easier to run, parallelize, and report in standard pipelines.
-
-In short, the project adopts the **discipline of BDD-style specification** without adopting the **runtime layer of Cucumber**.
+- browser rendering/navigation,
+- production infrastructure specifics (edge proxy behavior, CDN/network topology).
 
 ---
 
-## Why lightweight traceability is used
+## Coverage policy (SonarCloud and CI)
 
-The project uses **lightweight traceability** rather than a heavy requirements management process.
+Coverage is treated as a **diagnostic metric**, not a standalone quality objective.
 
-### What lightweight traceability means here
+Policy:
 
-Each important functional scenario gets:
+1. Use coverage to identify suspiciously untested code paths.
+2. Prioritize tests by business risk and scenario criticality.
+3. Reject low-value tests whose only purpose is to raise percentage.
+4. Assess quality through both coverage and traceability evidence.
 
-- a stable scenario identifier,
-- a canonical scenario description in a `.feature` file,
-- one or more planned executable tests,
-- and a mapping entry in the traceability matrix.
+For this TFG, the strongest quality evidence is:
 
-### Why this is the right level for the project
-
-1. It is academically defensible for a TFG.
-2. It keeps functional intent visible.
-3. It prevents the test suite from becoming disconnected from requirements.
-4. It avoids excessive process overhead.
-5. It makes progress measurable over time.
-
-The objective is not bureaucratic traceability; the objective is **practical and auditable linkage** between what the system must do and what is actually tested.
+- scenario traceability,
+- meaningful assertions,
+- and coherent multi-layer validation where risk justifies it.
 
 ---
 
-## Relationship between scenarios and executable tests
+## Traceability and governance
 
-A scenario in `docs/features/` does not imply a single test file.
+The traceability matrix (`docs/testing/traceability-matrix.md`) is the living status artifact that records:
 
-A single scenario may be validated by several test layers, for example:
+- covered vs partial vs missing scenarios,
+- layer distribution of evidence,
+- and honest gaps to prioritize next.
 
-- a backend unit test for business rules,
-- a backend integration test for the HTTP contract,
-- a frontend UI/component test for page behavior,
-- and optionally a Playwright E2E for the full journey.
-
-This is acceptable and desirable.
-
-The key rule is that the scenario identifier must remain stable and must be easy to reference from tests, planning documents, PRs, or CI reporting.
+The matrix is intentionally transparent: partial coverage remains explicitly marked partial.
 
 ---
 
-## How this strategy fits CI/CD
+## Decision rules for contributors
 
-This testing strategy is designed to integrate naturally with CI/CD.
+When adding or modifying behavior:
 
-### Expected pipeline structure
-
-A typical pipeline should evolve toward these stages:
-
-1. **Static checks**  
-   Formatting, linting, and basic quality gates.
-
-2. **Backend unit tests**  
-   Fast feedback on domain and use case rules.
-
-3. **Frontend unit/UI tests**  
-   Fast feedback on pages, forms, and role-based UI behavior.
-
-4. **Backend integration tests**  
-   Validation of HTTP contracts, security, and persistence.
-
-5. **E2E smoke scenarios**  
-   Validation of a small number of critical business flows.
-
-6. **Coverage and reporting artifacts**  
-   Coverage reports, test summaries, and traceability status where feasible.
-
-### Value for CI/CD
-
-This model helps the project achieve:
-
-- faster feedback at lower layers,
-- stronger confidence before deployment,
-- clearer evidence for academic evaluation,
-- and a direct link between requirements and automation.
-
-For a DevOps-oriented TFG, the important point is that testing is not an isolated activity: it becomes part of the delivery pipeline and release confidence model.
+1. Identify affected scenario(s) in `docs/features`.
+2. Select the lowest-cost layer that can provide credible evidence.
+3. Add higher-layer tests only when lower layers cannot prove the risk.
+4. Keep assertions behavior-centric and deterministic.
+5. Update traceability status honestly.
 
 ---
 
-## Governance and maintenance rules
+## Document map
 
-To keep this strategy stable over time, the project should follow these rules.
+- Strategy/governance: `docs/testing/testing-strategy.md` (this file)
+- Layer-by-layer deep explanation: `docs/testing/testing-types-deep-dive.md`
+- Current scenario coverage status: `docs/testing/traceability-matrix.md`
 
-1. Every new critical feature should add or update at least one scenario in `docs/features/`.
-2. Each scenario must have a stable ID.
-3. The traceability matrix must be updated when tests are added or removed.
-4. Executable tests should reference scenario IDs whenever practical.
-5. The `.feature` files should remain readable by humans and stable over time.
-6. The `.feature` files should avoid technical implementation details.
-7. The executable tests remain the source of automated verification, while the `.feature` files remain the source of functional intent.
-
----
-
-## Summary
-
-This project adopts a layered testing strategy with lightweight traceability.
-
-Its key principles are:
-
-- canonical functional scenarios in `.feature` files,
-- executable tests implemented with native tools rather than Cucumber,
-- a clear chain from requirement to code,
-- and CI/CD-compatible automation by layers.
-
-This approach is well suited to the objectives of the TFG: serious testing, good engineering practices, and a defensible DevOps-oriented quality strategy.
