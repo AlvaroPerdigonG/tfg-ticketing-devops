@@ -138,4 +138,18 @@ describe("AdminPage", () => {
       expect(messageErrorSpy).toHaveBeenCalledWith("Could not load users");
     });
   });
+
+  it("muestra error si se intenta guardar categoría con nombre vacío", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AdminPage />);
+
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
+    const nameInput = await screen.findByPlaceholderText("Name");
+    await user.clear(nameInput);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(messageErrorSpy).toHaveBeenCalledWith("Name is required");
+    expect(updateCategoryMock).not.toHaveBeenCalled();
+  });
 });

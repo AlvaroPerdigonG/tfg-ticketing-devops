@@ -275,4 +275,66 @@ describe("TicketDetailPage", () => {
     await user.click(screen.getByRole("button", { name: "Back to tickets" }));
     expect(navigateMock).toHaveBeenCalledWith("/tickets");
   });
+
+  it("renderiza eventos de timeline para creación, cambio de estado y asignación", async () => {
+    server.use(
+      http.get("/api/tickets/ticket-1", () =>
+        jsonResponse(
+          buildTicket({
+            timeline: [
+              {
+                id: "ev-1",
+                kind: "EVENT",
+                createdAt: "2026-03-15T10:00:00.000Z",
+                actorUserId: "user-1",
+                actorDisplayName: "User One",
+                content: null,
+                eventType: "TICKET_CREATED",
+                payload: {},
+              },
+              {
+                id: "ev-2",
+                kind: "EVENT",
+                createdAt: "2026-03-15T10:01:00.000Z",
+                actorUserId: "agent-1",
+                actorDisplayName: "Agent One",
+                content: null,
+                eventType: "STATUS_CHANGED",
+                payload: { from: "OPEN", to: "IN_PROGRESS" },
+              },
+              {
+                id: "ev-3",
+                kind: "EVENT",
+                createdAt: "2026-03-15T10:02:00.000Z",
+                actorUserId: "agent-1",
+                actorDisplayName: "Agent One",
+                content: null,
+                eventType: "ASSIGNED_TO_ME",
+                payload: {},
+              },
+            ],
+          }),
+        ),
+      ),
+    );
+
+    renderWithProviders(<TicketDetailPage />, { router: {} });
+
+    expect(await screen.findByText("Ticket creado")).toBeInTheDocument();
+    expect(screen.getByText("Cambio de estado: OPEN → IN_PROGRESS")).toBeInTheDocument();
+    expect(screen.getByText("Assigned to Agent One")).toBeInTheDocument();
+  });
+
+  it("muestra mensaje genérico cuando la carga falla con error no tipado", async () => {
+    server.use(
+      http.get("/api/tickets/ticket-1", () => {
+        throw "boom";
+      }),
+    );
+
+    renderWithProviders(<TicketDetailPage />, { router: {} });
+
+    expect(await screen.findByText("Error loading ticket")).toBeInTheDocument();
+    expect(screen.getByText("Could not load the ticket.")).toBeInTheDocument();
+  });
 });
