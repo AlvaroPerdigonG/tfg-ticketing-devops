@@ -1,60 +1,67 @@
 # Traceability matrix
 
-This matrix reflects the **real current state** of functional traceability in the repository with:
+This matrix reflects the current traceability state in the repository using the chain:
 
-- canonical scenarios in `docs/features/*.feature`,
-- backend traceability via `@SpecificationRef`,
-- frontend UI tests (Vitest/RTL) using scenario IDs in test titles, and
-- Playwright E2E tests using scenario IDs in `test(...)` titles.
+**Requirement -> Scenario (`.feature`) -> Automated test evidence -> Code path**
 
-Intended chain:
+Sources used for this snapshot:
 
-**Requirement -> Scenario (`.feature`) -> Test -> Code**
+- Functional scenarios in `docs/features/*.feature`.
+- Backend scenario references via `@SpecificationRef`.
+- Frontend UI scenario IDs in Vitest/RTL test titles.
+- E2E scenario IDs in Playwright `test(...)` titles.
+- Generated traceability report from `scripts/traceability/check-traceability.mjs`.
 
-> Note: `.feature` files are canonical functional specification and traceability anchors (they are not executed with Cucumber).
+> Note: `.feature` files are canonical functional specifications and traceability anchors (they are not executed with Cucumber).
 
-## Scenario status matrix
+## Scenario status matrix (updated snapshot)
 
 | Scenario ID | Backend coverage | Frontend UI coverage | E2E coverage | Real status | Notes (honest scope / gaps) |
 |---|---|---|---|---|---|
-| AUTH-01 | ✅ Unit + integration covered. | ✅ `LoginPage.test.tsx`, `AuthProvider.test.tsx`, `ProtectedRoute.test.tsx`. | ✅ `e2e/auth.spec.ts` (`AUTH-01`). | COVERED | End-to-end login happy path exists and is traceable across layers. |
-| AUTH-02 | ✅ Unit + integration covered. | ✅ `LoginPage.test.tsx` invalid login flow with visible error. | ✅ `e2e/auth.spec.ts` (`AUTH-02`). | COVERED | Invalid credential rejection is verified in API, UI feedback, and browser flow. |
-| AUTH-03 | ✅ Unit + integration covered. | ❌ No scenario-specific UI test. | ❌ No scenario-specific E2E test. | COVERED | Scenario is currently specified at authentication backend contract/rule level; no UI/E2E implementation yet for inactive-user UX. |
-| AUTH-04 | ✅ Unit + integration covered. | ❌ No registration UI test. | ❌ No registration E2E. | PARTIAL | Registration exists at backend level, but frontend registration journey is not automated yet. |
-| AUTH-05 | ✅ Unit + integration covered. | ❌ No duplicate-email UI test. | ❌ No duplicate-email E2E. | PARTIAL | Duplicate email rejection is only asserted in backend tests. |
-| TICKET-USER-01 | ✅ Unit + integration covered. | ✅ `CreateTicketPage.test.tsx` (`[TICKET-USER-01]`). | ✅ `e2e/tickets-user.spec.ts` (`TICKET-USER-01`). | COVERED | Ticket creation is covered from form submit to detail navigation in E2E. |
-| TICKET-USER-02 | ✅ Integration covered. | ❌ No frontend UI scenario test (expected, API security scenario). | ❌ No E2E scenario. | PARTIAL | Missing browser-level unauthorized create attempt check (without token/session). |
-| TICKET-USER-03 | ✅ Integration covered. | ⚠️ `UserTicketsHomePage.test.tsx` tagged `[TICKET-USER-03]`, but relies on backend response fixture and does not prove cross-user leakage by itself. | ❌ No E2E scenario. | PARTIAL | Frontend assertion is useful but partial for the full isolation claim in the scenario text. |
-| TICKET-USER-04 | ✅ Integration covered. | ❌ No ticket-detail ownership UI scenario test. | ❌ No E2E scenario. | PARTIAL | Missing UI/E2E proof that owner can open and view full detail. |
-| TICKET-USER-05 | ✅ Unit + integration covered. | ✅ `UserTicketsHomePage.test.tsx` tagged `[TICKET-USER-05]` (no status actions visible for user). | ❌ No E2E scenario. | PARTIAL | UI role restriction exists, but no browser E2E for forbidden status change attempt. |
-| TICKET-AGENT-01 | ✅ Unit + integration covered. | ⚠️ `AgentAdminTicketsPage.test.tsx` tagged `[TICKET-AGENT-01]` only checks list-page action visibility (not transition execution). | ✅ `e2e/tickets-agent.spec.ts` (`TICKET-AGENT-01`) executes status transition and verifies result. | COVERED | Functional transition is validated in backend + E2E; frontend unit test is partial but non-blocking for scenario coverage. |
-| TICKET-AGENT-02 | ✅ Unit + integration covered. | ❌ No UI test for invalid transition error handling. | ❌ No E2E invalid-transition scenario. | PARTIAL | Invalid transition is only validated in backend tests today. |
-| TICKET-AGENT-03 | ✅ Integration covered. | ✅ `AgentAdminTicketsPage.test.tsx` tagged `[TICKET-AGENT-03]` + filter/query mapping assertion. | ❌ No E2E scenario. | PARTIAL | Manageable queue + filtering are in frontend unit tests, but no browser E2E for operational view. |
-| TICKET-AGENT-04 | ✅ Unit + integration covered. | ❌ No UI test for “assign to me” action. | ❌ No E2E scenario. | PARTIAL | Assignment flow is currently backend-only in automated tests. |
-| ADMIN-01 | ✅ Integration covered. | ⚠️ `AdminPage.test.tsx` checks tabs/data rendering, but not deep list semantics for all admin fields. | ❌ No E2E scenario. | PARTIAL | Basic UI smoke coverage exists; end-to-end admin user-list flow is missing. |
-| ADMIN-02 | ✅ Integration covered. | ⚠️ `AdminPage.test.tsx` covers loaded categories at a shallow level. | ❌ No E2E scenario. | PARTIAL | Needs stronger UI assertions and/or E2E for administrative category listing behavior. |
-| ADMIN-03 | ✅ Integration covered. | ❌ No UI deactivation scenario test. | ❌ No E2E deactivation scenario. | PARTIAL | User deactivation is validated only via backend automation. |
-| ADMIN-04 | ✅ Integration covered. | ✅ `RequireRole.test.tsx` tagged `[ADMIN-04]` (+ route guard behavior). | ✅ `e2e/admin.spec.ts` (`ADMIN-04`). | COVERED | Forbidden access for non-admin is covered in backend, UI guard, and full browser navigation. |
+| AUTH-01 | ✅ Unit + integration covered. | ✅ `LoginPage.test.tsx`, `AuthProvider.test.tsx`, `ProtectedRoute.test.tsx`. | ✅ `e2e/auth.spec.ts` (`AUTH-01`). | COVERED | Multi-layer evidence for login happy path (API + UI + browser). |
+| AUTH-02 | ✅ Unit + integration covered. | ✅ `LoginPage.test.tsx` invalid-login flow. | ✅ `e2e/auth.spec.ts` (`AUTH-02`). | COVERED | Invalid credentials are validated across backend, UI feedback, and browser flow. |
+| AUTH-03 | ✅ Unit + integration covered. | ❌ No scenario-specific UI test. | ❌ No scenario-specific E2E test. | PARTIAL | Inactive-user rejection is covered in backend only; frontend UX flow not automated. |
+| AUTH-04 | ✅ Unit + integration covered. | ❌ No registration UI test. | ❌ No registration E2E test. | PARTIAL | Registration is validated at backend level; frontend registration journey lacks automation. |
+| AUTH-05 | ✅ Unit + integration covered. | ❌ No duplicate-email UI test. | ❌ No duplicate-email E2E test. | PARTIAL | Duplicate email rejection currently evidenced only in backend tests. |
+| TICKET-USER-01 | ✅ Unit + integration covered. | ✅ `CreateTicketPage.test.tsx` (`[TICKET-USER-01]`). | ✅ `e2e/tickets-user.spec.ts` (`TICKET-USER-01`). | COVERED | Multi-layer coverage from form submission to browser-level navigation/result. |
+| TICKET-USER-02 | ✅ Integration covered. | ❌ No scenario-specific UI test (API/security-focused scenario). | ❌ No E2E scenario. | PARTIAL | Unauthorized ticket creation path is backend-only today. |
+| TICKET-USER-03 | ✅ Integration covered. | ⚠️ `UserTicketsHomePage.test.tsx` tagged `[TICKET-USER-03]` with fixture-level assertion. | ❌ No E2E scenario. | PARTIAL | Useful UI evidence exists, but full cross-user leakage proof remains backend-centric. |
+| TICKET-USER-04 | ✅ Integration covered. | ❌ No ownership-specific ticket detail UI test. | ❌ No E2E scenario. | PARTIAL | Missing UI/E2E evidence for owner-only detail access journey. |
+| TICKET-USER-05 | ✅ Unit + integration covered. | ✅ `UserTicketsHomePage.test.tsx` (`[TICKET-USER-05]`). | ❌ No E2E scenario. | PARTIAL | UI role restriction exists; no browser-level forbidden status-change journey yet. |
+| TICKET-AGENT-01 | ✅ Unit + integration covered. | ⚠️ `AgentAdminTicketsPage.test.tsx` tagged `[TICKET-AGENT-01]` (UI action visibility). | ✅ `e2e/tickets-agent.spec.ts` (`TICKET-AGENT-01`). | COVERED | Backend + E2E demonstrate transition behavior; UI unit evidence is supportive but shallow. |
+| TICKET-AGENT-02 | ✅ Unit + integration covered. | ❌ No UI invalid-transition handling test. | ❌ No E2E invalid-transition scenario. | PARTIAL | Invalid transition behavior is validated only in backend tests. |
+| TICKET-AGENT-03 | ✅ Integration covered. | ✅ `AgentAdminTicketsPage.test.tsx` (`[TICKET-AGENT-03]`) filter/query mapping. | ❌ No E2E scenario. | PARTIAL | Queue/filtering has UI evidence but no browser-level journey yet. |
+| TICKET-AGENT-04 | ✅ Unit + integration covered. | ❌ No UI “assign to me” scenario test. | ✅ `e2e/tickets-agent.spec.ts` (`TICKET-AGENT-04`). | PARTIAL | Backend + E2E evidence exists; frontend UI unit scenario is still missing. |
+| ADMIN-01 | ✅ Integration covered. | ❌ No scenario-specific UI test ID currently detected. | ❌ No E2E scenario. | PARTIAL | Admin user list is backend-covered; explicit scenario-tagged UI/E2E evidence absent. |
+| ADMIN-02 | ✅ Integration covered. | ❌ No scenario-specific UI test ID currently detected. | ❌ No E2E scenario. | PARTIAL | Admin categories listing is backend-covered; explicit UI/E2E scenario mapping missing. |
+| ADMIN-03 | ✅ Integration covered. | ❌ No UI deactivation scenario test. | ❌ No E2E deactivation scenario. | PARTIAL | User deactivation currently validated only via backend automation. |
+| ADMIN-04 | ✅ Integration covered. | ✅ `RequireRole.test.tsx` tagged `[ADMIN-04]`. | ✅ `e2e/admin.spec.ts` (`ADMIN-04`). | COVERED | Forbidden non-admin access is covered in backend, UI guard, and browser flow. |
 
 ## Status legend
 
 - **NOT STARTED**: no executable test reasonably demonstrates the scenario.
-- **PARTIAL**: at least one layer is covered, but key assertions/layers are still missing.
-- **COVERED**: currently adequate coverage for scenario intent with existing automated tests.
+- **PARTIAL**: at least one layer has evidence, but key assertions/layers are still missing.
+- **COVERED**: scenario has adequate multi-layer evidence for current project goals.
 
-## Frontend/E2E coverage summary (current snapshot)
+## Coverage summary (current generated snapshot)
 
-- **Frontend UI scenarios with explicit ID in tests**: AUTH-01, AUTH-02, TICKET-USER-01, TICKET-USER-03, TICKET-USER-05, TICKET-AGENT-01, TICKET-AGENT-03, ADMIN-04.
-- **E2E scenarios with explicit ID in Playwright**: AUTH-01, AUTH-02, TICKET-USER-01, TICKET-AGENT-01, ADMIN-04.
-- **Scenarios with E2E still missing**: AUTH-03, AUTH-04, AUTH-05, TICKET-USER-02, TICKET-USER-03, TICKET-USER-04, TICKET-USER-05, TICKET-AGENT-02, TICKET-AGENT-03, TICKET-AGENT-04, ADMIN-01, ADMIN-02, ADMIN-03.
+Based on `artifacts/traceability/traceability-report.md`:
 
-## Recommended next CI/CD step
+- Total scenarios: **18**
+- **MULTI_LAYER (covered): 5** -> AUTH-01, AUTH-02, TICKET-USER-01, TICKET-AGENT-01, ADMIN-04.
+- **PARTIAL: 13**
+- **NOT_REFERENCED: 0**
 
-Promote this matrix into a **quality gate input** in CI:
+## CI/CD evaluation of the previous recommendation
 
-1. Add a lightweight script that parses scenario IDs from `docs/features/*.feature`.
-2. Parse IDs from frontend (`*.test.tsx`) and E2E (`e2e/*.spec.ts`) titles.
-3. Fail (or warn initially) when a scenario expected for the phase has no matching automated ID.
-4. Publish an artifact (Markdown/JSON) each pipeline run so the matrix can be regenerated automatically for memory/DevOps deliverables.
+The previous recommendation proposed adding traceability automation in CI. That recommendation is now **already implemented**:
 
-This keeps traceability auditable and avoids manual drift between specification and test suites.
+- The repository includes `scripts/traceability/check-traceability.mjs`.
+- CI includes a dedicated `traceability-check` job in `.github/workflows/ci.yml`.
+- The job publishes Markdown/JSON artifacts each run (`artifacts/traceability/*`).
+
+Therefore, no additional mandatory CI step is required right now for baseline traceability automation.
+
+### Optional next step (only if stricter governance is desired)
+
+If the team wants a stronger gate in the future, consider introducing a phase-based policy (warn -> fail) for scenarios that remain PARTIAL in prioritized epics. This is optional and should be adopted only when it does not block incremental delivery unnecessarily.

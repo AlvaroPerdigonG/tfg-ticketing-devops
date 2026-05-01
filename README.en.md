@@ -91,6 +91,7 @@ With backend running:
 - API endpoints: `docs/tickets-endpoints-proposal.md`
 - Auth review: `docs/auth-review.md`
 - Testing strategy: `docs/testing/testing-strategy.md`
+- Testing types deep dive: `docs/testing/testing-types-deep-dive.md`
 - Traceability matrix: `docs/testing/traceability-matrix.md`
 - CI/CD strategy: `docs/devops/cicd-strategy.md`
 

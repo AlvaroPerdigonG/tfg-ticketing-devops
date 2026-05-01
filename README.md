@@ -133,6 +133,7 @@ npm run test:e2e
 
 - Endpoints i contractes API actuals: `docs/tickets-endpoints-proposal.md`
 - Estratègia de testing: `docs/testing/testing-strategy.md`
+- Deep dive de tipus de test: `docs/testing/testing-types-deep-dive.md`
 - Matriu de traçabilitat: `docs/testing/traceability-matrix.md`
 - Estratègia CI/CD: `docs/devops/cicd-strategy.md`
 
