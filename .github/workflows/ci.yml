@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   backend-unit:
-    name: backend-unit
+    name: backend-unit-and-architecture-fitness
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,7 +33,7 @@ jobs:
           cache: maven
           cache-dependency-path: ticketing-backend/pom.xml
 
-      - name: Run backend unit tests
+      - name: Run backend unit + architecture fitness tests
         run: ./mvnw -B -ntp test -DskipITs=true
 
   backend-integration:
