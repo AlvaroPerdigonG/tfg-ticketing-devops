@@ -58,6 +58,24 @@ Primary role:
 - provide fast feedback for regressions in business decisions,
 - isolate logic defects with high diagnosis precision.
 
+### 1.1) Architecture fitness tests (backend)
+
+In addition to classic unit tests, the backend includes **architecture fitness tests** with ArchUnit.
+
+Primary role:
+
+- enforce layer boundaries (`domain`, `application`, `api`, `infrastructure`),
+- prevent accidental coupling to technical frameworks in core layers,
+- and detect architectural erosion early in CI with fast feedback.
+
+Why this decision was made:
+
+- business logic quality depends not only on behavior correctness, but also on preserving clean dependency direction,
+- architectural regressions are expensive to fix late,
+- and architecture rules can be validated cheaply as part of normal backend test execution (`mvn test`).
+
+These checks are governance tests: they protect structural decisions and complement functional tests, without replacing them.
+
 ### 2) Backend integration tests
 
 Integration tests are central to this project because the backend is the system of record.
