@@ -1,6 +1,6 @@
 package com.aperdigon.ticketing_backend.api.shared.pagination;
 
-import org.springframework.data.domain.Page;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PagedResult;
 
 import java.util.List;
 
@@ -10,12 +10,12 @@ public record PageResponse<T>(
         int size,
         long total
 ) {
-    public static <T> PageResponse<T> from(Page<T> page) {
+    public static <T> PageResponse<T> from(PagedResult<T> page) {
         return new PageResponse<>(
-                page.getContent(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements()
+                page.content(),
+                page.page(),
+                page.size(),
+                page.totalElements()
         );
     }
 }

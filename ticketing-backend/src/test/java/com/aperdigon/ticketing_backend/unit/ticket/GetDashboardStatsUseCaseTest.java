@@ -3,6 +3,8 @@ package com.aperdigon.ticketing_backend.unit.ticket;
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
 import com.aperdigon.ticketing_backend.application.shared.CurrentUser;
 import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenException;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageQuery;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PagedResult;
 import com.aperdigon.ticketing_backend.application.tickets.dashboard.AgentTicketCount;
 import com.aperdigon.ticketing_backend.application.tickets.dashboard.GetDashboardStatsUseCase;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
@@ -11,8 +13,6 @@ import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -108,12 +108,12 @@ public final class GetDashboardStatsUseCaseTest {
         }
 
         @Override
-        public Page<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, Pageable pageable) {
+        public PagedResult<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, PageQuery pageQuery) {
             throw new UnsupportedOperationException("Not needed in this test");
         }
 
         @Override
-        public Page<Ticket> findAgentTickets(UserId actorId, com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope scope, TicketStatus status, String q, Pageable pageable) {
+        public PagedResult<Ticket> findAgentTickets(UserId actorId, com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope scope, TicketStatus status, String q, PageQuery pageQuery) {
             throw new UnsupportedOperationException("Not needed in this test");
         }
 

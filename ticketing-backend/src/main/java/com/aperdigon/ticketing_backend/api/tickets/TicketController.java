@@ -10,6 +10,8 @@ import com.aperdigon.ticketing_backend.api.tickets.create.CreateTicketResponse;
 import com.aperdigon.ticketing_backend.api.tickets.dashboard.DashboardStatsResponse;
 import com.aperdigon.ticketing_backend.api.tickets.detail.TicketDetailResponse;
 import com.aperdigon.ticketing_backend.api.tickets.list.TicketSummaryResponse;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageDirection;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageQuery;
 import com.aperdigon.ticketing_backend.application.tickets.change_status.ChangeTicketStatusCommand;
 import com.aperdigon.ticketing_backend.application.tickets.change_status.ChangeTicketStatusUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.add_comment.AddTicketCommentCommand;
@@ -30,8 +32,6 @@ import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,9 +103,9 @@ public class TicketController {
             @RequestParam(defaultValue = "20") int size
     ) {
         var actor = currentUserProvider.getCurrentUser();
-        var pageable = PageRequest.of(page, Math.min(Math.max(size, 1), 100), Sort.by(Sort.Direction.DESC, "updatedAt"));
+        var pageQuery = PageQuery.of(page, Math.min(Math.max(size, 1), 100), "updatedAt", PageDirection.DESC);
 
-        var result = listMyTicketsUseCase.execute(new ListMyTicketsQuery(actor, status, q, pageable));
+        var result = listMyTicketsUseCase.execute(new ListMyTicketsQuery(actor, status, q, pageQuery));
         return PageResponse.from(result.map(TicketSummaryResponse::from));
     }
 
@@ -119,9 +119,9 @@ public class TicketController {
             @RequestParam(defaultValue = "20") int size
     ) {
         var actor = currentUserProvider.getCurrentUser();
-        var pageable = PageRequest.of(page, Math.min(Math.max(size, 1), 100), Sort.by(Sort.Direction.DESC, "updatedAt"));
+        var pageQuery = PageQuery.of(page, Math.min(Math.max(size, 1), 100), "updatedAt", PageDirection.DESC);
 
-        var result = listTicketsUseCase.execute(new ListTicketsQuery(actor, scope, status, q, pageable));
+        var result = listTicketsUseCase.execute(new ListTicketsQuery(actor, scope, status, q, pageQuery));
         return PageResponse.from(result.map(TicketSummaryResponse::from));
     }
 

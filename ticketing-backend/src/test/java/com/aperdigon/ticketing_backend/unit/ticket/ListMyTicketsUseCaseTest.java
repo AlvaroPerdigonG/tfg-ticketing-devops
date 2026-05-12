@@ -10,7 +10,6 @@ import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.aperdigon.ticketing_backend.test_support.DomainTestDataFactory;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageRequest;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -44,10 +43,10 @@ final class ListMyTicketsUseCaseTest {
                 new CurrentUser(actor.id(), actor.role()),
                 TicketStatus.OPEN,
                 "printer",
-                PageRequest.of(0, 10)
+                PageQuery.of(0, 10, "createdAt", PageDirection.ASC)
         ));
 
-        assertEquals(1, result.getTotalElements());
-        assertEquals(matchingTicket.id(), result.getContent().get(0).id());
+        assertEquals(1, result.totalElements());
+        assertEquals(matchingTicket.id(), result.content().get(0).id());
     }
 }
