@@ -1,6 +1,9 @@
 package com.aperdigon.ticketing_backend.test_support;
 
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageDirection;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageQuery;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PagedResult;
 import com.aperdigon.ticketing_backend.application.tickets.dashboard.AgentTicketCount;
 import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
@@ -8,10 +11,6 @@ import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import com.aperdigon.ticketing_backend.domain.user.UserRole;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -36,25 +35,25 @@ public final class InMemoryTicketRepository implements TicketRepository {
     }
 
     @Override
-    public Page<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, Pageable pageable) {
+    public PagedResult<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, PageQuery pageQuery) {
         List<Ticket> filtered = sortedTickets()
                 .filter(ticket -> ticket.createdBy().equals(createdBy))
                 .filter(ticket -> status == null || ticket.status() == status)
                 .filter(ticket -> matchesQuery(ticket, q))
                 .toList();
 
-        return toPage(filtered, pageable);
+        return toPage(filtered, pageQuery);
     }
 
     @Override
-    public Page<Ticket> findAgentTickets(UserId actorId, TicketQueueScope scope, TicketStatus status, String q, Pageable pageable) {
+    public PagedResult<Ticket> findAgentTickets(UserId actorId, TicketQueueScope scope, TicketStatus status, String q, PageQuery pageQuery) {
         List<Ticket> filtered = sortedTickets()
                 .filter(ticket -> matchesScope(ticket, actorId, scope))
                 .filter(ticket -> status == null || ticket.status() == status)
                 .filter(ticket -> matchesQuery(ticket, q))
                 .toList();
 
-        return toPage(filtered, pageable);
+        return toPage(filtered, pageQuery);
     }
 
     @Override
@@ -132,17 +131,33 @@ public final class InMemoryTicketRepository implements TicketRepository {
                 || ticket.description().toLowerCase().contains(normalizedQuery);
     }
 
-    private Page<Ticket> toPage(List<Ticket> filtered, Pageable pageable) {
-        if (pageable == null || pageable.isUnpaged()) {
-            return new PageImpl<>(filtered, Pageable.unpaged(), filtered.size());
+    private PagedResult<Ticket> toPage(List<Ticket> filtered, PageQuery pageQuery) {
+        PageQuery effectivePageQuery = pageQuery == null
+                ? PageQuery.of(0, Math.max(filtered.size(), 1), "createdAt", PageDirection.ASC)
+                : pageQuery;
+
+        List<Ticket> sorted = sort(filtered, effectivePageQuery);
+        int start = effectivePageQuery.page() * effectivePageQuery.size();
+        if (start >= sorted.size()) {
+            return new PagedResult<>(List.of(), effectivePageQuery.page(), effectivePageQuery.size(), sorted.size());
         }
 
-        int start = (int) pageable.getOffset();
-        if (start >= filtered.size()) {
-            return new PageImpl<>(List.of(), pageable, filtered.size());
-        }
+        int end = Math.min(start + effectivePageQuery.size(), sorted.size());
+        return new PagedResult<>(sorted.subList(start, end), effectivePageQuery.page(), effectivePageQuery.size(), sorted.size());
+    }
 
-        int end = Math.min(start + pageable.getPageSize(), filtered.size());
-        return new PageImpl<>(filtered.subList(start, end), pageable, filtered.size());
+    private List<Ticket> sort(List<Ticket> tickets, PageQuery pageQuery) {
+        Comparator<Ticket> comparator = switch (pageQuery.sortBy()) {
+            case "updatedAt" -> Comparator.comparing(Ticket::updatedAt);
+            case "createdAt" -> Comparator.comparing(Ticket::createdAt);
+            case "title" -> Comparator.comparing(Ticket::title, String.CASE_INSENSITIVE_ORDER);
+            default -> Comparator.comparing(Ticket::createdAt);
+        };
+
+        comparator = comparator.thenComparing(ticket -> ticket.id().value());
+        if (pageQuery.direction() == PageDirection.DESC) {
+            comparator = comparator.reversed();
+        }
+        return tickets.stream().sorted(comparator).toList();
     }
 }

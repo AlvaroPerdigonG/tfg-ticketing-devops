@@ -47,6 +47,9 @@ Backend unit tests validate application and domain behavior **without booting th
 
 - Use-case invariants and branch logic (e.g., create ticket, status transitions, assignment rules).
 - Authentication and registration decision logic.
+- Admin/category use-case decisions (category creation/update/listing, user activation toggles, active category listing).
+- Ticket detail composition and access-rule preservation at use-case level.
+- Pure domain behavior only where the domain object owns meaningful rules (ticket defaults, comments, assignment, terminal resolved state, available transitions).
 - Domain transitions and permission checks handled inside use cases.
 
 Representative files:
@@ -55,7 +58,14 @@ Representative files:
 - `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/auth/RegisterUseCaseTest.java`
 - `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/ChangeTicketStatusUseCaseTest.java`
 - `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/AssignTicketToMeUseCaseTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/GetTicketDetailUseCaseTest.java`
 - `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/TicketAvailableTransitionsTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/ticket/TicketDomainBehaviorTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/admin/CreateCategoryUseCaseTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/admin/UpdateCategoryUseCaseTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/admin/ListAdminUsersUseCaseTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/admin/UpdateUserActiveUseCaseTest.java`
+- `ticketing-backend/src/test/java/com/aperdigon/ticketing_backend/unit/categories/ListActiveCategoriesUseCaseTest.java`
 
 ### Worked example (repository-based)
 
@@ -75,11 +85,24 @@ Representative files:
 - The test asserts that registration with a duplicate email triggers a business rejection path.
 - This directly protects the domain/application rule independent of transport/database wiring.
 
+### Application-level test doubles and pagination boundary
+
+Backend unit tests may use in-memory repositories as test doubles for application ports. Those doubles should implement the same application-owned contracts as production adapters.
+
+For ticket list use cases, pagination is intentionally represented in the application layer with:
+
+- `PageQuery` for page/size/sort/direction input,
+- `PagedResult<T>` for content and totals,
+- `PageDirection` for sort direction.
+
+This avoids leaking Spring Data `Page`/`Pageable` into use-case signatures or application ports. Spring-specific translation belongs in API/infrastructure adapters (`TicketController`, `JpaTicketRepository`), while in-memory repositories can simulate filtering/sorting/paging deterministically for unit tests.
+
 ### What they do not validate
 
 - Spring MVC serialization/deserialization.
 - Security filter-chain behavior (`401` vs `403`, JWT parsing in runtime filters).
 - Real JPA/PostgreSQL behavior.
+- Exact Spring Data pagination/query execution; repository adapter behavior remains integration-test territory.
 
 ### Real value
 
@@ -91,6 +114,7 @@ Representative files:
 
 - Re-testing framework internals (e.g., asserting Spring annotations from unit tests).
 - Over-mocking until tests no longer represent business behavior.
+- Reintroducing framework-specific types (for example Spring Data `Pageable`) into application ports just to simplify tests.
 - Treating unit tests as sufficient evidence for API-level correctness.
 
 ### When to write
@@ -100,7 +124,8 @@ Write backend unit tests when adding/changing:
 - domain rules,
 - use-case decision trees,
 - error conditions,
-- role/permission decisions in application services.
+- role/permission decisions in application services,
+- application-owned boundary contracts used by multiple adapters (for example pagination DTOs), while keeping adapter-specific execution in integration tests.
 
 ## 4. Backend integration tests (reference architecture)
 
@@ -131,7 +156,8 @@ A typical backend integration test in this project validates, end-to-end inside 
 3. Security configuration and role restrictions.
 4. Application service invocation.
 5. Persistence adapters and database writes/reads in PostgreSQL.
-6. HTTP response mapping and status code contract.
+6. Translation between application-owned boundary contracts and framework/runtime details (for example `PageQuery` -> Spring Data `PageRequest`).
+7. HTTP response mapping and status code contract.
 
 Representative files:
 
@@ -198,6 +224,7 @@ Write backend integration tests for:
 - new endpoints,
 - security-sensitive changes,
 - changes in persistence mapping/query behavior,
+- adapter translation between application contracts and framework types,
 - business flows where HTTP contract is part of the requirement.
 
 ## 5. Frontend UI/component tests (Vitest + RTL + MSW)

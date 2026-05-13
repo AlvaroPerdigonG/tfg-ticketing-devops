@@ -2,6 +2,8 @@ package com.aperdigon.ticketing_backend.unit.ticket;
 
 import com.aperdigon.ticketing_backend.application.shared.CurrentUser;
 import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenException;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageDirection;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageQuery;
 import com.aperdigon.ticketing_backend.application.tickets.list.ListTicketsQuery;
 import com.aperdigon.ticketing_backend.application.tickets.list.ListTicketsUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
@@ -12,7 +14,6 @@ import com.aperdigon.ticketing_backend.specification.TestLevel;
 import com.aperdigon.ticketing_backend.test_support.DomainTestDataFactory;
 import com.aperdigon.ticketing_backend.test_support.InMemoryTicketRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageRequest;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -54,11 +55,11 @@ final class ListTicketsUseCaseTest {
                 TicketQueueScope.MINE,
                 TicketStatus.IN_PROGRESS,
                 "printer",
-                PageRequest.of(0, 10)
+                PageQuery.of(0, 10, "createdAt", PageDirection.ASC)
         ));
 
-        assertEquals(1, result.getTotalElements());
-        assertEquals(myAssignedTicket.id(), result.getContent().get(0).id());
+        assertEquals(1, result.totalElements());
+        assertEquals(myAssignedTicket.id(), result.content().get(0).id());
     }
 
     @Test
@@ -70,7 +71,7 @@ final class ListTicketsUseCaseTest {
                 TicketQueueScope.ALL,
                 null,
                 null,
-                PageRequest.of(0, 10)
+                PageQuery.of(0, 10, "createdAt", PageDirection.ASC)
         )));
     }
 }

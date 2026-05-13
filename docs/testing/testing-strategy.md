@@ -55,6 +55,8 @@ Unit tests are expected to be the fastest and most numerous.
 Primary role:
 
 - protect domain/application logic (use-case rules, transitions, validations),
+- keep use-case tests as the main unit-level regression net,
+- complement use-case tests with pure domain tests only where internal domain rules exist (ticket transitions, comments, assignment, terminal states),
 - provide fast feedback for regressions in business decisions,
 - isolate logic defects with high diagnosis precision.
 
@@ -66,6 +68,7 @@ Primary role:
 
 - enforce layer boundaries (`domain`, `application`, `api`, `infrastructure`),
 - prevent accidental coupling to technical frameworks in core layers,
+- keep application-level ports framework-agnostic (for example, pagination is expressed with `PageQuery`/`PagedResult`, not Spring Data `Page`/`Pageable`),
 - and detect architectural erosion early in CI with fast feedback.
 
 Why this decision was made:
@@ -177,7 +180,8 @@ When adding or modifying behavior:
 2. Select the lowest-cost layer that can provide credible evidence.
 3. Add higher-layer tests only when lower layers cannot prove the risk.
 4. Keep assertions behavior-centric and deterministic.
-5. Update traceability status honestly.
+5. Keep framework-specific types at API/infrastructure boundaries; application-layer test doubles should depend on application-owned contracts.
+6. Update traceability status honestly.
 
 ---
 

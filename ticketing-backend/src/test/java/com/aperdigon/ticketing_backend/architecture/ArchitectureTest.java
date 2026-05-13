@@ -121,10 +121,10 @@ class ArchitectureTest {
         }
 
         @Test
-        @DisplayName("application must not depend on Spring Data JPA")
-        void applicationMustNotDependOnSpringDataJpa() {
+        @DisplayName("application must not depend on Spring Data")
+        void applicationMustNotDependOnSpringData() {
             noClasses().that().resideInAPackage("..application..")
-                    .should().dependOnClassesThat().resideInAPackage("org.springframework.data.jpa..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.data..")
                     .check(IMPORTED_CLASSES);
         }
 

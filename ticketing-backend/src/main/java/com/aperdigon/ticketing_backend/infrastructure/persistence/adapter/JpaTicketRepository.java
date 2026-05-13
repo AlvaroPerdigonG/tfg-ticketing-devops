@@ -1,6 +1,9 @@
 package com.aperdigon.ticketing_backend.infrastructure.persistence.adapter;
 
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageDirection;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PageQuery;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PagedResult;
 import com.aperdigon.ticketing_backend.application.tickets.dashboard.AgentTicketCount;
 import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
@@ -15,8 +18,8 @@ import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.TicketSpringDataRepository;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.repository.UserSpringDataRepository;
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +103,7 @@ public class JpaTicketRepository implements TicketRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, Pageable pageable) {
+    public PagedResult<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, PageQuery pageQuery) {
         Specification<TicketJpaEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("createdBy").get("id"), createdBy.value()));
@@ -117,12 +120,18 @@ public class JpaTicketRepository implements TicketRepository {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        return ticketSpringRepo.findAll(spec, pageable).map(TicketMapper::toDomain);
+        var page = ticketSpringRepo.findAll(spec, toPageRequest(pageQuery));
+        return new PagedResult<>(
+                page.getContent().stream().map(TicketMapper::toDomain).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Ticket> findAgentTickets(UserId actorId, TicketQueueScope scope, TicketStatus status, String q, Pageable pageable) {
+    public PagedResult<Ticket> findAgentTickets(UserId actorId, TicketQueueScope scope, TicketStatus status, String q, PageQuery pageQuery) {
         Specification<TicketJpaEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -147,7 +156,18 @@ public class JpaTicketRepository implements TicketRepository {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        return ticketSpringRepo.findAll(spec, pageable).map(TicketMapper::toDomain);
+        var page = ticketSpringRepo.findAll(spec, toPageRequest(pageQuery));
+        return new PagedResult<>(
+                page.getContent().stream().map(TicketMapper::toDomain).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
+    }
+
+    private static PageRequest toPageRequest(PageQuery pageQuery) {
+        var direction = pageQuery.direction() == PageDirection.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
+        return PageRequest.of(pageQuery.page(), pageQuery.size(), Sort.by(direction, pageQuery.sortBy()));
     }
 
     @Override

@@ -3,8 +3,8 @@ package com.aperdigon.ticketing_backend.application.tickets.list;
 import com.aperdigon.ticketing_backend.application.ports.TicketRepository;
 import com.aperdigon.ticketing_backend.application.shared.exception.ForbiddenException;
 import com.aperdigon.ticketing_backend.domain.shared.validation.Guard;
+import com.aperdigon.ticketing_backend.application.shared.pagination.PagedResult;
 import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +16,7 @@ public final class ListTicketsUseCase {
         this.ticketRepository = Guard.notNull(ticketRepository, "ticketRepository");
     }
 
-    public Page<Ticket> execute(ListTicketsQuery query) {
+    public PagedResult<Ticket> execute(ListTicketsQuery query) {
         Guard.notNull(query, "query");
 
         if (!query.actor().isAgentOrAdmin()) {
@@ -28,7 +28,7 @@ public final class ListTicketsUseCase {
                 query.scope(),
                 query.status(),
                 query.q(),
-                query.pageable()
+                query.pageQuery()
         );
     }
 }
