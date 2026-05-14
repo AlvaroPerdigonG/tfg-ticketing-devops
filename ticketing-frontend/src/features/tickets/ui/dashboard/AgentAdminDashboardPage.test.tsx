@@ -39,7 +39,7 @@ function renderPage() {
 }
 
 describe("AgentAdminDashboardPage", () => {
-  it("muestra cards y gráficos de estadísticas", async () => {
+  it("shows statistic cards and charts", async () => {
     server.use(http.get("/api/tickets/dashboard/stats", () => jsonResponse(statsFixture)));
 
     renderPage();
@@ -50,7 +50,7 @@ describe("AgentAdminDashboardPage", () => {
     expect(screen.getAllByText("Admin Uno")).toHaveLength(2);
   });
 
-  it("navega a tickets con filtros al clicar una card", async () => {
+  it("navigates to tickets with filters when clicking a card", async () => {
     server.use(http.get("/api/tickets/dashboard/stats", () => jsonResponse(statsFixture)));
 
     const { router } = renderPage();

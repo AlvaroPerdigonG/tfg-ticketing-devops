@@ -22,7 +22,7 @@ describe("CreateTicketPage", () => {
     navigateMock.mockReset();
   });
 
-  it("mantiene submit deshabilitado mientras faltan campos requeridos", async () => {
+  it("keeps submit disabled while required fields are missing", async () => {
     server.use(http.get("/api/categories", () => jsonResponse([{ id: "cat-1", name: "General" }])));
 
     renderWithProviders(<CreateTicketPage />, { router: {} });
@@ -31,7 +31,7 @@ describe("CreateTicketPage", () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it("deshabilita envío mientras carga categorías", async () => {
+  it("disables submission while categories are loading", async () => {
     server.use(
       http.get("/api/categories", async () => {
         await new Promise((resolve) => setTimeout(resolve, 150));
@@ -45,7 +45,7 @@ describe("CreateTicketPage", () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it("[TICKET-USER-01] Usuario crea ticket correctamente", async () => {
+  it("TICKET-USER-01 User creates ticket correctly", async () => {
     const user = userEvent.setup();
     let payload: unknown;
 
@@ -87,7 +87,7 @@ describe("CreateTicketPage", () => {
     });
   });
 
-  it("deshabilita botón durante el envío para evitar doble submit", async () => {
+  it("disables the button during submission to prevent double submit", async () => {
     let createTicketRequests = 0;
 
     server.use(
@@ -121,7 +121,7 @@ describe("CreateTicketPage", () => {
     });
   });
 
-  it("muestra error visible cuando falla el envío", async () => {
+  it("shows a visible error when submission fails", async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -132,7 +132,7 @@ describe("CreateTicketPage", () => {
     renderWithProviders(<CreateTicketPage />, { router: {} });
 
     await user.type(await screen.findByLabelText("Title"), "No imprime");
-    await user.type(screen.getByLabelText("Description"), "Error de cola de impresión");
+    await user.type(screen.getByLabelText("Description"), "Printer queue error");
 
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Category" }));
     fireEvent.click(await screen.findByText("General"));

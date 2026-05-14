@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
 
-test("ADMIN-04 usuario no autorizado no accede a administración", async ({ page }) => {
+test("ADMIN-04 Non-admin cannot access admin endpoints", async ({ page }) => {
   await loginAs(page, "user");
   await page.goto("/admin");
 

@@ -79,7 +79,7 @@ describe("TicketDetailPage", () => {
     );
   });
 
-  it("carga el ticket y muestra título, estado y timeline", async () => {
+  it("loads the ticket and shows title, status, and timeline", async () => {
     server.use(http.get("/api/tickets/ticket-1", () => jsonResponse(buildTicket())));
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
@@ -91,7 +91,7 @@ describe("TicketDetailPage", () => {
     expect(screen.getByRole("button", { name: "Assign ticket to me" })).toBeInTheDocument();
   });
 
-  it("permite asignarse ticket y recarga detalle", async () => {
+  it("allows assigning the ticket to self and reloads detail", async () => {
     const ticketState = buildTicket();
 
     server.use(
@@ -114,7 +114,7 @@ describe("TicketDetailPage", () => {
     });
   });
 
-  it("permite cambiar de estado y refleja el nuevo badge", async () => {
+  it("allows changing status and reflects the new badge", async () => {
     const ticketState = buildTicket();
 
     server.use(
@@ -138,7 +138,7 @@ describe("TicketDetailPage", () => {
     });
   });
 
-  it("envía comentario, limpia textarea y muestra contenido nuevo en timeline", async () => {
+  it("sends a comment, clears the textarea, and shows new timeline content", async () => {
     const ticketState = buildTicket();
     ticketState.assignedToUserId = "agent-1";
     ticketState.assignedToDisplayName = "Agent One";
@@ -174,16 +174,16 @@ describe("TicketDetailPage", () => {
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
     const textarea = await screen.findByPlaceholderText("Write a comment");
-    await user.type(textarea, "  Revisado, aplico solución.  ");
+    await user.type(textarea, "  Reviewed, applying a solution.  ");
     await user.click(screen.getByRole("button", { name: "Send comment" }));
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("")).toBeInTheDocument();
-      expect(screen.getByText("Revisado, aplico solución.")).toBeInTheDocument();
+      expect(screen.getByText("Reviewed, applying a solution.")).toBeInTheDocument();
     });
   });
 
-  it("en rol USER oculta la caja de acciones de gestión pero permite comentar", async () => {
+  it("with USER role hides the management actions box but allows commenting", async () => {
     hasAnyRoleMock.mockImplementation((roles) => roles.includes("USER"));
     authStateMock.user = { id: "user-1" };
     server.use(http.get("/api/tickets/ticket-1", () => jsonResponse(buildTicket())));
@@ -198,7 +198,7 @@ describe("TicketDetailPage", () => {
     expect(screen.getByRole("button", { name: "Send comment" })).toBeInTheDocument();
   });
 
-  it("agente no propietario ve mensaje y no puede usar acciones ni comentar", async () => {
+  it("non-owner agent sees a message and cannot use actions or comment", async () => {
     authStateMock.user = { id: "agent-2" };
     server.use(
       http.get("/api/tickets/ticket-1", () =>
@@ -221,7 +221,7 @@ describe("TicketDetailPage", () => {
     expect(screen.queryByRole("button", { name: "Send comment" })).not.toBeInTheDocument();
   });
 
-  it("admin puede usar acciones y comentar aunque no sea propietario", async () => {
+  it("admin can use actions and comment even when not the owner", async () => {
     hasAnyRoleMock.mockImplementation((roles) => roles.includes("ADMIN"));
     authStateMock.user = { id: "admin-1" };
     server.use(
@@ -242,7 +242,7 @@ describe("TicketDetailPage", () => {
     expect(screen.getByPlaceholderText("Write a comment")).toBeInTheDocument();
   });
 
-  it("si el ticket está resuelto deshabilita envío de comentarios", async () => {
+  it("disables comment submission when the ticket is resolved", async () => {
     server.use(
       http.get("/api/tickets/ticket-1", () =>
         jsonResponse(
@@ -263,7 +263,7 @@ describe("TicketDetailPage", () => {
     expect(submitCommentButton).toBeDisabled();
   });
 
-  it("si falta id muestra error y volver navega a /tickets", async () => {
+  it("shows an error when the id is missing and back navigates to /tickets", async () => {
     paramsMock.mockReturnValue({ id: undefined });
     const user = userEvent.setup();
 
@@ -276,7 +276,7 @@ describe("TicketDetailPage", () => {
     expect(navigateMock).toHaveBeenCalledWith("/tickets");
   });
 
-  it("renderiza eventos de timeline para creación, cambio de estado y asignación", async () => {
+  it("renders timeline events for creation, status changes, and assignment", async () => {
     server.use(
       http.get("/api/tickets/ticket-1", () =>
         jsonResponse(
@@ -325,7 +325,7 @@ describe("TicketDetailPage", () => {
     expect(screen.getByText("Assigned to Agent One")).toBeInTheDocument();
   });
 
-  it("muestra mensaje genérico cuando la carga falla con error no tipado", async () => {
+  it("shows a generic message when loading fails with an untyped error", async () => {
     server.use(
       http.get("/api/tickets/ticket-1", () => {
         throw "boom";

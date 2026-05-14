@@ -24,7 +24,7 @@ describe("TicketsPage", () => {
     hasAnyRoleMock.mockReset();
   });
 
-  it("renderiza vista USER cuando no tiene rol agent/admin", () => {
+  it("renders USER view when the user does not have agent/admin role", () => {
     hasAnyRoleMock.mockReturnValue(false);
 
     renderWithProviders(<TicketsPage />, { router: {} });
@@ -32,7 +32,7 @@ describe("TicketsPage", () => {
     expect(screen.getByRole("heading", { name: "My tickets" })).toBeInTheDocument();
   });
 
-  it("renderiza vista de gestión cuando tiene rol AGENT/ADMIN", () => {
+  it("renders management view when the user has AGENT/ADMIN role", () => {
     hasAnyRoleMock.mockReturnValue(true);
 
     renderWithProviders(<TicketsPage />, { router: {} });
