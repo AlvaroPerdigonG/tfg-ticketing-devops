@@ -2,14 +2,14 @@ import { expect, test } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
 import { getCredentials } from "./utils/env";
 
-test("AUTH-01 login correcto redirige al área autenticada", async ({ page }) => {
+test("AUTH-01 Correct login", async ({ page }) => {
   await loginAs(page, "user");
 
   await expect(page).toHaveURL(/\/tickets$/);
   await expect(page.getByTestId("user-tickets-title")).toBeVisible();
 });
 
-test("AUTH-02 login incorrecto muestra error y mantiene sesión no autenticada", async ({
+test("AUTH-02 Invalid login", async ({
   page,
 }) => {
   const user = getCredentials("user");

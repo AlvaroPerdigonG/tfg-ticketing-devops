@@ -18,7 +18,7 @@ const queueTicket = {
 } as const;
 
 describe("AgentAdminTicketsPage", () => {
-  it("[TICKET-AGENT-03] muestra tickets gestionables para agent/admin", async () => {
+  it("TICKET-AGENT-03 Agent sees manageable tickets", async () => {
     server.use(
       http.get("/api/tickets", () =>
         jsonResponse({
@@ -36,7 +36,7 @@ describe("AgentAdminTicketsPage", () => {
     expect(screen.getByRole("cell", { name: "Impresora bloqueada" })).toBeInTheDocument();
   });
 
-  it("lee filtros desde query params y los aplica al backend", async () => {
+  it("reads filters from query params and applies them to the backend", async () => {
     let capturedSearch = "";
 
     server.use(
@@ -59,7 +59,7 @@ describe("AgentAdminTicketsPage", () => {
     expect(screen.getByRole("heading", { name: "Tickets assigned to me" })).toBeInTheDocument();
   });
 
-  it("muestra loading y empty state", async () => {
+  it("shows loading and empty state", async () => {
     server.use(
       http.get("/api/tickets", async () => {
         await new Promise((resolve) => setTimeout(resolve, 120));
@@ -77,7 +77,7 @@ describe("AgentAdminTicketsPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("muestra error state cuando falla la cola", async () => {
+  it("shows error state when the queue fails", async () => {
     server.use(http.get("/api/tickets", () => jsonResponse({ message: "fail" }, { status: 500 })));
 
     renderWithProviders(<AgentAdminTicketsPage />, { router: { initialEntries: ["/tickets"] } });
@@ -85,7 +85,7 @@ describe("AgentAdminTicketsPage", () => {
     expect(await screen.findByText("Could not load the ticket queue")).toBeInTheDocument();
   });
 
-  it("[TICKET-AGENT-01] muestra acciones de UI para gestión de estado si existen", async () => {
+  it("TICKET-AGENT-01 Agent/admin changes status correctly", async () => {
     server.use(
       http.get("/api/tickets", () =>
         jsonResponse({
@@ -101,11 +101,11 @@ describe("AgentAdminTicketsPage", () => {
 
     await screen.findByRole("cell", { name: "TCK-200" });
 
-    // En esta pantalla actualmente solo existe acción "View".
+    // This screen currently only exposes the "View" action.
     expect(screen.getByRole("button", { name: "View" })).toBeInTheDocument();
   });
 
-  it("fallback a vista unassigned y estado all cuando query params son inválidos", async () => {
+  it("falls back to unassigned view and all status when query params are invalid", async () => {
     let capturedSearch = "";
 
     server.use(
@@ -127,7 +127,7 @@ describe("AgentAdminTicketsPage", () => {
     expect(screen.getByRole("heading", { name: "Unassigned queue" })).toBeInTheDocument();
   });
 
-  it("permite aplicar búsqueda y limpiar filtros", async () => {
+  it("allows applying search and clearing filters", async () => {
     let capturedSearch = "";
     const user = userEvent.setup();
 

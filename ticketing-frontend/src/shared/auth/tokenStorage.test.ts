@@ -12,7 +12,7 @@ describe("tokenStorage", () => {
     sessionStorage.clear();
   });
 
-  it("persiste en localStorage cuando remember=true", () => {
+  it("persists in localStorage when remember=true", () => {
     persistAccessToken("token-local", { remember: true });
 
     expect(localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBe("token-local");
@@ -20,7 +20,7 @@ describe("tokenStorage", () => {
     expect(getStoredAccessToken()).toBe("token-local");
   });
 
-  it("persiste en sessionStorage cuando remember=false", () => {
+  it("persists in sessionStorage when remember=false", () => {
     persistAccessToken("token-session", { remember: false });
 
     expect(sessionStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBe("token-session");
@@ -28,7 +28,7 @@ describe("tokenStorage", () => {
     expect(getStoredAccessToken()).toBe("token-session");
   });
 
-  it("limpia ambos storages al cerrar sesión", () => {
+  it("clears both storages on logout", () => {
     localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, "token-local");
     sessionStorage.setItem(AUTH_TOKEN_STORAGE_KEY, "token-session");
 

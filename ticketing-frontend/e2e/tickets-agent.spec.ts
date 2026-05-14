@@ -4,7 +4,7 @@ import { selectFirstTicketCategory } from "./fixtures/tickets";
 
 async function createTicketAsUser(page: Page) {
   const uniqueSuffix = Date.now();
-  const title = `E2E agente ${uniqueSuffix}`;
+  const title = `E2E agent ${uniqueSuffix}`;
 
   await loginAs(page, "user");
   await page.getByTestId("user-create-ticket-cta").click();
@@ -13,7 +13,7 @@ async function createTicketAsUser(page: Page) {
   await page.getByLabel("Title").fill(title);
   await page
     .getByLabel("Description")
-    .fill("Ticket creado para validar cambio de estado por agente.");
+    .fill("Ticket created to validate agent status changes.");
   await selectFirstTicketCategory(page);
   await page.getByTestId("create-ticket-submit").click();
 
@@ -22,7 +22,7 @@ async function createTicketAsUser(page: Page) {
   return title;
 }
 
-test("TICKET-AGENT-01 agent/admin cambia estado correctamente", async ({ page }) => {
+test("TICKET-AGENT-01 Agent/admin changes status correctly", async ({ page }) => {
   const ticketTitle = await createTicketAsUser(page);
 
   await page.getByRole("button", { name: "Logout" }).click();
@@ -42,7 +42,7 @@ test("TICKET-AGENT-01 agent/admin cambia estado correctamente", async ({ page })
   await expect(page.getByTestId("ticket-detail-status")).toContainText("In progress");
 });
 
-test("TICKET-AGENT-04 agent se asigna ticket y comenta en el detalle", async ({ page }) => {
+test("TICKET-AGENT-04 Assign to me works correctly", async ({ page }) => {
   const ticketTitle = await createTicketAsUser(page);
 
   await page.getByRole("button", { name: "Logout" }).click();
@@ -60,7 +60,7 @@ test("TICKET-AGENT-04 agent se asigna ticket y comenta en el detalle", async ({ 
   await page.getByRole("button", { name: "Assign ticket to me" }).click();
   await expect(page.getByRole("button", { name: "Assign ticket to me" })).toHaveCount(0);
 
-  const commentText = `Comentario E2E agente ${Date.now()}`;
+  const commentText = `E2E agent comment ${Date.now()}`;
   await page.getByPlaceholder("Write a comment").fill(commentText);
   await page.getByRole("button", { name: "Send comment" }).click();
 

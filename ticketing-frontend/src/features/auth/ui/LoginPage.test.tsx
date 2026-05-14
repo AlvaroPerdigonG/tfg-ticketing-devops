@@ -60,15 +60,15 @@ beforeEach(() => {
   loginMock.mockReset();
 });
 
-describe("[AUTH-01] Login correcto", () => {
-  it("envía credenciales válidas y navega al destino protegido tras autenticarse", async () => {
+describe("AUTH-01 Correct login", () => {
+  it("submits valid credentials and navigates to the protected destination after authentication", async () => {
     const user = userEvent.setup();
 
     loginMock.mockResolvedValueOnce({
       accessToken: buildJwt({
         sub: "u1",
         email: "user@test.com",
-        displayName: "Usuario",
+        displayName: "User",
         roles: ["USER"],
         exp: Math.floor(Date.now() / 1000) + 3600,
       }),
@@ -84,7 +84,7 @@ describe("[AUTH-01] Login correcto", () => {
     expect(await screen.findByRole("heading", { name: "Tickets" })).toBeInTheDocument();
   });
 
-  it("muestra estado loading durante el envío", async () => {
+  it("shows loading state during submission", async () => {
     const user = userEvent.setup();
     const request = deferred<{ accessToken: string }>();
 
@@ -103,7 +103,7 @@ describe("[AUTH-01] Login correcto", () => {
       accessToken: buildJwt({
         sub: "u1",
         email: "user@test.com",
-        displayName: "Usuario",
+        displayName: "User",
         roles: ["USER"],
         exp: Math.floor(Date.now() / 1000) + 3600,
       }),
@@ -112,7 +112,7 @@ describe("[AUTH-01] Login correcto", () => {
     expect(await screen.findByRole("heading", { name: "Home" })).toBeInTheDocument();
   });
 
-  it("aplica validación visible del formulario cuando faltan campos requeridos", async () => {
+  it("applies visible form validation when required fields are missing", async () => {
     const user = userEvent.setup();
 
     renderLogin();
@@ -124,8 +124,8 @@ describe("[AUTH-01] Login correcto", () => {
   });
 });
 
-describe("[AUTH-02] Login inválido", () => {
-  it("muestra feedback de error y mantiene al usuario en login", async () => {
+describe("AUTH-02 Invalid login", () => {
+  it("shows error feedback and keeps the user on login", async () => {
     const user = userEvent.setup();
 
     loginMock.mockRejectedValueOnce(new ApiError("Invalid credentials", 401));

@@ -28,8 +28,8 @@ function renderRoute() {
   return render(<RouterProvider router={router} />);
 }
 
-describe("[ADMIN-04] usuario no autorizado no accede a admin", () => {
-  it("redirecciona a /forbidden y oculta el contenido protegido", async () => {
+describe("ADMIN-04 Non-admin cannot access admin endpoints", () => {
+  it("redirects to /forbidden and hides protected content", async () => {
     useAuthMock.mockReturnValue({ hasAnyRole: () => false });
 
     renderRoute();

@@ -27,8 +27,8 @@ function renderRoute(initialEntries: string[] = ["/tickets"]) {
   return render(<RouterProvider router={router} />);
 }
 
-describe("[AUTH-01] rutas protegidas respetan estado autenticado", () => {
-  it("redirecciona a /login cuando no hay sesión autenticada", async () => {
+describe("AUTH-01 Correct login", () => {
+  it("redirects to /login when there is no authenticated session", async () => {
     useAuthMock.mockReturnValue({ isAuthenticated: false, isHydrated: true });
 
     renderRoute();
@@ -36,7 +36,7 @@ describe("[AUTH-01] rutas protegidas respetan estado autenticado", () => {
     expect(await screen.findByRole("heading", { name: "Login Page" })).toBeInTheDocument();
   });
 
-  it("renderiza el contenido protegido cuando la sesión está autenticada", async () => {
+  it("renders protected content when the session is authenticated", async () => {
     useAuthMock.mockReturnValue({ isAuthenticated: true, isHydrated: true });
 
     renderRoute();

@@ -17,7 +17,7 @@ const baseTicket = {
 } as const;
 
 describe("UserTicketsHomePage", () => {
-  it("[TICKET-USER-03] muestra solo los tickets del usuario authenticated", async () => {
+  it("TICKET-USER-03 User sees only their own tickets", async () => {
     server.use(
       http.get("/api/tickets/me", () =>
         jsonResponse({
@@ -36,7 +36,7 @@ describe("UserTicketsHomePage", () => {
     expect(screen.getByRole("button", { name: "View" })).toBeInTheDocument();
   });
 
-  it("muestra loading state mientras la petición está en curso", async () => {
+  it("shows loading state while the request is in progress", async () => {
     server.use(
       http.get("/api/tickets/me", async () => {
         await new Promise((resolve) => setTimeout(resolve, 120));
@@ -50,7 +50,7 @@ describe("UserTicketsHomePage", () => {
     expect(await screen.findByText("You do not have any tickets yet")).toBeInTheDocument();
   });
 
-  it("muestra empty state cuando el usuario no tiene tickets", async () => {
+  it("shows empty state when the user has no tickets", async () => {
     server.use(
       http.get("/api/tickets/me", () => jsonResponse({ items: [], page: 0, size: 20, total: 0 })),
     );
@@ -60,7 +60,7 @@ describe("UserTicketsHomePage", () => {
     expect(await screen.findByText("You do not have any tickets yet")).toBeInTheDocument();
   });
 
-  it("muestra error state cuando falla la carga", async () => {
+  it("shows error state when loading fails", async () => {
     server.use(
       http.get("/api/tickets/me", () => jsonResponse({ message: "boom" }, { status: 500 })),
     );
@@ -70,7 +70,7 @@ describe("UserTicketsHomePage", () => {
     expect(await screen.findByText("Could not load your tickets")).toBeInTheDocument();
   });
 
-  it("[TICKET-USER-05] no muestra acciones de cambio de estado", async () => {
+  it("TICKET-USER-05 User cannot change ticket status", async () => {
     server.use(
       http.get("/api/tickets/me", () =>
         jsonResponse({
@@ -85,7 +85,7 @@ describe("UserTicketsHomePage", () => {
     renderWithProviders(<UserTicketsHomePage />, { router: {} });
 
     await screen.findByRole("cell", { name: "TCK-001" });
-    expect(screen.queryByRole("button", { name: /cambiar estado/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /change status/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /resolver/i })).not.toBeInTheDocument();
   });
 });

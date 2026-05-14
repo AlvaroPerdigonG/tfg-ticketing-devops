@@ -21,8 +21,8 @@ function AuthStateProbe() {
 
   return (
     <section>
-      <p>Estado: {isAuthenticated ? "authenticated" : "anonymous"}</p>
-      <p>Usuario: {state.user?.email ?? "no user"}</p>
+      <p>Status: {isAuthenticated ? "authenticated" : "anonymous"}</p>
+      <p>User: {state.user?.email ?? "no user"}</p>
       <button type="button" onClick={() => login("admin@test.com", "Password.123", true)}>
         Login
       </button>
@@ -35,8 +35,8 @@ function AuthStateProbeSession() {
 
   return (
     <section>
-      <p>Estado sesión: {isAuthenticated ? "authenticated" : "anonymous"}</p>
-      <p>Usuario sesión: {state.user?.email ?? "no user"}</p>
+      <p>Session status: {isAuthenticated ? "authenticated" : "anonymous"}</p>
+      <p>Session user: {state.user?.email ?? "no user"}</p>
       <button type="button" onClick={() => login("agent@test.com", "Password.123", false)}>
         Session login
       </button>
@@ -50,8 +50,8 @@ beforeEach(() => {
   loginMock.mockReset();
 });
 
-describe("[AUTH-01] login correcto refleja estado authenticated", () => {
-  it("actualiza el estado visible de sesión cuando el backend devuelve un token válido", async () => {
+describe("AUTH-01 Correct login", () => {
+  it("updates the visible session state when the backend returns a valid token", async () => {
     const user = userEvent.setup();
 
     const token = buildJwt({
@@ -72,17 +72,17 @@ describe("[AUTH-01] login correcto refleja estado authenticated", () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByText("Estado: anonymous")).toBeInTheDocument();
+    expect(screen.getByText("Status: anonymous")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Login" }));
 
-    expect(await screen.findByText("Estado: authenticated")).toBeInTheDocument();
-    expect(screen.getByText("Usuario: admin@test.com")).toBeInTheDocument();
+    expect(await screen.findByText("Status: authenticated")).toBeInTheDocument();
+    expect(screen.getByText("User: admin@test.com")).toBeInTheDocument();
     expect(localStorage.getItem("ticketing_access_token")).toBe(token);
     expect(sessionStorage.getItem("ticketing_access_token")).toBeNull();
   });
 
-  it("con remember=false guarda token en sessionStorage y no en localStorage", async () => {
+  it("with remember=false stores token in sessionStorage and not in localStorage", async () => {
     const user = userEvent.setup();
 
     const token = buildJwt({
@@ -105,7 +105,7 @@ describe("[AUTH-01] login correcto refleja estado authenticated", () => {
 
     await user.click(screen.getByRole("button", { name: "Session login" }));
 
-    expect(await screen.findByText("Estado sesión: authenticated")).toBeInTheDocument();
+    expect(await screen.findByText("Session status: authenticated")).toBeInTheDocument();
     expect(localStorage.getItem("ticketing_access_token")).toBeNull();
     expect(sessionStorage.getItem("ticketing_access_token")).toBe(token);
   });

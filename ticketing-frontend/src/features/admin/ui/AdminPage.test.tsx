@@ -51,7 +51,7 @@ describe("AdminPage", () => {
     ]);
   });
 
-  it("renderiza tabs y datos cargados en categorías", async () => {
+  it("renders tabs and loaded category data", async () => {
     renderWithProviders(<AdminPage />);
 
     expect(screen.getByRole("heading", { name: "Administration" })).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe("AdminPage", () => {
     expect(screen.getByRole("tab", { name: "Users" })).toBeInTheDocument();
   });
 
-  it("crea una categoría nueva y limpia el input", async () => {
+  it("creates a new category and clears the input", async () => {
     createCategoryMock.mockResolvedValue({ id: "cat-2", name: "Hardware", isActive: true });
 
     const user = userEvent.setup();
@@ -77,7 +77,7 @@ describe("AdminPage", () => {
     expect(messageSuccessSpy).toHaveBeenCalledWith("Category created");
   });
 
-  it("edita categoría existente (nombre + activa/inactiva)", async () => {
+  it("edits an existing category (name + active/inactive)", async () => {
     updateCategoryMock.mockResolvedValue({ id: "cat-1", name: "Software Legacy", isActive: false });
 
     const user = userEvent.setup();
@@ -105,7 +105,7 @@ describe("AdminPage", () => {
     expect(messageSuccessSpy).toHaveBeenCalledWith("Category updated");
   });
 
-  it("deactiva usuario desde tab de usuarios", async () => {
+  it("deactivates user from users tab", async () => {
     updateUserActiveMock.mockResolvedValue({
       id: "u1",
       email: "user@test.com",
@@ -127,7 +127,7 @@ describe("AdminPage", () => {
     expect(messageSuccessSpy).toHaveBeenCalledWith("User status updated");
   });
 
-  it("muestra error cuando falla la carga inicial", async () => {
+  it("shows an error when initial loading fails", async () => {
     getCategoriesMock.mockRejectedValueOnce(new Error("boom"));
     getUsersMock.mockRejectedValueOnce(new Error("boom"));
 
@@ -139,7 +139,7 @@ describe("AdminPage", () => {
     });
   });
 
-  it("muestra error si se intenta guardar categoría con nombre vacío", async () => {
+  it("shows an error when trying to save a category with an empty name", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
