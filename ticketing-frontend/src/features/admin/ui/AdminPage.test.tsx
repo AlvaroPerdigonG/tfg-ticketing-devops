@@ -1,5 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { message } from "antd";
 import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import { vi } from "vitest";
@@ -62,12 +61,11 @@ describe("AdminPage", () => {
   it("creates a new category and clears the input", async () => {
     createCategoryMock.mockResolvedValue({ id: "cat-2", name: "Hardware", isActive: true });
 
-    const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
     const input = await screen.findByPlaceholderText("New category");
-    await user.type(input, "Hardware");
-    await user.click(screen.getByRole("button", { name: "Create" }));
+    fireEvent.change(input, { target: { value: "Hardware" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create" }));
 
     await waitFor(() => {
       expect(createCategoryMock).toHaveBeenCalledWith("Hardware");
@@ -80,19 +78,17 @@ describe("AdminPage", () => {
   it("edits an existing category (name + active/inactive)", async () => {
     updateCategoryMock.mockResolvedValue({ id: "cat-1", name: "Software Legacy", isActive: false });
 
-    const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
-    await user.click(await screen.findByRole("button", { name: "Edit" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
 
     const nameInput = await screen.findByPlaceholderText("Name");
-    await user.clear(nameInput);
-    await user.type(nameInput, "Software Legacy");
+    fireEvent.change(nameInput, { target: { value: "Software Legacy" } });
 
     const modalSwitch = screen.getAllByRole("switch")[0];
-    await user.click(modalSwitch);
+    fireEvent.click(modalSwitch);
 
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(updateCategoryMock).toHaveBeenCalledWith("cat-1", {
@@ -114,12 +110,11 @@ describe("AdminPage", () => {
       isActive: false,
     });
 
-    const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
-    await user.click(screen.getByRole("tab", { name: "Users" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Users" }));
     const userSwitch = await screen.findByRole("switch");
-    await user.click(userSwitch);
+    fireEvent.click(userSwitch);
 
     await waitFor(() => {
       expect(updateUserActiveMock).toHaveBeenCalledWith("u1", false);
@@ -140,14 +135,13 @@ describe("AdminPage", () => {
   });
 
   it("shows an error when trying to save a category with an empty name", async () => {
-    const user = userEvent.setup();
     renderWithProviders(<AdminPage />);
 
-    await user.click(await screen.findByRole("button", { name: "Edit" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
     const nameInput = await screen.findByPlaceholderText("Name");
-    await user.clear(nameInput);
+    fireEvent.change(nameInput, { target: { value: "" } });
 
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(messageErrorSpy).toHaveBeenCalledWith("Name is required");
     expect(updateCategoryMock).not.toHaveBeenCalled();
