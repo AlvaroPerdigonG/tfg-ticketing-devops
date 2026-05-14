@@ -9,9 +9,7 @@ test("AUTH-01 Correct login", async ({ page }) => {
   await expect(page.getByTestId("user-tickets-title")).toBeVisible();
 });
 
-test("AUTH-02 Invalid login", async ({
-  page,
-}) => {
+test("AUTH-02 Invalid login", async ({ page }) => {
   const user = getCredentials("user");
 
   await page.goto("/login");
