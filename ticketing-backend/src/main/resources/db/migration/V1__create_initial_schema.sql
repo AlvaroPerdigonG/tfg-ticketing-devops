@@ -1,25 +1,25 @@
 -- Crear tabla de usuarios (sin password_hash todavía)
 CREATE TABLE users (
     id UUID PRIMARY KEY,
-    email CHARACTER VARYING(320) NOT NULL UNIQUE,
-    display_name CHARACTER VARYING(120) NOT NULL,
-    role CHARACTER VARYING(20) NOT NULL,
+    email VARCHAR(320) NOT NULL UNIQUE,
+    display_name VARCHAR(120) NOT NULL,
+    role VARCHAR(20) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT true
 );
 
 -- Crear tabla de categorías
 CREATE TABLE categories (
     id UUID PRIMARY KEY,
-    name CHARACTER VARYING(120) NOT NULL UNIQUE,
+    name VARCHAR(120) NOT NULL UNIQUE,
     is_active BOOLEAN NOT NULL DEFAULT true
 );
 
 -- Crear tabla de tickets
 CREATE TABLE tickets (
     id UUID PRIMARY KEY,
-    title CHARACTER VARYING(200) NOT NULL,
+    title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
-    status CHARACTER VARYING(30) NOT NULL,
+    status VARCHAR(30) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     created_by_user_id UUID NOT NULL REFERENCES users(id),
