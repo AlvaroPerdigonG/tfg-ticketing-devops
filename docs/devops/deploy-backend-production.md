@@ -44,20 +44,65 @@ Automatic deployment is now subordinated to CI quality gates:
 
 ## Required `production` environment secrets
 
+The GitHub Environment `production` must define the following secrets. `EC2_SSH_PORT` is required and is currently set explicitly to `22`.
+
+### EC2 connection and deployment
+
 - `EC2_HOST`
 - `EC2_USER`
+- `EC2_SSH_PORT`
 - `EC2_SSH_PRIVATE_KEY`
 - `EC2_SSH_KNOWN_HOSTS`
 - `EC2_APP_DIR`
-- `EC2_SSH_PORT` (optional, defaults to `22`)
-- `BACKEND_BASE_URL`
+
+### Runtime backend configuration
+
 - `DOMAIN`
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASSWORD`
 - `APP_SECURITY_CORS_ALLOWED_ORIGINS`
+
+### JWT key material
+
 - `JWT_PUBLIC_KEY_PEM`
 - `JWT_PRIVATE_KEY_PEM`
+
+### Post-deploy validation
+
+- `BACKEND_BASE_URL`
+
+## GitHub Environment `production`
+
+The GitHub Environment `production` is currently used as a logical boundary to group deployment secrets. It is not yet used as a manual approval gate, does not define required reviewers, and does not add environment-specific branch rules.
+
+Deployment control depends mainly on:
+
+- branch protection on `main`;
+- successful CI execution;
+- the workflow condition that deploys automatically only when CI finishes successfully on a `push` to `main`;
+- `workflow_dispatch`, which remains available for controlled manual deployments.
+
+## Frontend/backend production configuration
+
+This workflow deploys only the backend. The frontend is deployed outside this workflow through Cloudflare Pages.
+
+In Cloudflare Pages, the frontend uses `VITE_API_BASE_URL` to point to the public backend. The verified production value is:
+
+```env
+VITE_API_BASE_URL=https://tfg-ticketing-api.duckdns.org
+```
+
+The backend uses `APP_SECURITY_CORS_ALLOWED_ORIGINS` to allow the deployed frontend origin. The verified production value is:
+
+```env
+APP_SECURITY_CORS_ALLOWED_ORIGINS=https://tfg-ticketing-devops.pages.dev
+```
+
+These variables are complementary:
+
+- `VITE_API_BASE_URL` resolves the backend address consumed by the frontend;
+- `APP_SECURITY_CORS_ALLOWED_ORIGINS` resolves the backend CORS policy for the frontend origin.
 
 ## Deployment sequence
 
@@ -133,7 +178,10 @@ using `curl` + retries and requires JSON response with status `UP`.
 
 - No automated rollback yet.
 - No container registry yet (no `docker pull` flow in this batch).
-- No frontend deployment automation in this workflow.
+- No AWS Secrets Manager or external secret manager yet.
+- No automated secret rotation yet.
+- GitHub Environment `production` currently has no manual approval rule.
+- No frontend deployment automation in this backend workflow, because Cloudflare Pages handles frontend deployment separately.
 - No Terraform/IaC in this batch.
 
 ## Next batch candidates
