@@ -1,16 +1,13 @@
 package com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.mapper;
 
 
-import com.aperdigon.ticketing_backend.domain.category.Category;
-import com.aperdigon.ticketing_backend.domain.category.CategoryId;
-import com.aperdigon.ticketing_backend.domain.ticket.*;
-import com.aperdigon.ticketing_backend.domain.user.User;
+import com.aperdigon.ticketing_backend.domain.ticket.Comment;
+import com.aperdigon.ticketing_backend.domain.ticket.CommentId;
+import com.aperdigon.ticketing_backend.domain.ticket.Ticket;
+import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
-import com.aperdigon.ticketing_backend.domain.user.UserRole;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.CategoryJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.CommentJpaEntity;
 import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.TicketJpaEntity;
-import com.aperdigon.ticketing_backend.infrastructure.persistence.jpa.entity.UserJpaEntity;
 
 import java.util.List;
 import java.util.UUID;

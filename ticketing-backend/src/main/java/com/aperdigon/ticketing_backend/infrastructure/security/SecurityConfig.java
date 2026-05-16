@@ -16,6 +16,8 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    private static final String ROLE_AGENT = "AGENT";
+
     @Value("${app.security.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
@@ -36,15 +38,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
 
                         //UC1: crear ticket todos
-                        .requestMatchers(HttpMethod.POST, "/api/tickets").hasAnyRole("USER","AGENT","ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/tickets/me").hasAnyRole("USER","AGENT","ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/tickets/dashboard/**").hasAnyRole("AGENT", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/tickets").hasAnyRole("AGENT", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/tickets/*").hasAnyRole("USER", "AGENT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/tickets").hasAnyRole("USER", ROLE_AGENT, "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/me").hasAnyRole("USER", ROLE_AGENT, "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/dashboard/**").hasAnyRole(ROLE_AGENT, "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets").hasAnyRole(ROLE_AGENT, "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/*").hasAnyRole("USER", ROLE_AGENT, "ADMIN")
 
                         // UC4: cambiar estado solo AGENT/ADMIN
-                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAnyRole("AGENT", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/assignment/me").hasAnyRole("AGENT", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAnyRole(ROLE_AGENT, "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/assignment/me").hasAnyRole(ROLE_AGENT, "ADMIN")
 
                         // administración solo ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

@@ -32,6 +32,8 @@ import java.util.Set;
 @Repository
 public class JpaTicketRepository implements TicketRepository {
 
+    private static final String ASSIGNED_TO_FIELD = "assignedTo";
+
     private final TicketSpringDataRepository ticketSpringRepo;
     private final UserSpringDataRepository userSpringRepo;
     private final CategorySpringDataRepository categorySpringRepo;
@@ -136,12 +138,12 @@ public class JpaTicketRepository implements TicketRepository {
             List<Predicate> predicates = new ArrayList<>();
 
             if (scope == TicketQueueScope.UNASSIGNED) {
-                predicates.add(cb.isNull(root.get("assignedTo")));
+                predicates.add(cb.isNull(root.get(ASSIGNED_TO_FIELD)));
             } else if (scope == TicketQueueScope.MINE) {
-                predicates.add(cb.equal(root.get("assignedTo").get("id"), actorId.value()));
+                predicates.add(cb.equal(root.get(ASSIGNED_TO_FIELD).get("id"), actorId.value()));
             } else if (scope == TicketQueueScope.OTHERS) {
-                predicates.add(cb.isNotNull(root.get("assignedTo")));
-                predicates.add(cb.notEqual(root.get("assignedTo").get("id"), actorId.value()));
+                predicates.add(cb.isNotNull(root.get(ASSIGNED_TO_FIELD)));
+                predicates.add(cb.notEqual(root.get(ASSIGNED_TO_FIELD).get("id"), actorId.value()));
             }
 
             if (status != null) {
