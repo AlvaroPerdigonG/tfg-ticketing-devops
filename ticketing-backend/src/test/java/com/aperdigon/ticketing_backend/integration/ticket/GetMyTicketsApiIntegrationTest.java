@@ -119,5 +119,20 @@ class GetMyTicketsApiIntegrationTest extends AbstractAuthenticatedApiIntegration
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].title").value("Assigned to me"))
                 .andExpect(jsonPath("$.items[0].assignedToUserId").value(agent.getId().toString()));
+
+        mockMvc.perform(get("/api/tickets")
+                        .with(bearerToken(token))
+                        .param("scope", "UNASSIGNED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("Unassigned queue ticket"));
+
+        mockMvc.perform(get("/api/tickets")
+                        .with(bearerToken(token))
+                        .param("scope", "OTHERS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("Assigned to another agent"))
+                .andExpect(jsonPath("$.items[0].assignedToUserId").value(otherAgent.getId().toString()));
     }
 }

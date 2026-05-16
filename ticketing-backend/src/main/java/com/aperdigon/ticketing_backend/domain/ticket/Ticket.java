@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 
 public final class Ticket {
+    private static final String CLOCK_FIELD = "clock";
+
     private final TicketId id;
 
     private String title;
@@ -75,7 +77,7 @@ public final class Ticket {
         Guard.notNull(category, "category");
         Guard.notNull(creator, "creator");
         Guard.notNull(priority, "priority");
-        Instant now = Instant.now(Guard.notNull(clock, "clock"));
+        Instant now = Instant.now(Guard.notNull(clock, CLOCK_FIELD));
 
         return new Ticket(
                 new TicketId(UUID.randomUUID()),
@@ -140,7 +142,7 @@ public final class Ticket {
     // Comportamiento de dominio (UC5)
     public Comment addComment(String content, UserId authorId, Clock clock) {
         Guard.notNull(authorId, "authorId");
-        Instant now = Instant.now(Guard.notNull(clock, "clock"));
+        Instant now = Instant.now(Guard.notNull(clock, CLOCK_FIELD));
 
         Comment comment = new Comment(
                 new CommentId(UUID.randomUUID()),
@@ -168,7 +170,7 @@ public final class Ticket {
     }
 
     private void touch(Clock clock) {
-        this.updatedAt = Instant.now(Guard.notNull(clock, "clock"));
+        this.updatedAt = Instant.now(Guard.notNull(clock, CLOCK_FIELD));
     }
 
     private static boolean isValidTransition(TicketStatus from, TicketStatus to) {

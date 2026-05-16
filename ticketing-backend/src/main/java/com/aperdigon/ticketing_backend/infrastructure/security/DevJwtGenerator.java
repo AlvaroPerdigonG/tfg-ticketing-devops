@@ -9,6 +9,9 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -18,10 +21,12 @@ import com.nimbusds.jwt.SignedJWT;
 
 public class DevJwtGenerator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DevJwtGenerator.class);
+
     public static void main(String[] args) throws Exception {
 
         if (args.length < 3) {
-            System.out.println("Usage: DevJwtGenerator <privateKeyPath> <subUuid> <role>");
+            LOGGER.info("Usage: DevJwtGenerator <privateKeyPath> <subUuid> <role>");
             return;
         }
 
@@ -31,10 +36,10 @@ public class DevJwtGenerator {
 
         String token = generate(privateKeyPath, sub, List.of(role));
 
-        System.out.println("sub = " + sub);
-        System.out.println("role = " + role);
-        System.out.println("\nTOKEN:\n");
-        System.out.println(token);
+        LOGGER.info("sub = {}", sub);
+        LOGGER.info("role = {}", role);
+        LOGGER.info("TOKEN:");
+        LOGGER.info("{}", token);
     }
 
     public static String generate(String privateKeyPath, String subject, List<String> roles) throws Exception {
