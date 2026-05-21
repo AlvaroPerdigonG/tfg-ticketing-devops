@@ -103,6 +103,13 @@ public class JpaTicketRepository implements TicketRepository {
         return ticketSpringRepo.findWithDetailsById(id.value()).map(TicketMapper::toDomain);
     }
 
+
+    @Override
+    @Transactional
+    public void deleteById(TicketId id) {
+        ticketSpringRepo.deleteById(id.value());
+    }
+
     @Override
     @Transactional(readOnly = true)
     public PagedResult<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, PageQuery pageQuery) {
