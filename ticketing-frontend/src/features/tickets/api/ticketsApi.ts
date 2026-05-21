@@ -58,5 +58,7 @@ export const ticketsApi = {
   addComment: (ticketId: string, content: string) =>
     authClient.post<AddTicketCommentResponse>(`/api/tickets/${ticketId}/comments`, { content }),
 
+  deleteTicket: (ticketId: string) => authClient.delete<void>(`/api/tickets/${ticketId}`),
+
   getDashboardStats: () => authClient.get<DashboardStats>("/api/tickets/dashboard/stats"),
 };

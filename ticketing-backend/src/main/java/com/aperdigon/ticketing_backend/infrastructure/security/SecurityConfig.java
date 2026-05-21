@@ -48,6 +48,7 @@ public class SecurityConfig {
                         // UC4: cambiar estado solo AGENT/ADMIN
                         .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAnyRole(ROLE_AGENT, ROLE_ADMIN)
                         .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/assignment/me").hasAnyRole(ROLE_AGENT, ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/api/tickets/*").hasRole(ROLE_ADMIN)
 
                         // administración solo ADMIN
                         .requestMatchers("/api/admin/**").hasRole(ROLE_ADMIN)

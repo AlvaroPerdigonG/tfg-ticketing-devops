@@ -17,6 +17,7 @@ import java.util.Set;
 public interface TicketRepository {
     Ticket save(Ticket ticket);
     Optional<Ticket> findById(TicketId id);
+    void deleteById(TicketId id);
 
     PagedResult<Ticket> findMyTickets(UserId createdBy, TicketStatus status, String q, PageQuery pageQuery);
 

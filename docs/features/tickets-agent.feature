@@ -40,3 +40,11 @@ Feature: Agent and administrator operational ticket management
     When the requester asks to assign the ticket to themselves
     Then the request is accepted
     And the ticket becomes assigned to that requester
+
+
+  Scenario: TICKET-AGENT-05 Admin deletes a ticket from management list
+    Given an existing ticket is visible in operational queue
+    And the requester has role administrator
+    When the requester confirms ticket deletion from the management list
+    Then the ticket is removed from persistence
+    And the ticket no longer appears in the queue
