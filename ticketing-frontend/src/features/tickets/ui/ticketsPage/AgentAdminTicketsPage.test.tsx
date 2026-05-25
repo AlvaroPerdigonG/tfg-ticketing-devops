@@ -144,8 +144,8 @@ describe("AgentAdminTicketsPage", () => {
 
     await screen.findByRole("heading", { name: "Tickets assigned to me" });
 
-    await user.clear(screen.getByPlaceholderText("Search by title or ID"));
-    await user.type(screen.getByPlaceholderText("Search by title or ID"), "network");
+    await user.clear(screen.getByPlaceholderText("Search by title"));
+    await user.type(screen.getByPlaceholderText("Search by title"), "network");
     await user.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() => {
@@ -156,7 +156,7 @@ describe("AgentAdminTicketsPage", () => {
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Unassigned queue" })).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("Search by title or ID")).toHaveValue("");
+      expect(screen.getByPlaceholderText("Search by title")).toHaveValue("");
     });
   });
 });

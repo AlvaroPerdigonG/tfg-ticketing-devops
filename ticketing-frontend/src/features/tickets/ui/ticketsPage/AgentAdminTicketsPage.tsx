@@ -258,7 +258,7 @@ export function AgentAdminTicketsPage() {
           <Input
             value={inputQuery}
             onChange={(event) => setInputQuery(event.target.value)}
-            placeholder="Search by title or ID"
+            placeholder="Search by title"
           />
           <Button onClick={onApplySearch}>Search</Button>
           <Button onClick={onClearFilters}>Clear filters</Button>
