@@ -55,10 +55,10 @@ export function TicketDetailPage() {
           ) : (
             <Typography.Text>
               {entry.eventType === "STATUS_CHANGED" &&
-                `Cambio de estado: ${entry.payload.from} → ${entry.payload.to}`}
+                `Status changed: ${entry.payload.from} → ${entry.payload.to}`}
               {entry.eventType === "ASSIGNED_TO_ME" &&
                 `Assigned to ${entry.actorDisplayName ?? "agent"}`}
-              {entry.eventType === "TICKET_CREATED" && "Ticket creado"}
+              {entry.eventType === "TICKET_CREATED" && "Ticket created"}
             </Typography.Text>
           )}
         </Space>
@@ -187,6 +187,7 @@ export function TicketDetailPage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>
       {errorMessage && (
         <Alert
           type="error"

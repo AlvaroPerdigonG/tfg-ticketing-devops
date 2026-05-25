@@ -85,6 +85,7 @@ describe("TicketDetailPage", () => {
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
     expect(await screen.findByTestId("ticket-detail-title")).toHaveTextContent("Printer issue");
+    expect(screen.getByRole("button", { name: "Back to tickets" })).toBeInTheDocument();
     expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("Open");
     expect(screen.getByText("Paper jam on tray 2")).toBeInTheDocument();
     expect(screen.getByText("Category: Hardware")).toBeInTheDocument();
@@ -320,8 +321,8 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Ticket creado")).toBeInTheDocument();
-    expect(screen.getByText("Cambio de estado: OPEN → IN_PROGRESS")).toBeInTheDocument();
+    expect(await screen.findByText("Ticket created")).toBeInTheDocument();
+    expect(screen.getByText("Status changed: OPEN → IN_PROGRESS")).toBeInTheDocument();
     expect(screen.getByText("Assigned to Agent One")).toBeInTheDocument();
   });
 

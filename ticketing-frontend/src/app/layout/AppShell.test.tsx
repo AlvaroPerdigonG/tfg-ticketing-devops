@@ -50,9 +50,9 @@ describe("AppShell", () => {
     hasRoleMock.mockReturnValue(false);
     renderWithRouter();
 
-    expect(await screen.findByText("TFG Ticketing")).toBeInTheDocument();
+    expect(await screen.findByText("DeskOps")).toBeInTheDocument();
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
-    expect(screen.getByText("Ticketing Platform")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Logout" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Dashboard page" })).toBeInTheDocument();
   });
 
