@@ -84,7 +84,9 @@ export function AppShell() {
           }}
         >
           <div>
-            {showBackToTickets && <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>}
+            {showBackToTickets && (
+              <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>
+            )}
           </div>
           <Button onClick={onLogout}>Logout</Button>
         </Header>
