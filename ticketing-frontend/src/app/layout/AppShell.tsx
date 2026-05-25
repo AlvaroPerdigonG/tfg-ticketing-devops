@@ -46,6 +46,7 @@ export function AppShell() {
   const isAdmin = hasRole("ADMIN");
   const canSeeDashboard = hasRole("AGENT") || isAdmin;
   const menuItems = getMenuItems(canSeeDashboard, isAdmin);
+  const showBackToTickets = /^\/tickets\/[^/]+$/.test(location.pathname);
 
   const onLogout = () => {
     logout();
@@ -57,7 +58,7 @@ export function AppShell() {
       <Sider style={{ borderRight: "1px solid #f0f0f0", width: 240, background: "#fff" }}>
         <div style={{ padding: "16px 20px" }}>
           <Typography.Title level={4} style={{ margin: 0 }}>
-            TFG Ticketing
+            DeskOps
           </Typography.Title>
           <Typography.Text type="secondary">{state.user?.displayName ?? "User"}</Typography.Text>
         </div>
@@ -82,10 +83,11 @@ export function AppShell() {
             height: 64,
           }}
         >
-          <Typography.Title level={5} style={{ margin: 0 }}>
-            Ticketing Platform
-          </Typography.Title>
-
+          <div>
+            {showBackToTickets && (
+              <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>
+            )}
+          </div>
           <Button onClick={onLogout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24 }}>

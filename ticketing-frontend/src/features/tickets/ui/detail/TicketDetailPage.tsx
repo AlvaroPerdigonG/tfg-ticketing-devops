@@ -55,10 +55,10 @@ export function TicketDetailPage() {
           ) : (
             <Typography.Text>
               {entry.eventType === "STATUS_CHANGED" &&
-                `Cambio de estado: ${entry.payload.from} → ${entry.payload.to}`}
+                `Status changed: ${entry.payload.from} → ${entry.payload.to}`}
               {entry.eventType === "ASSIGNED_TO_ME" &&
                 `Assigned to ${entry.actorDisplayName ?? "agent"}`}
-              {entry.eventType === "TICKET_CREATED" && "Ticket creado"}
+              {entry.eventType === "TICKET_CREATED" && "Ticket created"}
             </Typography.Text>
           )}
         </Space>

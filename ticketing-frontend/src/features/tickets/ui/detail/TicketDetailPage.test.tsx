@@ -320,8 +320,8 @@ describe("TicketDetailPage", () => {
 
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
-    expect(await screen.findByText("Ticket creado")).toBeInTheDocument();
-    expect(screen.getByText("Cambio de estado: OPEN → IN_PROGRESS")).toBeInTheDocument();
+    expect(await screen.findByText("Ticket created")).toBeInTheDocument();
+    expect(screen.getByText("Status changed: OPEN → IN_PROGRESS")).toBeInTheDocument();
     expect(screen.getByText("Assigned to Agent One")).toBeInTheDocument();
   });
 

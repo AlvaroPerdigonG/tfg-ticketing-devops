@@ -29,6 +29,7 @@ function renderWithRouter(initialEntries: string[] = ["/dashboard"]) {
         children: [
           { path: "/dashboard", element: <h1>Dashboard page</h1> },
           { path: "/tickets", element: <h1>Tickets page</h1> },
+          { path: "/tickets/:id", element: <h1>Ticket detail page</h1> },
           { path: "/tickets/new", element: <h1>Nuevo ticket page</h1> },
           { path: "/login", element: <h1>Login page</h1> },
         ],
@@ -50,9 +51,9 @@ describe("AppShell", () => {
     hasRoleMock.mockReturnValue(false);
     renderWithRouter();
 
-    expect(await screen.findByText("TFG Ticketing")).toBeInTheDocument();
+    expect(await screen.findByText("DeskOps")).toBeInTheDocument();
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
-    expect(screen.getByText("Ticketing Platform")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Logout" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Dashboard page" })).toBeInTheDocument();
   });
 
@@ -98,5 +99,14 @@ describe("AppShell", () => {
 
     expect(logoutMock).toHaveBeenCalledTimes(1);
     expect(await screen.findByRole("heading", { name: "Login page" })).toBeInTheDocument();
+  });
+
+  it("shows back to tickets button only on ticket detail pages", async () => {
+    hasRoleMock.mockReturnValue(false);
+    renderWithRouter(["/tickets/ticket-1"]);
+
+    expect(await screen.findByRole("heading", { name: "Ticket detail page" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back to tickets" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Logout" })).toBeInTheDocument();
   });
 });
