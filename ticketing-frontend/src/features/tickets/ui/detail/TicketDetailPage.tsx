@@ -187,7 +187,6 @@ export function TicketDetailPage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>
       {errorMessage && (
         <Alert
           type="error"

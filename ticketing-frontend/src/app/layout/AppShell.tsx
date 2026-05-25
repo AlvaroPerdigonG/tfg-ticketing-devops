@@ -46,6 +46,7 @@ export function AppShell() {
   const isAdmin = hasRole("ADMIN");
   const canSeeDashboard = hasRole("AGENT") || isAdmin;
   const menuItems = getMenuItems(canSeeDashboard, isAdmin);
+  const showBackToTickets = /^\/tickets\/[^/]+$/.test(location.pathname);
 
   const onLogout = () => {
     logout();
@@ -82,6 +83,9 @@ export function AppShell() {
             height: 64,
           }}
         >
+          <div>
+            {showBackToTickets && <Button onClick={() => navigate("/tickets")}>Back to tickets</Button>}
+          </div>
           <Button onClick={onLogout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24 }}>

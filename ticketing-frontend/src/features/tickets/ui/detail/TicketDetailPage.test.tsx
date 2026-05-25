@@ -85,7 +85,6 @@ describe("TicketDetailPage", () => {
     renderWithProviders(<TicketDetailPage />, { router: {} });
 
     expect(await screen.findByTestId("ticket-detail-title")).toHaveTextContent("Printer issue");
-    expect(screen.getByRole("button", { name: "Back to tickets" })).toBeInTheDocument();
     expect(screen.getByTestId("ticket-detail-status")).toHaveTextContent("Open");
     expect(screen.getByText("Paper jam on tray 2")).toBeInTheDocument();
     expect(screen.getByText("Category: Hardware")).toBeInTheDocument();
