@@ -31,7 +31,7 @@ Root causes:
 cd ticketing-backend
 docker compose down -v
 docker compose up -d
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ## Existing DB recovery path (when needed)

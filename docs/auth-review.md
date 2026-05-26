@@ -53,8 +53,3 @@
 - Frontend/backend auth contracts are aligned
 - Backend authorization and frontend guards are consistent
 - Stateless Bearer JWT approach fits SPA architecture
-
-## Recommended next improvements
-1. Keep OpenAPI/Swagger docs updated as API evolves
-2. Evaluate refresh-token strategy for longer sessions
-3. Expand E2E coverage for role-protected routes
