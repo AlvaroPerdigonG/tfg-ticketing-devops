@@ -47,7 +47,7 @@ Network flow:
 
 ## 3) Required environment variables
 
-Minimum base (see `ticketing-backend/.env.example`):
+Minimum base for a manual `.env` file:
 
 - `DB_NAME`
 - `DB_USER`
@@ -70,8 +70,7 @@ Recommended optional:
 
 ```bash
 cd /path/to/repo/ticketing-backend
-cp .env.example .env
-# edit .env with real values (do not commit them)
+# create .env and edit it with real values (do not commit it)
 ```
 
 ### 4.2 Start services

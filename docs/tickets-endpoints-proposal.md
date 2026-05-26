@@ -29,8 +29,8 @@
 {
   "email": "new@local.test",
   "displayName": "New User",
-  "password": "password",
-  "confirmPassword": "password"
+  "password": "Password1!",
+  "confirmPassword": "Password1!"
 }
 ```
 - Response:

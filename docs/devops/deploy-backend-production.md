@@ -35,7 +35,7 @@ File: `.github/workflows/deploy-backend-production.yml`
   1. `deploy-backend-production`
   2. `smoke-backend-production` (`needs: deploy-backend-production`)
 
-Automatic deployment is now subordinated to CI quality gates:
+Automatic deployment is subordinated to CI quality gates:
 
 - Deploy runs automatically only when `CI` concludes with `success`.
 - It only auto-deploys runs where `CI` itself was triggered by `push` to `main`.
@@ -173,19 +173,3 @@ This keeps the production behavior versioned and aligned with the manual EC2 set
 - `${BACKEND_BASE_URL}/actuator/health`
 
 using `curl` + retries and requires JSON response with status `UP`.
-
-## Current limitations (intentional)
-
-- No automated rollback yet.
-- No container registry yet (no `docker pull` flow in this batch).
-- No AWS Secrets Manager or external secret manager yet.
-- No automated secret rotation yet.
-- GitHub Environment `production` currently has no manual approval rule.
-- No frontend deployment automation in this backend workflow, because Cloudflare Pages handles frontend deployment separately.
-- No Terraform/IaC in this batch.
-
-## Next batch candidates
-
-- Add controlled rollback strategy.
-- Add deployment notifications.
-- Optionally evolve toward image registry + pull model.

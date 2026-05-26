@@ -1,96 +1,146 @@
+# TFG - Fullstack Ticketing Platform with DevOps
+
 [![CI](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AlvaroPerdigonG_tfg-ticketing-devops&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AlvaroPerdigonG_tfg-ticketing-devops)
 [![Deploy Backend Production](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/deploy-backend-production.yml/badge.svg)](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/deploy-backend-production.yml)
 
-# TFG – Plataforma de Ticketing amb Arquitectura DevOps
+This repository contains the source code for the final degree project **"Design and implementation of a ticketing platform with a DevOps architecture and cloud deployment"**.
 
-Aquest repositori conté el codi font del Treball de Final de Grau titulat:
+The project implements a fullstack ticketing application and uses it as a practical case study for continuous integration, continuous deployment, automated testing, quality analysis, traceability and containerized runtime environments.
 
-**“Disseny i implementació d’una plataforma de ticketing amb una arquitectura DevOps i desplegament al núvol”**
+## Main Technologies
 
-El projecte té com a objectiu desenvolupar una aplicació web de ticketing com a cas d’estudi per aplicar pràctiques modernes d’enginyeria del programari basades en DevOps, integració contínua, desplegament continu, control de qualitat automatitzat i contenidorització.
-
----
-
-## 🧭 Context acadèmic
-
-Aquest projecte forma part del Treball de Final de Grau del Grau en Enginyeria Informàtica.  
-El repositori és públic amb finalitats educatives i de recerca aplicada, i pretén servir com a exemple pràctic d’una arquitectura DevOps completa aplicada a una aplicació full-stack.
-
----
-
-## 🛠️ Tecnologies principals
-
-### Backend
+Backend:
 - Java 17
-- Spring Boot
-- JPA / Hibernate
+- Spring Boot 3.5
+- Spring Security with JWT
+- Spring Data JPA / Hibernate
+- Flyway
 - PostgreSQL
+- JUnit, ArchUnit and Testcontainers
 
-### Frontend
-- React
+Frontend:
+- React 19
 - TypeScript
-- Vite
+- Vite 7
+- Ant Design
+- Vitest, React Testing Library and MSW
+- Playwright for manual E2E tests
 
-### DevOps i Qualitat
-- GitHub Actions (CI/CD)
-- Docker i Docker Compose
+DevOps and quality:
+- GitHub Actions
+- Docker and Docker Compose
 - SonarCloud
-- ESLint / Checkstyle
-- JUnit, REST Assured, Testcontainers
-- React Testing Library
+- Dependency Review
+- JaCoCo and LCOV coverage reports
+- Automated traceability checks for functional scenarios
 
-### Infraestructura
-- Desplegament en entorn de núvol
+## Repository Structure
 
----
+```text
+.
+|-- .github/workflows/              # CI, security and backend deployment workflows
+|-- docs/                           # Technical, functional, testing and DevOps documentation
+|   |-- devops/                     # CI/CD, deployment, branch policy and cloud packaging
+|   |-- features/                   # Functional scenarios in Gherkin format
+|   `-- testing/                    # Testing strategy and traceability matrix
+|-- scripts/traceability/           # Traceability verification script
+|-- ticketing-backend/              # Spring Boot API
+|   |-- src/main/java/.../api       # REST controllers and DTOs
+|   |-- src/main/java/.../application
+|   |-- src/main/java/.../domain
+|   |-- src/main/java/.../infrastructure
+|   `-- src/main/resources          # Spring profiles, Flyway migrations and local JWT keys
+`-- ticketing-frontend/             # React + Vite SPA
+    |-- src/app                     # Router, layout and application bootstrap
+    |-- src/features                # Auth, tickets and admin features
+    |-- src/shared                  # Shared API client and utilities
+    |-- src/test                    # Test setup and test utilities
+    `-- e2e                         # Playwright E2E tests
+```
 
-## 🧰 Prerequisits i execució local
+## Local Requirements
 
-Per executar el projecte en un entorn local és necessari disposar de les següents eines instal·lades:
-
-### Requisits generals
+Install:
 - Git
-- Docker (Docker Desktop o Docker Engine)
+- Docker Desktop with Docker Compose v2
+- JDK 17
+- Node.js compatible with Vite 7: `20.19+` or `22.12+` (Node 22 LTS is recommended)
+- npm, included with Node.js
 
-### Backend
-- Java Development Kit (JDK) 17 (LTS)
-- Maven (o Maven Wrapper inclòs al projecte)
+Installing Maven globally is not required because the backend includes Maven Wrapper (`mvnw` / `mvnw.cmd`).
 
-### Frontend
-- Node.js (versió LTS, 20.x recomanada)
-- npm (inclòs amb Node.js)
+## Local Execution
 
----
-
-## ▶ Execució del projecte en local
-
-### 1. Clonar el repositori
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/AlvaroPerdigonG/tfg-ticketing-devops.git
 cd tfg-ticketing-devops
 ```
 
-### 2. Iniciar la base de dades amb Docker
-El projecte utilitza una base de dades PostgreSQL dins `ticketing-backend/docker-compose.yml`.
+### 2. Start PostgreSQL
+
+The local database is defined in `ticketing-backend/docker-compose.yml` and uses PostgreSQL 16 Alpine with a persistent Docker volume.
 
 ```bash
 cd ticketing-backend
 docker compose up -d
 ```
 
-### 3. Executar el backend
-Des del directori `ticketing-backend`:
+Local database settings:
+- Host: `localhost`
+- Port: `5432`
+- Database: `ticketing`
+- User: `user`
+- Password: `password`
 
-```bash
-./mvnw spring-boot:run
+### 3. Run the backend
+
+The backend must run with the Spring `local` profile.
+
+Windows PowerShell:
+
+```powershell
+cd ticketing-backend
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-El backend quedarà accessible a: http://localhost:8080
+Linux/macOS/Git Bash:
 
-### 4. Executar el frontend
-En una altra terminal, des de la ruta arrel del repositori:
+```bash
+cd ticketing-backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+Windows helper script:
+
+```powershell
+cd ticketing-backend
+.\run.ps1
+```
+
+To reset the local database volume:
+
+```powershell
+.\run.ps1 -ResetDatabase
+```
+
+Backend URLs:
+- API: `http://localhost:8080`
+- Health check: `http://localhost:8080/actuator/health`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+### 4. Configure and run the frontend
+
+Create `ticketing-frontend/.env.local`:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+Install dependencies and start Vite:
 
 ```bash
 cd ticketing-frontend
@@ -98,63 +148,109 @@ npm install
 npm run dev
 ```
 
-El frontend quedarà accessible a: http://localhost:5173
+Frontend URL:
 
-### ⚙ Configuració
-Les variables de configuració s’estableixen mitjançant fitxers d’entorn i perfils d’execució:
+```text
+http://localhost:5173
+```
 
-- Backend: `ticketing-backend/src/main/resources/application.yml` i perfils (`application-local.yml`, `application-cloud.yml`).
-- Frontend: variables d’entorn amb Vite (p. ex. `.env.local`).
+### 5. Local test users
 
-No s’inclouen credencials ni secrets productius al repositori.
+With the `local` profile, the backend creates minimal seed data if missing:
 
-### 🧪 Execució de proves
+| Role | Email | Password |
+|---|---|---|
+| User | `user@local.test` | `password` |
+| Agent | `agent@local.test` | `password` |
+
+The `General` category is also created automatically.
+
+## IDE Setup
+
+### IntelliJ IDEA for backend
+
+1. Open `ticketing-backend` as a Maven project, or open the repository root and import the Maven module.
+2. Configure the project SDK as JDK 17.
+3. Enable Lombok and annotation processing if IntelliJ requests it.
+4. Create a Spring Boot run configuration for `TicketingBackendApplication`.
+5. Set the active profile to `local` (`SPRING_PROFILES_ACTIVE=local` or `spring-boot.run.profiles=local`).
+6. Start PostgreSQL with `docker compose up -d` before running the application.
+
+### Visual Studio Code for frontend
+
+1. Open `ticketing-frontend`.
+2. Install dependencies with `npm install`.
+3. Create `.env.local` with `VITE_API_BASE_URL=http://localhost:8080`.
+4. Run `npm run dev`.
+5. Recommended extensions: ESLint, Prettier and TypeScript/React support.
+
+## Tests and Validation
+
 Backend:
+
 ```bash
 cd ticketing-backend
 ./mvnw test
+./mvnw verify -DskipITs=false
 ```
 
 Frontend:
+
 ```bash
 cd ticketing-frontend
+npm run format:check
+npm run lint
 npm run test:run
+npm run build
 ```
 
-E2E (Playwright):
+Manual Playwright E2E:
+
 ```bash
 cd ticketing-frontend
+npm run build
+npm run preview
 npm run test:e2e
 ```
 
----
+The backend must be running and the frontend must point to `http://localhost:8080` through `VITE_API_BASE_URL`.
 
-## 📚 Documentació funcional i tècnica
+## Documentation
 
-- Endpoints i contractes API actuals: `docs/tickets-endpoints-proposal.md`
-- Estratègia de testing: `docs/testing/testing-strategy.md`
-- Deep dive de tipus de test: `docs/testing/testing-types-deep-dive.md`
-- Matriu de traçabilitat: `docs/testing/traceability-matrix.md`
-- Estratègia CI/CD: `docs/devops/cicd-strategy.md`
+Main repository documentation:
+- `docs/local-development.md`: detailed local execution and IDE setup guide.
+- `docs/tickets-endpoints-proposal.md`: current HTTP API reference.
+- `docs/auth-review.md`: authentication and authorization contract review.
+- `docs/devops/cicd-strategy.md`: CI/CD strategy and quality-gate rationale.
+- `docs/devops/branch-policy.md`: branch governance and pull request policy.
+- `docs/devops/backend-cloud-packaging.md`: backend runtime packaging model.
+- `docs/devops/aws-ec2-backend.md`: manual EC2 backend deployment architecture.
+- `docs/devops/deploy-backend-production.md`: automated production backend deployment workflow.
+- `docs/features/*.feature`: canonical functional scenarios used for traceability.
+- `docs/testing/testing-strategy.md`: testing governance model.
+- `docs/testing/testing-types-deep-dive.md`: detailed explanation of test types.
+- `docs/testing/traceability-matrix.md`: current scenario coverage status.
+- `ticketing-backend/SEED_Y_PERSISTENCIA.md`: local seed data and persistence notes.
+- `ticketing-backend/SOLUCION_MIGRACION.md`: Flyway migration recovery notes.
+- `ticketing-backend/HELP.md`: Spring Boot generated reference notes for the backend module.
+- `ticketing-frontend/e2e/PLAYWRIGHT-E2E-EXECUTION.md`: manual Playwright E2E execution guide.
 
-### OpenAPI / Swagger (local)
+## CI/CD
 
-Amb el backend en marxa (`http://localhost:8080`):
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+The main workflow `.github/workflows/ci.yml` runs on pull requests and pushes to `main`. It includes:
+- Backend unit tests and architecture fitness tests.
+- Backend integration tests with PostgreSQL through Testcontainers.
+- Frontend formatting, linting, tests and production build.
+- Traceability verification.
+- SonarCloud analysis with Quality Gate.
 
----
+The workflow `.github/workflows/deploy-backend-production.yml` deploys the backend to production after a successful CI run on `main` or through manual dispatch. The frontend is deployed separately through Cloudflare Pages.
 
-## ⚖️ Llicència
+## License
 
-Aquest projecte es distribueix sota llicència **MIT**.  
-Consulta el fitxer [LICENSE](LICENSE) per a més informació.
+This project is distributed under the MIT License. See `LICENSE`.
 
----
+## Author
 
-## 👤 Autor
-
-Treball de Final de Grau realitzat per:
-
-**Álvaro Perdigón Gordillo**  
+Álvaro Perdigón Gordillo  
 Grau en Enginyeria Informàtica de Gestió i Sistemes d'Informació - Tecnocampus

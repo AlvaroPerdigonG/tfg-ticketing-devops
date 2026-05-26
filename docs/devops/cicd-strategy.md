@@ -1,7 +1,7 @@
 # CI/CD strategy for Ticketing project
 
 ## 1. Document purpose
-Define a practical, auditable CI/CD strategy for the monorepo (`ticketing-backend` + `ticketing-frontend`) with TFG scope constraints.
+Define a practical, auditable CI/CD strategy for the monorepo (`ticketing-backend` + `ticketing-frontend`).
 
 ## 2. CI vs CD in this project
 
@@ -25,53 +25,28 @@ CI/CD only delivers value if test signal quality is credible. The project priori
 
 1. stable backend and frontend tests
 2. reproducible execution in CI
-3. traceability evidence for TFG defense
+3. traceability evidence 
 
-## 4. Target CI validations
-Minimum pipeline gates:
-
-1. Backend unit tests (domain/use-case confidence)
-2. Backend integration tests (HTTP, security, persistence contracts)
-3. Frontend formatting/linting checks
-4. Frontend unit/UI tests
-5. Frontend production build
-6. Traceability check for scenario IDs (`AUTH-*`, `TICKET-*`, `ADMIN-*`)
-7. SonarCloud scan and report publishing
-
-## 5. Target CD automations
-
-### 5.1 Staging deployment from `main`
-- Trigger after successful CI on merge
-- Validate full deployed integration path
-
-### 5.2 Post-deploy smoke checks
-- Health endpoint checks
-- basic frontend availability checks
-
-### 5.3 Production promotion (later phase)
-- explicit approval gates
-- stricter operational checks
-
-## 6. Quality-gate philosophy
+## 4. Quality-gate philosophy
 - prioritize meaningful tests over vanity coverage
 - keep traceability lightweight but enforceable
 - use static/security analysis for early risk detection
 - prefer simple, maintainable workflows over over-engineering
 
-## 7. Branching and governance baseline
+## 5. Branching and governance baseline
 - protected `main`
 - feature/fix/docs branches
 - mandatory PR flow
 - required checks before merge
 
-## 8. Tool responsibilities
+## 6. Tool responsibilities
 - **GitHub Actions**: CI/CD orchestration
 - **SonarCloud**: maintainability and quality insights (backend JaCoCo XML + frontend Vitest LCOV, waiting for Quality Gate result in CI)
 - **Dependabot**: dependency update hygiene
-- **Security workflow (dependency review / CodeQL when enabled)**: early security signal
+- **Security workflow (dependency review / CodeQL)**: early security signal
 - **GitHub Environments**: staging/production secret and policy isolation
 
-## 9. Workflow structure guidance
+## 7. Workflow structure guidance
 Prefer separate workflows by responsibility:
 
 - `ci-*` validation workflows
@@ -80,9 +55,9 @@ Prefer separate workflows by responsibility:
 
 This improves maintainability and failure diagnosis.
 
-## 10. Practical TFG approach
+## 8. Practical TFG approach
 The strategy aims for:
 
 1. **Simplicity**: operable by a single maintainer
 2. **Reproducibility**: similar checks in local and CI
-3. **Defensibility**: clear quality evidence for project memory/defense
+3. **Defensibility**: clear quality evidence
