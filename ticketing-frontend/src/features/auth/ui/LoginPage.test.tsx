@@ -144,7 +144,7 @@ describe("AUTH-01 Correct login", () => {
     await user.click(getSubmitButton());
 
     expect(loginMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Ticketing Platform" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "DeskOps Ticketing Platform" })).toBeInTheDocument();
   });
 });
 
