@@ -6,6 +6,7 @@ import { AuthProvider } from "src/app/providers/AuthProvider";
 import { ApiError } from "src/shared/api/errors";
 import { renderWithProviders } from "src/test/utils/renderWithProviders";
 import { buildJwt } from "src/test/utils/authTestUtils";
+import { RoleLandingRedirect } from "src/app/pages/RoleLandingRedirect";
 import { LoginPage } from "./LoginPage";
 
 const loginMock = vi.fn();
@@ -22,8 +23,9 @@ function renderLogin(initialState?: { from?: string }) {
   const router = createMemoryRouter(
     [
       { path: "/login", element: <LoginPage /> },
+      { path: "/", element: <RoleLandingRedirect /> },
       { path: "/tickets", element: <h1>Tickets</h1> },
-      { path: "/", element: <h1>Home</h1> },
+      { path: "/dashboard", element: <h1>Dashboard</h1> },
     ],
     { initialEntries: [{ pathname: "/login", state: initialState }] },
   );
@@ -61,7 +63,7 @@ beforeEach(() => {
 });
 
 describe("AUTH-01 Correct login", () => {
-  it("submits valid credentials and navigates to the protected destination after authentication", async () => {
+  it("submits valid credentials and navigates to the role default destination after authentication", async () => {
     const user = userEvent.setup();
 
     loginMock.mockResolvedValueOnce({
@@ -74,7 +76,7 @@ describe("AUTH-01 Correct login", () => {
       }),
     });
 
-    renderLogin({ from: "/tickets" });
+    renderLogin({ from: "/admin" });
 
     await user.type(screen.getByLabelText("Email"), "user@test.com");
     await user.type(screen.getByLabelText("Password"), "Password.123");
@@ -82,6 +84,28 @@ describe("AUTH-01 Correct login", () => {
 
     expect(loginMock).toHaveBeenCalledWith({ email: "user@test.com", password: "Password.123" });
     expect(await screen.findByRole("heading", { name: "Tickets" })).toBeInTheDocument();
+  });
+
+  it("redirects admins and agents to dashboard through role landing", async () => {
+    const user = userEvent.setup();
+
+    loginMock.mockResolvedValueOnce({
+      accessToken: buildJwt({
+        sub: "a1",
+        email: "admin@test.com",
+        displayName: "Admin",
+        roles: ["ADMIN"],
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      }),
+    });
+
+    renderLogin();
+
+    await user.type(screen.getByLabelText("Email"), "admin@test.com");
+    await user.type(screen.getByLabelText("Password"), "Password.123");
+    await user.click(getSubmitButton());
+
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   });
 
   it("shows loading state during submission", async () => {
@@ -109,7 +133,7 @@ describe("AUTH-01 Correct login", () => {
       }),
     });
 
-    expect(await screen.findByRole("heading", { name: "Home" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Tickets" })).toBeInTheDocument();
   });
 
   it("applies visible form validation when required fields are missing", async () => {
