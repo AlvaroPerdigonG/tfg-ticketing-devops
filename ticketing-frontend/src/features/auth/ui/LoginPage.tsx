@@ -50,7 +50,7 @@ export function LoginPage() {
     <main className="auth-page">
       <section className="auth-card">
         <div className="auth-brand">
-          <h1>Ticketing Platform</h1>
+          <h1>DeskOps Ticketing Platform</h1>
           <p>Sign in or create your account to manage support tickets efficiently.</p>
         </div>
 
