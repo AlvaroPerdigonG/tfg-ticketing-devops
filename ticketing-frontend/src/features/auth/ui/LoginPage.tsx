@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ApiError } from "../../../shared/api/errors";
 import { useAuth } from "../hooks/useAuth";
 import "./LoginPage.css";
@@ -9,7 +9,6 @@ type AuthMode = "login" | "register";
 export function LoginPage() {
   const { login, register } = useAuth();
   const nav = useNavigate();
-  const loc = useLocation() as { state?: { from?: string } };
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
@@ -38,8 +37,7 @@ export function LoginPage() {
         await register({ email, displayName, password, confirmPassword, remember });
       }
 
-      const from = loc.state?.from ?? "/";
-      nav(from, { replace: true });
+      nav("/", { replace: true });
     } catch (err) {
       if (err instanceof ApiError) setError(`${err.status} — ${err.message}`);
       else setError("Could not complete authentication");
@@ -52,7 +50,7 @@ export function LoginPage() {
     <main className="auth-page">
       <section className="auth-card">
         <div className="auth-brand">
-          <h1>Ticketing Platform</h1>
+          <h1>DeskOps Ticketing Platform</h1>
           <p>Sign in or create your account to manage support tickets efficiently.</p>
         </div>
 
