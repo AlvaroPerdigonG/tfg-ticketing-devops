@@ -11,7 +11,9 @@ public final class HealthController {
 
     @GetMapping("/api/health")
     @Operation(summary = "Health check")
-    public String health() {
-        return "ok";
+    public HealthResponse health() {
+        return new HealthResponse("ok", "deskops-api", "2026.06-demo");
     }
+
+    public record HealthResponse(String status, String service, String version) {}
 }
