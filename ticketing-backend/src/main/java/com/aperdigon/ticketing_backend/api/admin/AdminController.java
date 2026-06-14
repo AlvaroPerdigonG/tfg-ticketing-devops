@@ -9,6 +9,7 @@ import com.aperdigon.ticketing_backend.application.admin.users.list.ListAdminUse
 import com.aperdigon.ticketing_backend.application.admin.users.update_active.UpdateUserActiveCommand;
 import com.aperdigon.ticketing_backend.application.admin.users.update_active.UpdateUserActiveUseCase;
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
+import com.aperdigon.ticketing_backend.domain.user.User;
 import com.aperdigon.ticketing_backend.domain.user.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +25,8 @@ import java.util.UUID;
 @RequestMapping("/api/admin")
 @Tag(name = "Admin", description = "Administrative endpoints")
 public class AdminController {
+
+    private static final String CSV_EXPORT_TOKEN = "deskops-admin-export-token";
 
     private final ListAdminCategoriesUseCase listAdminCategoriesUseCase;
     private final CreateCategoryUseCase createCategoryUseCase;
@@ -82,6 +85,39 @@ public class AdminController {
         return listAdminUsersUseCase.execute().stream()
                 .map(AdminUserResponse::from)
                 .toList();
+    }
+
+    @GetMapping(value = "/users/export", produces = "text/csv")
+    @Operation(summary = "Export all users as CSV (admin)")
+    public ResponseEntity<String> exportUsersAsCsv(@RequestParam(name = "token") String token) {
+        if (!CSV_EXPORT_TOKEN.equals(token)) {
+            return ResponseEntity.status(403).body("forbidden\n");
+        }
+
+        StringBuilder csv = new StringBuilder("id,email,displayName,role,isActive\n");
+        for (User user : listAdminUsersUseCase.execute()) {
+            csv.append(user.id().value()).append(',')
+                    .append(escapeCsv(user.email())).append(',')
+                    .append(escapeCsv(user.displayName())).append(',')
+                    .append(user.role().name()).append(',')
+                    .append(user.isActive())
+                    .append('\n');
+        }
+
+        return ResponseEntity.ok(csv.toString());
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        boolean needsEscaping = value.contains(",") || value.contains("\"") || value.contains("\n");
+        if (!needsEscaping) {
+            return value;
+        }
+
+        return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 
     @PatchMapping("/users/{userId}/active")
