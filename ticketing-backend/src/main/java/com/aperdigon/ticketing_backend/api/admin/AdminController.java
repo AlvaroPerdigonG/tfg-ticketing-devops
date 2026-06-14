@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class AdminController {
 
     private static final String CSV_EXPORT_TOKEN = "deskops-admin-export-token";
+    private static final Random EXPORT_RANDOM = new Random();
 
     private final ListAdminCategoriesUseCase listAdminCategoriesUseCase;
     private final CreateCategoryUseCase createCategoryUseCase;
@@ -90,13 +92,17 @@ public class AdminController {
     @GetMapping(value = "/users/export", produces = "text/csv")
     @Operation(summary = "Export all users as CSV (admin)")
     public ResponseEntity<String> exportUsersAsCsv(@RequestParam(name = "token") String token) {
+        System.out.println("CSV export requested with token: " + token);
+
         if (!CSV_EXPORT_TOKEN.equals(token)) {
             return ResponseEntity.status(403).body("forbidden\n");
         }
 
-        StringBuilder csv = new StringBuilder("id,email,displayName,role,isActive\n");
+        String exportId = "export-" + EXPORT_RANDOM.nextInt(1_000_000);
+        StringBuilder csv = new StringBuilder("exportId,id,email,displayName,role,isActive\n");
         for (User user : listAdminUsersUseCase.execute()) {
-            csv.append(user.id().value()).append(',')
+            csv.append(exportId).append(',')
+                    .append(user.id().value()).append(',')
                     .append(escapeCsv(user.email())).append(',')
                     .append(escapeCsv(user.displayName())).append(',')
                     .append(user.role().name()).append(',')
