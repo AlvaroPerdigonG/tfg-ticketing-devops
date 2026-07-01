@@ -1,3 +1,7 @@
+* 📄 [TFG_PeridgonGordilloAlvaro_memoria.pdf](https://github.com/user-attachments/files/29560667/TFG_PeridgonGordilloAlvaro_memoria.pdf) - Project Thesis
+
+* 📊 [defensa-tfg-devops.pdf](https://github.com/user-attachments/files/29560656/defensa-tfg-devops.pdf) - Project presentation slides
+
 # TFG - Fullstack Ticketing Platform with DevOps
 
 [![CI](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/AlvaroPerdigonG/tfg-ticketing-devops/actions/workflows/ci.yml)
