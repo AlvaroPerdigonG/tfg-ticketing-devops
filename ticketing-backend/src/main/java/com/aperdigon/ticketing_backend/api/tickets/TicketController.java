@@ -27,6 +27,8 @@ import com.aperdigon.ticketing_backend.application.tickets.list.ListMyTicketsUse
 import com.aperdigon.ticketing_backend.application.tickets.list.ListTicketsQuery;
 import com.aperdigon.ticketing_backend.application.tickets.list.ListTicketsUseCase;
 import com.aperdigon.ticketing_backend.application.tickets.list.TicketQueueScope;
+import com.aperdigon.ticketing_backend.application.tickets.delete.DeleteTicketCommand;
+import com.aperdigon.ticketing_backend.application.tickets.delete.DeleteTicketUseCase;
 import com.aperdigon.ticketing_backend.domain.category.CategoryId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketId;
 import com.aperdigon.ticketing_backend.domain.ticket.TicketStatus;
@@ -52,6 +54,7 @@ public class TicketController {
     private final GetTicketDetailUseCase getTicketDetailUseCase;
     private final AddTicketCommentUseCase addTicketCommentUseCase;
     private final GetDashboardStatsUseCase getDashboardStatsUseCase;
+    private final DeleteTicketUseCase deleteTicketUseCase;
     private final CurrentUserProvider currentUserProvider;
 
     public TicketController(
@@ -63,6 +66,7 @@ public class TicketController {
             GetTicketDetailUseCase getTicketDetailUseCase,
             AddTicketCommentUseCase addTicketCommentUseCase,
             GetDashboardStatsUseCase getDashboardStatsUseCase,
+            DeleteTicketUseCase deleteTicketUseCase,
             CurrentUserProvider currentUserProvider
     ) {
         this.createTicketUseCase = createTicketUseCase;
@@ -73,6 +77,7 @@ public class TicketController {
         this.getTicketDetailUseCase = getTicketDetailUseCase;
         this.addTicketCommentUseCase = addTicketCommentUseCase;
         this.getDashboardStatsUseCase = getDashboardStatsUseCase;
+        this.deleteTicketUseCase = deleteTicketUseCase;
         this.currentUserProvider = currentUserProvider;
     }
 
@@ -161,6 +166,15 @@ public class TicketController {
                 actor
         ));
 
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a ticket (admin only)")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        var actor = currentUserProvider.getCurrentUser();
+        deleteTicketUseCase.execute(new DeleteTicketCommand(new TicketId(id), actor));
         return ResponseEntity.noContent().build();
     }
 

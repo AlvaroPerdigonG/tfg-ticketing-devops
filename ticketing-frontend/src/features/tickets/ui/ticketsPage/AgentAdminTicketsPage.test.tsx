@@ -6,6 +6,9 @@ import { http } from "src/test/msw/http";
 import { server } from "src/test/msw/server";
 import { AgentAdminTicketsPage } from "./AgentAdminTicketsPage";
 
+const useAuthMock = vi.fn();
+vi.mock("src/features/auth/hooks/useAuth", () => ({ useAuth: () => useAuthMock() }));
+
 const queueTicket = {
   id: "TCK-200",
   title: "Impresora bloqueada",
@@ -18,6 +21,9 @@ const queueTicket = {
 } as const;
 
 describe("AgentAdminTicketsPage", () => {
+  beforeEach(() => {
+    useAuthMock.mockReturnValue({ hasRole: (role: string) => role === "ADMIN" });
+  });
   it("TICKET-AGENT-03 Agent sees manageable tickets", async () => {
     server.use(
       http.get("/api/tickets", () =>
@@ -158,5 +164,37 @@ describe("AgentAdminTicketsPage", () => {
       expect(screen.getByRole("heading", { name: "Unassigned queue" })).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Search by title")).toHaveValue("");
     });
+  });
+
+  it("TICKET-AGENT-05 shows delete button only for ADMIN and deletes on confirm", async () => {
+    const user = userEvent.setup();
+    let deleteCalls = 0;
+
+    server.use(
+      http.get("/api/tickets", () =>
+        jsonResponse({
+          items: [queueTicket],
+          page: 0,
+          size: 20,
+          total: 1,
+        }),
+      ),
+      http.delete("/api/tickets/TCK-200", () => {
+        deleteCalls += 1;
+        return jsonResponse({}, { status: 200 });
+      }),
+    );
+
+    const { rerender } = renderWithProviders(<AgentAdminTicketsPage />, {
+      router: { initialEntries: ["/tickets"] },
+    });
+    await screen.findByRole("cell", { name: "TCK-200" });
+    await user.click(screen.getByRole("button", { name: "Delete ticket TCK-200" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(deleteCalls).toBe(1));
+
+    useAuthMock.mockReturnValue({ hasRole: () => false });
+    rerender(<AgentAdminTicketsPage />);
+    expect(screen.queryByRole("button", { name: "Delete ticket TCK-200" })).not.toBeInTheDocument();
   });
 });

@@ -19,4 +19,5 @@ export const http = {
   get: createMethodHandler("GET"),
   post: createMethodHandler("POST"),
   patch: createMethodHandler("PATCH"),
+  delete: createMethodHandler("DELETE"),
 };

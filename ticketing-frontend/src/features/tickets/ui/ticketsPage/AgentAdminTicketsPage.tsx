@@ -10,9 +10,12 @@ import {
   Table,
   Tag,
   Typography,
+  Popconfirm,
 } from "antd";
 import type { TableProps } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import { DeleteOutlined } from "@ant-design/icons";
+import { useAuth } from "../../../auth/hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ticketsApi } from "../../api/ticketsApi";
 import { ticketPriorityLabel } from "../../model/presentation";
@@ -79,6 +82,8 @@ export function AgentAdminTicketsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tickets, setTickets] = useState<TicketSummary[]>([]);
   const [total, setTotal] = useState(0);
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole("ADMIN");
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -126,6 +131,12 @@ export function AgentAdminTicketsPage() {
     };
   }, [query, statusFilter, view]);
 
+  const handleDeleteTicket = async (ticketId: string) => {
+    await ticketsApi.deleteTicket(ticketId);
+    setTickets((current) => current.filter((ticket) => ticket.id !== ticketId));
+    setTotal((current) => Math.max(0, current - 1));
+  };
+
   const columns: TableProps<TicketSummary>["columns"] = useMemo(
     () => [
       { title: "ID", dataIndex: "id", key: "id", width: 180 },
@@ -168,13 +179,26 @@ export function AgentAdminTicketsPage() {
         key: "actions",
         width: 120,
         render: (_id: unknown, row: TicketSummary) => (
-          <Button size="small" onClick={() => navigate(`/tickets/${row.id}`)}>
-            View
-          </Button>
+          <Space>
+            <Button size="small" onClick={() => navigate(`/tickets/${row.id}`)}>
+              View
+            </Button>
+            {isAdmin ? (
+              <Popconfirm
+                title="Delete ticket"
+                description="Are you sure you want to delete this ticket?"
+                okText="Delete"
+                cancelText="Cancel"
+                onConfirm={() => void handleDeleteTicket(row.id)}
+              >
+                <Button size="small" danger icon={<DeleteOutlined />} aria-label={`Delete ticket ${row.id}`} />
+              </Popconfirm>
+            ) : null}
+          </Space>
         ),
       },
     ],
-    [navigate],
+    [isAdmin, navigate],
   );
 
   const viewLabel =
