@@ -30,11 +30,11 @@ jobs:
     steps:
       - name: Checkout repository (manual dispatch)
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout repository (CI-validated commit)
         if: github.event_name == 'workflow_run'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Deploy exactly the commit that passed CI, not latest main.
           ref: ${{ github.event.workflow_run.head_sha }}
